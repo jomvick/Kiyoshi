@@ -1,102 +1,160 @@
 # Kiyoshi
 
-A minimalist glassmorphic Kanban productivity app with a sophisticated "Zen Design System" aesthetic. Built with Flutter for desktop platforms.
+A minimalist glassmorphic workspace manager with a sophisticated "Zen Design System" aesthetic. Built with Flutter for desktop platforms.
+
+![Kiyoshi](https://img.shields.io/badge/Platform-Flutter%20Desktop-blue)
+![License](https://img.shields.io/badge/License-Private-red)
 
 ## Features
 
-- **Dashboard** - Studio overview with activity timeline and metrics
-- **Projects** - Workspace/project management
-- **Tasks** - Kanban board with drag-and-drop cards
-- **Calendar** - Calendar view for scheduling
-- **Analytics** - Productivity metrics and insights
-- **Canvas** - Block-based note/todo system with multiple block types
+### Core Modules
+
+- **Dashboard** - Studio overview with activity timeline and performance metrics
+- **Workspaces** - Organize projects by workspace with custom themes
+- **Projects** - Full project CRUD with deadlines and status tracking
+- **Kanban Board** - Drag-and-drop task management with columns
+- **Calendar** - Schedule view with due dates and events
+- **Canvas** - Block-based content (text, heading, todo, link, image, file, divider, code)
+- **Notes** - Quick notes with rich block types
+
+### Special Modes
+
+- **Zen Mode** - "The Monolith" focus session for deep work
+- **Quick Entry** - Slash commands (`/`) for fast block creation
+- **Command Palette** - Keyboard-driven navigation (`Cmd+K`)
 
 ## Design System
 
-Kiyoshi features a unique "Zen Design System" with:
+### Philosophy
 
-- **Glassmorphism** - Frosted glass panels with backdrop blur
-- **No-Line Rule** - Minimal borders, uses visual separation
-- **Editorial Typography** - Montserrat (display), Inter (body), JetBrains Mono (code)
-- **Sage/Slate Palette** - Calming, productivity-focused colors
+Kiyoshi implements a unique **Zen Design System**:
+
+| Principle | Implementation |
+|-----------|---------------|
+| Glassmorphism | Frosted glass panels with backdrop blur |
+| No-Line Rule | Visual separation without borders |
+| Editorial Typography | Display/Mono fonts with tight tracking |
+| Spectral Palette | Calming sage/slate color system |
+
+### UI Components
+
+- `GlassCard` - Frosted glass container
+- `GlassPrismPanel` - Prism-effect glass panel
+- `PrismaticBorderPainter` - Animated spectral border
+- `KanbanCard` - Apple-inspired task card
+- `ZenQuickEntry` - Morphing input bar
+- `MorphingZenBar` - Animated dock navigation
 
 ## Tech Stack
 
 | Component | Technology |
 |-----------|------------|
-| Framework | Flutter |
-| State Management | flutter_riverpod |
+| Framework | Flutter 3.x |
+| State | flutter_riverpod |
 | Database | Drift (SQLite) |
-| UI/Animations | flutter_animate, animations |
+| Animations | flutter_animate |
 | Calendar | table_calendar |
 | Icons | lucide_icons |
+| Fonts | Google Fonts |
 
-## Getting Started
+## Installation
 
-### Prerequisites
+```bash
+# Clone
+git clone https://github.com/jomvick/Kiyoshi.git
+cd Kiyoshi
 
-- Flutter SDK 3.11+
-- Dart SDK 3.11+
-- Desktop development tools (for Linux: `flutter doctor`)
+# Install deps
+flutter pub get
 
-### Installation
+# Generate Drift code
+flutter pub run build_runner build --delete-conflicting-outputs
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   flutter pub get
-   ```
-3. Generate database code:
-   ```bash
-   flutter pub run build_runner build
-   ```
-4. Run the app:
-   ```bash
-   flutter run
-   ```
+# Run
+flutter run
+```
 
 ### Desktop Targets
 
 ```bash
 flutter run -d linux    # Linux
-flutter run -d macos    # macOS
+flutter run -d macos    # macOS  
 flutter run -d windows  # Windows
+```
+
+### Build Release
+
+```bash
+flutter build apk --release
+flutter build ios --release
+flutter build web --release
 ```
 
 ## Architecture
 
 ```
 lib/
-├── main.dart
+├── main.dart                    # Entry point
 └── src/
-    ├── app/                    # App widget and routing
-    ├── core/                   # Core utilities
-    │   ├── constants/          # Colors, typography
-    │   ├── database/           # Drift database + repositories
-    │   ├── design_system/      # Design tokens
-    │   ├── navigation/         # App destinations
-    │   ├── providers/          # Riverpod providers
-    │   ├── services/           # Vault, metadata services
-    │   └── theme/              # AppTheme
-    ├── features/               # Feature modules
-    │   ├── analytics/
-    │   ├── calendar/
-    │   ├── canvas/
-    │   ├── dashboard/
-    │   ├── kanban_board/
-    │   ├── projects/
-    │   └── tasks/
-    └── shared/                 # Shared UI
-        ├── layout/             # Desktop shell, page shells
-        └── widgets/           # Reusable widgets
+    ├── app/                    # KiyoshiApp routing
+    ├── core/
+    │   ├── constants/          # zen_colors, zen_typography
+    │   ├── database/           # Drift + ProjectRepository
+    │   ├── design_system/      # kiyoshi_zen_tokens
+    │   ├── navigation/         # app_destinations
+    │   ├── providers/         # Riverpod providers
+    │   ├── services/          # vault, metadata
+    │   └── theme/            # AppTheme
+    ├── features/
+    │   ├── analytics/         # AnalyticsScreen
+    │   ├── calendar/         # CalendarScreen
+    │   ├── canvas/          # BlockCanvas + block widgets
+    │   ├── dashboard/       # KiyoshiZenDashboardView
+    │   ├── kanban_board/    # KanbanBoardScreen
+    │   ├── navigation/      # MorphingZenBar
+    │   ├── notes/          # NotesScreen
+    │   ├── projects/       # ProjectsScreen + detail
+    │   ├── tasks/          # TasksScreen
+    │   └── zen/            # TheMonolithWidget
+    └── shared/
+        ├── layout/         # AppDesktopShell
+        └── widgets/        # Shared UI components
+```
+
+## Database Schema
+
+```
+Blocks       # text, todo, link, image, file blocks
+Workspaces   # project workspaces
+Projects    # projects within workspaces
+Tasks       # Kanban tasks
 ```
 
 ## Testing
 
 ```bash
+# Run all tests
 flutter test
+
+# Specific test file
+flutter test test/providers_test.dart
 ```
+
+## Recent Changes
+
+### v1.0.0
+- Initial release
+- Glassmorphism UI system
+- Drift SQLite database
+- Riverpod state management
+- Full CRUD for workspaces, projects, tasks
+- Zen Mode (Monolith) for focus sessions
+- Quick Entry with slash commands
 
 ## License
 
-Private project - all rights reserved
+Private - All rights reserved
+
+---
+
+Built with Flutter 💙
