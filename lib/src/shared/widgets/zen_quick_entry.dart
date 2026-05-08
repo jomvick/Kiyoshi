@@ -52,12 +52,15 @@ class _ZenQuickEntryState extends State<ZenQuickEntry> with TickerProviderStateM
   late List<String> _projectSuggestions;
   
   final List<Map<String, dynamic>> _slashCommands = [
-    {'icon': LucideIcons.type, 'label': 'Text', 'prefix': ''},
-    {'icon': LucideIcons.heading, 'label': 'Heading', 'prefix': '# '},
-    {'icon': LucideIcons.checkSquare, 'label': 'Todo', 'prefix': '- [ ] '},
-    {'icon': LucideIcons.link, 'label': 'Link', 'prefix': 'https://'},
-    {'icon': LucideIcons.image, 'label': 'Image', 'prefix': '/img '},
+    {'icon': LucideIcons.type, 'label': 'Text', 'color': AppTheme.primary},
+    {'icon': LucideIcons.heading, 'label': 'Heading', 'color': const Color(0xFF5EEAD4)},
+    {'icon': LucideIcons.checkSquare, 'label': 'Todo', 'color': const Color(0xFF7C8CFF)},
+    {'icon': LucideIcons.link, 'label': 'Link', 'color': AppTheme.primary},
+    {'icon': LucideIcons.image, 'label': 'Image', 'color': const Color(0xFFFF6B9A)},
   ];
+
+  /// Mode commande actif
+  Map<String, dynamic>? _activeCommand;
 
   late AnimationController _borderRotationController;
 
@@ -93,8 +96,9 @@ class _ZenQuickEntryState extends State<ZenQuickEntry> with TickerProviderStateM
     final text = _controller.text;
     setState(() {
       _lastResult = ZenParser.parseRawInput(text);
-      _showGhostMenu = text.contains('#') && !text.split('#').last.contains(' ');
-      _showSlashMenu = text.startsWith('/');
+      _showGhostMenu = ZenParser.isProjectIntent(text);
+      // Only show slash menu while user is still choosing (no space after command yet)
+      _showSlashMenu = ZenParser.isSlashIntent(text);
     });
   }
 
@@ -113,7 +117,27 @@ class _ZenQuickEntryState extends State<ZenQuickEntry> with TickerProviderStateM
   }
 
   void _submitTask() async {
-    final rawText = _controller.text.trim();
+    final contentText = _controller.text.trim();
+    // En mode commande, on ajoute le préfixe pour le parser
+    final label = _activeCommand?['label']?.toString().toLowerCase() ?? '';
+    
+  String rawText;
+  if (label.isNotEmpty && contentText.isNotEmpty) {
+    if (label == 'heading') {
+      rawText = '# $contentText';
+    } else if (label == 'todo') {
+      rawText = '- [ ] $contentText';
+    } else if (label == 'image') {
+      rawText = '/img $contentText';
+    } else if (label == 'link') {
+      rawText = contentText.startsWith('http') ? contentText : 'https://$contentText';
+    } else {
+      rawText = contentText;
+    }
+  } else {
+    rawText = contentText;
+  }
+
     if (rawText.isEmpty) return;
     
     final parsed = ZenParser.parseRawInput(rawText);
@@ -126,7 +150,6 @@ class _ZenQuickEntryState extends State<ZenQuickEntry> with TickerProviderStateM
       );
       
       if (!exists) {
-        // Create the project and add to suggestions
         final createdId = await widget.onCreateProject!(projectName);
         if (createdId != null) {
           setState(() {
@@ -155,6 +178,7 @@ class _ZenQuickEntryState extends State<ZenQuickEntry> with TickerProviderStateM
       _currentPlaceholder = _placeholders[DateTime.now().second % _placeholders.length];
       if (!widget.isDashboard) _isManuallyExpanded = false;
       _showSlashMenu = false;
+      _activeCommand = null;
     });
     _controller.clear();
     _focusNode.unfocus();
@@ -194,18 +218,17 @@ class _ZenQuickEntryState extends State<ZenQuickEntry> with TickerProviderStateM
   }
 
   Widget _buildPrismaticBar() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double maxWidth = constraints.maxWidth < 640 ? constraints.maxWidth - 60 : 600;
-        final bool showFullBar = shouldBeExpanded;
-        
-        return AnimatedContainer(
+    // Center and cap width — never stretch across the full page.
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 640),
+        child: AnimatedContainer(
           duration: const Duration(milliseconds: 600),
           curve: Curves.easeOutQuart,
-          width: showFullBar ? maxWidth : 60,
+          width: shouldBeExpanded ? double.infinity : 60,
           height: 60,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(showFullBar ? 20 : 30),
+            borderRadius: BorderRadius.circular(shouldBeExpanded ? 20 : 30),
             boxShadow: [
               if (isVisualActive || (widget.isDashboard && !_isFocused))
                 BoxShadow(
@@ -215,49 +238,48 @@ class _ZenQuickEntryState extends State<ZenQuickEntry> with TickerProviderStateM
                 ),
             ],
           ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              ZenGlassCard(
-                radius: showFullBar ? 20 : 30,
-                opacity: isVisualActive ? 0.98 : (widget.isDashboard ? 0.4 : 0.05),
-                blurSigma: 15,
-                padding: EdgeInsets.zero,
-                child: const SizedBox.expand(),
-              ),
-              
-              if (_isFocused)
-                IgnorePointer(
-                  child: AnimatedBuilder(
-                    animation: _borderRotationController,
-                    builder: (context, child) {
-                      return CustomPaint(
-                        painter: PrismaticBorderPainter(
-                          animation: _borderRotationController.value,
-                          colors: KiyoshiZenTokens.spectralColors,
-                          radius: 20,
-                        ),
-                        child: const SizedBox.expand(),
-                      );
-                    },
-                  ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(shouldBeExpanded ? 20 : 30),
+            child: Stack(
+              children: [
+                ZenGlassCard(
+                  radius: shouldBeExpanded ? 20 : 30,
+                  opacity: isVisualActive ? 0.98 : (widget.isDashboard ? 0.4 : 0.05),
+                  blurSigma: 15,
+                  padding: EdgeInsets.zero,
+                  child: const SizedBox.expand(),
                 ),
 
-              Positioned.fill(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: showFullBar ? 20 : 0),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 500),
-                    switchInCurve: Curves.easeOutQuart,
-                    switchOutCurve: Curves.easeInQuart,
-                    child: showFullBar ? _buildExpandedContent() : _buildCollapsedIcon(),
+                if (_isFocused)
+                  IgnorePointer(
+                    child: AnimatedBuilder(
+                      animation: _borderRotationController,
+                      builder: (context, child) {
+                        return CustomPaint(
+                          painter: PrismaticBorderPainter(
+                            animation: _borderRotationController.value,
+                            colors: KiyoshiZenTokens.spectralColors,
+                            radius: 20,
+                          ),
+                          child: const SizedBox.expand(),
+                        );
+                      },
+                    ),
                   ),
+
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 500),
+                  switchInCurve: Curves.easeOutQuart,
+                  switchOutCurve: Curves.easeInQuart,
+                  child: shouldBeExpanded
+                      ? _buildExpandedContent()
+                      : _buildCollapsedIcon(),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -281,13 +303,55 @@ class _ZenQuickEntryState extends State<ZenQuickEntry> with TickerProviderStateM
   }
 
   Widget _buildExpandedContent() {
-    return SizedBox(
+    final cmd = _activeCommand;
+    final cmdColor = cmd != null ? (cmd['color'] as Color? ?? AppTheme.primary) : AppTheme.primary;
+    final hintText = cmd != null ? 'Write your ${cmd['label'].toString().toLowerCase()}...' : _currentPlaceholder;
+
+    return Container(
       key: const ValueKey('expanded'),
       width: double.infinity,
       height: 60,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Badge de commande
+          if (cmd != null) ...[
+            GestureDetector(
+              onTap: () {
+                setState(() => _activeCommand = null);
+                _controller.clear();
+                _focusNode.requestFocus();
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: cmdColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: cmdColor.withValues(alpha: 0.35)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      cmd['label'].toString().toUpperCase(),
+                      style: TextStyle(
+                        color: cmdColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Icon(LucideIcons.x, size: 10, color: cmdColor.withValues(alpha: 0.7)),
+                  ],
+                ),
+              ),
+            ).animate().fade(duration: 150.ms).scale(begin: const Offset(0.85, 0.85)),
+            const SizedBox(width: 8),
+          ],
+
+          // Champ de texte
           Expanded(
             child: TextField(
               controller: _controller,
@@ -300,22 +364,25 @@ class _ZenQuickEntryState extends State<ZenQuickEntry> with TickerProviderStateM
                 fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
-                hintText: _currentPlaceholder,
+                hintText: hintText,
                 hintStyle: TextStyle(
                   color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4),
-                  fontWeight: FontWeight.w400
+                  fontWeight: FontWeight.w400,
                 ),
                 border: InputBorder.none,
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(vertical: 14),
               ),
             ),
           ),
-          if (_isFocused && _lastResult != null) ...[
+          // Badges de feedback visuel
+          if (cmd == null && _isFocused && _lastResult != null)
             _buildVisualFeedback(),
+          // Bouton de validation
+          if (_isFocused || cmd != null) ...[
             const SizedBox(width: 8),
+            _buildSubmitButton(),
           ],
-          if (_isFocused) _buildSubmitButton(),
         ],
       ),
     );
@@ -401,18 +468,20 @@ class _ZenQuickEntryState extends State<ZenQuickEntry> with TickerProviderStateM
   }
 
   Widget _buildSlashItem(Map<String, dynamic> cmd) {
+    final color = cmd['color'] as Color? ?? AppTheme.primary;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          final prefix = cmd['prefix'] as String;
-          final cursorPos = prefix.length;
-          
-          setState(() => _showSlashMenu = false);
-          
-          _controller.text = prefix;
-          _controller.selection = TextSelection.collapsed(offset: cursorPos);
-          _focusNode.requestFocus();
+          // Activer le mode commande : badge visible, champ vidé et focus
+          setState(() {
+            _activeCommand = cmd;
+            _showSlashMenu = false;
+          });
+          _controller.clear();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _focusNode.requestFocus();
+          });
         },
         borderRadius: BorderRadius.circular(12),
         child: Container(
@@ -420,16 +489,20 @@ class _ZenQuickEntryState extends State<ZenQuickEntry> with TickerProviderStateM
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppTheme.primary.withValues(alpha: 0.05)),
+            border: Border.all(color: color.withValues(alpha: 0.15)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(cmd['icon'] as IconData, size: 18, color: AppTheme.primary),
+              Icon(cmd['icon'] as IconData, size: 18, color: color),
               const SizedBox(height: 6),
               Text(
                 cmd['label'] as String,
-                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
               ),
             ],
           ),
@@ -491,20 +564,32 @@ class _ZenQuickEntryState extends State<ZenQuickEntry> with TickerProviderStateM
 
   Widget _buildVisualFeedback() {
     if (_lastResult == null) return const SizedBox.shrink();
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (_lastResult!.metadata.containsKey('priority') && _lastResult!.metadata['priority'] < 3)
-          _buildBadge('P${_lastResult!.metadata['priority']}', const Color(0xFFFF4D8D)),
-        if (_lastResult!.metadata.containsKey('assignee')) ...[
-          const SizedBox(width: 4),
-          _buildBadge('@${_lastResult!.metadata['assignee']}', const Color(0xFF2DD4BF)),
-        ],
-        if (_lastResult!.metadata.containsKey('project')) ...[
-          const SizedBox(width: 4),
-          _buildBadge('PROJ', AppTheme.primary),
-        ],
-      ],
+    // Constrain badges to max 130px so they never crowd the submit button.
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 130),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_lastResult!.type != 'text')
+              _buildBadge(_lastResult!.type.toUpperCase(), AppTheme.primary),
+            if (_lastResult!.metadata.containsKey('priority') &&
+                _lastResult!.metadata['priority'] < 3) ...[
+              const SizedBox(width: 4),
+              _buildBadge('P${_lastResult!.metadata['priority']}', const Color(0xFFFF4D8D)),
+            ],
+            if (_lastResult!.metadata.containsKey('assignee')) ...[
+              const SizedBox(width: 4),
+              _buildBadge('@${_lastResult!.metadata['assignee']}', const Color(0xFF2DD4BF)),
+            ],
+            if (_lastResult!.metadata.containsKey('project')) ...[
+              const SizedBox(width: 4),
+              _buildBadge('PROJ', AppTheme.primary),
+            ],
+          ],
+        ),
+      ),
     ).animate().fade();
   }
 

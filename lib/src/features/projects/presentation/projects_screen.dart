@@ -137,6 +137,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
           child: ListView.builder(
             padding: const EdgeInsets.only(bottom: 120),
             itemCount: projects.length,
+            itemExtent: 140, // Increased: header(40) + title(24) + desc(40) + footer(30) = ~134px + margin
             itemBuilder: (context, index) {
               final project = projects[index];
               return ProjectCard(

@@ -36,7 +36,7 @@ class _ProjectCardState extends State<ProjectCard> {
         child: AnimatedContainer(
           duration: AppTheme.animFast,
           margin: const EdgeInsets.only(bottom: AppTheme.spaceMedium),
-          padding: const EdgeInsets.all(AppTheme.spaceLarge),
+          padding: const EdgeInsets.all(AppTheme.spaceMedium),
           decoration: BoxDecoration(
             color: _isHovering
                 ? Colors.white.withValues(alpha: 0.85)

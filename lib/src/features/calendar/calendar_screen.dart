@@ -220,6 +220,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                 ? _buildEmptyState()
                 : ListView.builder(
                     itemCount: dayBlocks.length,
+                    itemExtent: 72, // Fixed height for performance
                     padding: const EdgeInsets.only(bottom: 20),
                     itemBuilder: (context, index) {
                       final b = dayBlocks[index];

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:uuid/uuid.dart';
 import 'package:kiyoshi/src/features/projects/domain/entities/workspace.dart';
 import 'package:kiyoshi/src/features/projects/domain/entities/project.dart';
 import 'package:kiyoshi/src/core/navigation/app_destination.dart';
 import 'package:kiyoshi/src/core/theme/app_theme.dart';
 import 'package:kiyoshi/src/core/providers/zen_mode_provider.dart';
+import 'package:kiyoshi/src/core/providers/preferences_provider.dart';
 import 'package:kiyoshi/src/core/providers/database_provider.dart';
 import 'package:kiyoshi/src/features/canvas/application/zen_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -50,6 +52,7 @@ class _AppDesktopShellState extends ConsumerState<AppDesktopShell> {
   @override
   Widget build(BuildContext context) {
     final isZenMode = ref.watch(zenModeProvider);
+    final prefs = ref.watch(preferencesProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -71,48 +74,64 @@ class _AppDesktopShellState extends ConsumerState<AppDesktopShell> {
               child: _BackgroundGradients(),
             ),
             
-            // Layout: Sidebar + Main Content
-            Row(
-              children: [
-                // Left Sidebar - Hidden in Zen Mode
-                AnimatedContainer(
-                  duration: AppTheme.animMedium,
-                  curve: Curves.easeOutCubic,
-                  width: isZenMode ? 0 : 280,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const NeverScrollableScrollPhysics(),
-                    child: SizedBox(
-                      width: 280,
-                      child: Sidebar(
-                        selectedWorkspace: widget.selectedWorkspace,
-                        workspaces: widget.workspaces,
-                        onWorkspaceSelected: widget.onWorkspaceSelected,
-                        onCreateWorkspace: widget.onCreateWorkspace,
-                        onNewProjectTap: widget.onNewProjectTap,
-                        selectedDestination: widget.selectedDestination,
-                        onDestinationSelected: widget.onDestinationSelected,
+// Layout: Sidebar + Main Content
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final screenWidth = constraints.maxWidth;
+                final isNarrow = screenWidth < 600;
+                final isMedium = screenWidth < 900;
+
+final sidebarWidth = isZenMode 
+                  ? 0.0 
+                  : (isNarrow ? 0.0 : (isMedium ? 60.0 : prefs.sidebarWidth));
+
+                return Row(
+                  children: [
+                    // Left Sidebar - Responsive
+                    AnimatedContainer(
+                      duration: AppTheme.animMedium,
+                      curve: Curves.easeOutCubic,
+                      width: sidebarWidth,
+                      child: sidebarWidth > 0
+                          ? SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              physics: const NeverScrollableScrollPhysics(),
+                              child: SizedBox(
+                                width: isMedium ? 60 : prefs.sidebarWidth,
+                                child: isMedium
+                                    ? _buildCompactSidebar()
+                                    : Sidebar(
+                                        selectedWorkspace: widget.selectedWorkspace,
+                                        workspaces: widget.workspaces,
+                                        onWorkspaceSelected: widget.onWorkspaceSelected,
+                                        onCreateWorkspace: widget.onCreateWorkspace,
+                                        onNewProjectTap: widget.onNewProjectTap,
+                                        selectedDestination: widget.selectedDestination,
+                                        onDestinationSelected: widget.onDestinationSelected,
+                                      ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+
+                    // Right Main Content
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          top: isZenMode ? 0 : AppTheme.spaceMedium,
+                          right: isZenMode ? 0 : AppTheme.spaceMedium,
+                          bottom: isZenMode ? 0 : AppTheme.spaceMedium,
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(isZenMode ? 0 : AppTheme.radiusXLarge),
+                          child: widget.child,
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                
-                // Right Main Content
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      top: isZenMode ? 0 : AppTheme.spaceMedium,
-                      right: isZenMode ? 0 : AppTheme.spaceMedium,
-                      bottom: isZenMode ? 0 : AppTheme.spaceMedium,
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(isZenMode ? 0 : AppTheme.radiusXLarge),
-                      child: widget.child,
-                    ),
-                  ),
-                ),
-              ],
-),
+                  ],
+                );
+              },
+            ),
     
             // Zen Quick Entry - Only on Dashboard
             if (!isZenMode && widget.selectedDestination == AppDestination.dashboard)
@@ -196,6 +215,78 @@ class _AppDesktopShellState extends ConsumerState<AppDesktopShell> {
       ),
     );
   }
+
+  Widget _buildCompactSidebar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceMedium),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceContainerLow.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+      ),
+      child: Column(
+        children: [
+          ...AppDestination.values.map((dest) => _buildCompactNavItem(dest)),
+          const SizedBox(height: AppTheme.spaceLarge),
+          const Divider(indent: 12, endIndent: 12),
+          const SizedBox(height: AppTheme.spaceMedium),
+          _buildCompactAddButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCompactNavItem(AppDestination dest) {
+    final isSelected = widget.selectedDestination == dest;
+    return Tooltip(
+      message: dest.label,
+      child: InkWell(
+        onTap: () => widget.onDestinationSelected(dest),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        child: Container(
+          width: 44,
+          height: 44,
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: isSelected 
+                ? AppTheme.primary.withValues(alpha: 0.15)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          ),
+          child: Icon(
+            dest.icon,
+            size: 20,
+            color: isSelected 
+                ? AppTheme.primary 
+                : AppTheme.onSurfaceVariant,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompactAddButton() {
+    return Tooltip(
+      message: 'New Project',
+      child: InkWell(
+        onTap: widget.onNewProjectTap,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+        child: Container(
+          width: 44,
+          height: 44,
+          margin: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: AppTheme.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          ),
+          child: const Icon(
+            LucideIcons.plus,
+            size: 20,
+            color: AppTheme.primary,
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _BackgroundGradients extends StatelessWidget {
@@ -203,46 +294,48 @@ class _BackgroundGradients extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Top Left Sage Blob
-        Positioned(
-          top: -200,
-          left: -100,
-          child: Container(
-            width: 600,
-            height: 600,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  AppTheme.sage.withValues(alpha: 0.15),
-                  AppTheme.sage.withValues(alpha: 0.0),
-                ],
+    return RepaintBoundary(
+      child: Stack(
+        children: [
+          // Top Left Sage Blob
+          Positioned(
+            top: -200,
+            left: -100,
+            child: Container(
+              width: 600,
+              height: 600,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppTheme.sage.withValues(alpha: 0.15),
+                    AppTheme.sage.withValues(alpha: 0.0),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        
-        // Bottom Right Mint Blob
-        Positioned(
-          bottom: -300,
-          right: -100,
-          child: Container(
-            width: 800,
-            height: 800,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  AppTheme.mintTeal.withValues(alpha: 0.2),
-                  AppTheme.mintTeal.withValues(alpha: 0.0),
-                ],
+          
+          // Bottom Right Mint Blob
+          Positioned(
+            bottom: -300,
+            right: -100,
+            child: Container(
+              width: 800,
+              height: 800,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    AppTheme.mintTeal.withValues(alpha: 0.2),
+                    AppTheme.mintTeal.withValues(alpha: 0.0),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

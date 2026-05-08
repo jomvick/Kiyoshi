@@ -109,10 +109,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
   void _onAddTask(String status) async {
     final nameController = TextEditingController();
-    
+
     showDialog(
       context: context,
-      builder: (context) => Dialog(
+      builder: (dialogContext) => Dialog(
         backgroundColor: Colors.transparent,
         elevation: 0,
         child: ZenGlassCard(
@@ -171,42 +171,42 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       borderSide: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
                     ),
                   ),
-                  onSubmitted: (value) async {
-                    if (value.trim().isNotEmpty) {
-                      final parsed = ParsedBlock(
-                        type: 'todo',
-                        content: value.trim(),
-                        metadata: {'status': status},
-                      );
-                      await ref.read(blockServiceProvider).addBlock('global', parsed);
-                      if (mounted) Navigator.pop(context);
-                    }
-                  },
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context), 
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
-                      ),
-                      child: const Text('Cancel')
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: () async {
-                        if (nameController.text.trim().isNotEmpty) {
-                          final parsed = ParsedBlock(
-                            type: 'todo',
-                            content: nameController.text.trim(),
-                            metadata: {'status': status},
-                          );
-                          await ref.read(blockServiceProvider).addBlock('global', parsed);
-                          if (mounted) Navigator.pop(context);
-                        }
-                      },
+        onSubmitted: (value) async {
+          if (value.trim().isNotEmpty) {
+            final parsed = ParsedBlock(
+              type: 'todo',
+              content: value.trim(),
+              metadata: {'status': status},
+            );
+            await ref.read(blockServiceProvider).addBlock('global', parsed);
+            if (context.mounted) Navigator.pop(dialogContext);
+          }
+        },
+      ),
+      const SizedBox(height: 24),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            style: TextButton.styleFrom(
+              foregroundColor: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+            ),
+            child: const Text('Cancel')
+          ),
+          const SizedBox(width: 12),
+          ElevatedButton(
+            onPressed: () async {
+              if (nameController.text.trim().isNotEmpty) {
+                final parsed = ParsedBlock(
+                  type: 'todo',
+                  content: nameController.text.trim(),
+                  metadata: {'status': status},
+                );
+                await ref.read(blockServiceProvider).addBlock('global', parsed);
+                if (context.mounted) Navigator.pop(dialogContext);
+              }
+            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primary,
                         foregroundColor: Colors.white,
@@ -233,7 +233,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
     showDialog(
       context: context,
-      builder: (context) => Dialog(
+      builder: (dialogContext) => Dialog(
         backgroundColor: Colors.transparent,
         elevation: 0,
         child: ZenGlassCard(
@@ -286,8 +286,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: TextButton.styleFrom(
+              onPressed: () => Navigator.pop(dialogContext),
+              style: TextButton.styleFrom(
                         foregroundColor: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
                       ),
                       child: const Text('Cancel')
@@ -305,8 +305,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           setState(() {
                             _boards = [..._boards, newBoard];
                           });
-                          _saveBoards();
-                          Navigator.pop(context);
+                  _saveBoards();
+                  Navigator.pop(dialogContext);
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -420,10 +420,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
   void _onEditTask(ZenBlock block) async {
     final nameController = TextEditingController(text: block.content);
-    
+
     showDialog(
       context: context,
-      builder: (context) => Dialog(
+      builder: (dialogContext) => Dialog(
         backgroundColor: Colors.transparent,
         elevation: 0,
         child: ZenGlassCard(
@@ -476,34 +476,34 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       borderSide: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
                     ),
                   ),
-                  onSubmitted: (value) async {
-                    if (value.trim().isNotEmpty) {
-                      final updatedBlock = block.copyWith(content: value.trim());
-                      await ref.read(blockServiceProvider).updateBlock(updatedBlock);
-                      if (mounted) Navigator.pop(context);
-                    }
-                  },
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context), 
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
-                      ),
-                      child: const Text('Cancel')
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: () async {
-                        if (nameController.text.trim().isNotEmpty) {
-                          final updatedBlock = block.copyWith(content: nameController.text.trim());
-                          await ref.read(blockServiceProvider).updateBlock(updatedBlock);
-                          if (mounted) Navigator.pop(context);
-                        }
-                      },
+        onSubmitted: (value) async {
+          if (value.trim().isNotEmpty) {
+            final updatedBlock = block.copyWith(content: value.trim());
+            await ref.read(blockServiceProvider).updateBlock(updatedBlock);
+            if (context.mounted) Navigator.pop(dialogContext);
+          }
+        },
+      ),
+      const SizedBox(height: 24),
+      Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            style: TextButton.styleFrom(
+              foregroundColor: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+            ),
+            child: const Text('Cancel')
+          ),
+          const SizedBox(width: 12),
+          ElevatedButton(
+            onPressed: () async {
+              if (nameController.text.trim().isNotEmpty) {
+                final updatedBlock = block.copyWith(content: nameController.text.trim());
+                await ref.read(blockServiceProvider).updateBlock(updatedBlock);
+                if (context.mounted) Navigator.pop(dialogContext);
+              }
+            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primary,
                         foregroundColor: Colors.white,
@@ -541,6 +541,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           controller: scrollController,
           thickness: 6.0,
           radius: const Radius.circular(8.0),
+          thumbVisibility: true,
           child: SingleChildScrollView(
             controller: scrollController,
             scrollDirection: Axis.horizontal,

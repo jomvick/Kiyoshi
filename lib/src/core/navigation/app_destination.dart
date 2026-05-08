@@ -2,36 +2,18 @@ import 'package:flutter/widgets.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
 enum AppDestination {
-  dashboard(
-    label: 'Dashboard',
-    icon: LucideIcons.layoutGrid,
-  ),
-  projects(
-    label: 'Projects',
-    icon: LucideIcons.columns,
-  ),
-  tasks(
-    label: 'Tasks',
-    icon: LucideIcons.checkSquare,
-  ),
-  notes(
-    label: 'Notes',
-    icon: LucideIcons.fileText,
-  ),
-  calendar(
-    label: 'Calendar',
-    icon: LucideIcons.calendar,
-  ),
-  analytics(
-    label: 'Analytics',
-    icon: LucideIcons.barChart3,
-  );
+  dashboard('Dashboard', LucideIcons.layoutGrid),
+  projects('Projects', LucideIcons.columns),
+  tasks('Tasks', LucideIcons.checkSquare),
+  notes('Notes', LucideIcons.fileText),
+  calendar('Calendar', LucideIcons.calendar),
+  analytics('Analytics', LucideIcons.barChart3),
+  settings('Settings', LucideIcons.settings);
 
-  const AppDestination({
-    required this.label,
-    required this.icon,
-  });
+  const AppDestination(this.label, this.icon);
 
   final String label;
   final IconData icon;
+
+  int get ordinal => index;
 }

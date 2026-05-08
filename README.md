@@ -3,6 +3,7 @@
 A minimalist glassmorphic workspace manager with a sophisticated "Zen Design System" aesthetic. Built with Flutter for desktop platforms.
 
 ![Kiyoshi](https://img.shields.io/badge/Platform-Flutter%20Desktop-blue)
+![Version](https://img.shields.io/badge/Version-1.0.0-green)
 ![License](https://img.shields.io/badge/License-Private-red)
 
 ## Features
@@ -59,6 +60,40 @@ Kiyoshi implements a unique **Zen Design System**:
 
 ## Installation
 
+### Quick Install (One-line)
+
+```bash
+# AppImage (recommended)
+curl -L https://github.com/jomvick/kiyoshi/releases/latest/download/Kiyoshi-1.0.0-linux-x86_64.AppImage -o Kiyoshi.AppImage && chmod +x Kiyoshi.AppImage && ./Kiyoshi.AppImage
+```
+
+### Option 2: Flatpak
+
+```bash
+# Install flatpak-builder (first time)
+sudo dnf install flatpak-builder
+
+# Build and install
+flatpak-builder --user --install build.flatpak io.zenstudio.kiyoshi.yml
+
+# Or install from file
+flatpak install kiyoshi.flatpak
+```
+
+### Option 3: Portable Archive
+
+```bash
+# Download and extract
+curl -L https://github.com/jomvick/kiyoshi/releases/latest/download/kiyoshi-linux.tar.gz -o kiyoshi.tar.gz
+tar -xzf kiyoshi.tar.gz
+cd kiyoshi
+
+# Run
+./kiyoshi
+```
+
+### Option 4: Build from Source
+
 ```bash
 # Clone
 git clone https://github.com/jomvick/Kiyoshi.git
@@ -67,27 +102,11 @@ cd Kiyoshi
 # Install deps
 flutter pub get
 
-# Generate Drift code
-flutter pub run build_runner build --delete-conflicting-outputs
+# Build
+flutter build linux --release
 
 # Run
-flutter run
-```
-
-### Desktop Targets
-
-```bash
-flutter run -d linux    # Linux
-flutter run -d macos    # macOS  
-flutter run -d windows  # Windows
-```
-
-### Build Release
-
-```bash
-flutter build apk --release
-flutter build ios --release
-flutter build web --release
+./build/linux/x64/release/bundle/kiyoshi
 ```
 
 ## Architecture
@@ -150,6 +169,26 @@ flutter test test/providers_test.dart
 - Full CRUD for workspaces, projects, tasks
 - Zen Mode (Monolith) for focus sessions
 - Quick Entry with slash commands
+
+## Auto-Update
+
+Kiyoshi checks for updates automatically on startup. When a new version is available:
+- You'll see a notification in the app
+- Go to **Settings > Updates** to download
+
+### Manual Update (CLI)
+
+```bash
+# Download latest release
+curl -L https://github.com/jomvick/kiyoshi/releases/latest/download/Kiyoshi-linux.tar.gz -o kiyoshi.tar.gz
+
+# Backup and extract
+tar -xzf kiyoshi.tar.gz
+cp -r kiyoshi/* /opt/kiyoshi/
+
+# Restart app
+kiyoshi
+```
 
 ## License
 

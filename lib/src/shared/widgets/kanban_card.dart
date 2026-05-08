@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:kiyoshi/src/core/theme/app_theme.dart';
@@ -38,9 +39,11 @@ class KanbanCard extends StatefulWidget {
 class _KanbanCardState extends State<KanbanCard>
     with SingleTickerProviderStateMixin {
   bool _isHovering = false;
+  bool _isFocused = false;
   Offset _mousePosition = Offset.zero;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
+  final FocusNode _focusNode = FocusNode();
   @override
   void initState() {
     super.initState();
@@ -57,6 +60,7 @@ class _KanbanCardState extends State<KanbanCard>
   @override
   void dispose() {
     _animationController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -67,27 +71,44 @@ class _KanbanCardState extends State<KanbanCard>
     final theme = Theme.of(context);
     final isOverdue = _isOverdue();
 
-    return MouseRegion(
-          onEnter: (_) => _onHover(true),
-          onExit: (_) => _onHover(false),
-          onHover: (event) => setState(() => _mousePosition = event.localPosition),
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: widget.onTap,
-            onLongPress: _showContextMenu,
-            child: AnimatedBuilder(
-              animation: _animationController,
-              builder: (context, child) {
-                final isDone = widget.task.status == TaskStatus.done;
-                return Transform.scale(
-                  scale: _scaleAnimation.value,
-                  child: AnimatedOpacity(
-                    duration: AppTheme.animSlow,
-                    opacity: isDone ? 0.45 : 1.0, // "Ghosting" effect
-                    child: _buildFrostedCard(context, theme, isOverdue),
-                  ),
-                );
-              },
+    return Focus(
+          focusNode: _focusNode,
+          onFocusChange: (hasFocus) => setState(() => _isFocused = hasFocus),
+          onKeyEvent: (node, event) {
+            if (event is KeyDownEvent) {
+              if (event.logicalKey == LogicalKeyboardKey.enter || event.logicalKey == LogicalKeyboardKey.space) {
+                if (widget.onTap != null) widget.onTap!();
+                return KeyEventResult.handled;
+              }
+              if (event.logicalKey == LogicalKeyboardKey.delete || event.logicalKey == LogicalKeyboardKey.backspace) {
+                if (widget.onDelete != null) widget.onDelete!();
+                return KeyEventResult.handled;
+              }
+            }
+            return KeyEventResult.ignored;
+          },
+          child: MouseRegion(
+            onEnter: (_) => _onHover(true),
+            onExit: (_) => _onHover(false),
+            onHover: (event) => setState(() => _mousePosition = event.localPosition),
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: widget.onTap,
+              onLongPress: _showContextMenu,
+              child: AnimatedBuilder(
+                animation: _animationController,
+                builder: (context, child) {
+                  final isDone = widget.task.status == TaskStatus.done;
+                  return Transform.scale(
+                    scale: _scaleAnimation.value,
+                    child: AnimatedOpacity(
+                      duration: AppTheme.animSlow,
+                      opacity: isDone ? 0.45 : 1.0,
+                      child: _buildFrostedCard(context, theme, isOverdue),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         )
@@ -111,10 +132,12 @@ class _KanbanCardState extends State<KanbanCard>
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         border: Border.all(
-          color: widget.task.priority == TaskPriority.high
-              ? AppTheme.primary.withValues(alpha: 0.4)
-              : AppTheme.outline.withValues(alpha: 0.25),
-          width: 1,
+          color: _isFocused
+              ? AppTheme.primary.withValues(alpha: 0.8)
+              : (widget.task.priority == TaskPriority.high
+                  ? AppTheme.primary.withValues(alpha: 0.4)
+                  : AppTheme.outline.withValues(alpha: 0.25)),
+          width: _isFocused ? 2 : 1,
         ),
         boxShadow: [
           BoxShadow(
@@ -126,14 +149,16 @@ class _KanbanCardState extends State<KanbanCard>
       ),
       child: Stack(
         children: [
-          // Prismatic Border (for high priority or active state)
+          // Prismatic Border (for high priority or active state) - RepaintBoundary for isolation
           if (widget.task.priority == TaskPriority.high || _isHovering)
             Positioned.fill(
-              child: CustomPaint(
-                painter: PrismaticPainter(
-                  mousePosition: _mousePosition,
-                  radius: AppTheme.radiusLarge,
-                  opacity: _isHovering ? 0.4 : 0.2,
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: PrismaticPainter(
+                    mousePosition: _mousePosition,
+                    radius: AppTheme.radiusLarge,
+                    opacity: _isHovering ? 0.4 : 0.2,
+                  ),
                 ),
               ),
             ),

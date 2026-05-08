@@ -127,77 +127,147 @@ class AppTheme {
   
   // === THEME DATA ===
   static ThemeData get lightTheme {
-    final baseTextTheme = const TextTheme(
+    final textTheme = _buildTextTheme(Brightness.light);
+    return _buildTheme(textTheme, Brightness.light);
+  }
+
+  static ThemeData get darkTheme {
+    final textTheme = _buildTextTheme(Brightness.dark);
+    return _buildTheme(textTheme, Brightness.dark);
+  }
+
+  static ColorScheme get _lightColorScheme => const ColorScheme(
+    brightness: Brightness.light,
+    primary: primary,
+    onPrimary: onPrimary,
+    primaryContainer: primaryContainer,
+    onPrimaryContainer: onPrimaryContainer,
+    secondary: secondary,
+    onSecondary: onSecondary,
+    secondaryContainer: secondaryContainer,
+    onSecondaryContainer: onSecondaryContainer,
+    tertiary: tertiary,
+    onTertiary: onTertiary,
+    tertiaryContainer: tertiaryContainer,
+    onTertiaryContainer: onTertiaryContainer,
+    surface: surface,
+    onSurface: onBackground,
+    surfaceContainerLowest: surfaceContainerLowest,
+    surfaceContainerLow: surfaceContainerLow,
+    surfaceContainer: surfaceContainer,
+    surfaceContainerHigh: surfaceContainerHigh,
+    onSurfaceVariant: onSurfaceVariant,
+    error: error,
+    onError: onError,
+    errorContainer: errorContainer,
+    onErrorContainer: onErrorContainer,
+    outline: outline,
+    outlineVariant: outlineVariant,
+  );
+
+  static ColorScheme get _darkColorScheme {
+    return ColorScheme(
+      brightness: Brightness.dark,
+      primary: primary,
+      onPrimary: onPrimary,
+      primaryContainer: primaryContainer,
+      onPrimaryContainer: onPrimaryContainer,
+      secondary: secondary,
+      onSecondary: onSecondary,
+      secondaryContainer: secondaryContainer,
+      onSecondaryContainer: onSecondaryContainer,
+      tertiary: tertiary,
+      onTertiary: onTertiary,
+      tertiaryContainer: tertiaryContainer,
+      onTertiaryContainer: onTertiaryContainer,
+      surface: const Color(0xFF1E1E1E),
+      onSurface: Colors.white,
+      surfaceContainerLowest: const Color(0xFF1A1A1A),
+      surfaceContainerLow: const Color(0xFF252525),
+      surfaceContainer: const Color(0xFF2A2A2A),
+      surfaceContainerHigh: const Color(0xFF333333),
+      onSurfaceVariant: Colors.white70,
+      error: error,
+      onError: onError,
+      errorContainer: errorContainer,
+      onErrorContainer: onErrorContainer,
+      outline: const Color(0xFF444444),
+      outlineVariant: const Color(0xFF333333),
+    );
+  }
+
+  static TextTheme _buildTextTheme(Brightness brightness) {
+    final baseTextTheme = TextTheme(
       displayLarge: TextStyle(
         fontSize: 48,
         fontWeight: FontWeight.w600,
-        color: onBackground,
+        color: brightness == Brightness.dark ? Colors.white : onBackground,
         letterSpacing: -1.0,
         height: 1.1,
       ),
       displayMedium: TextStyle(
         fontSize: 36,
         fontWeight: FontWeight.w600,
-        color: onBackground,
+        color: brightness == Brightness.dark ? Colors.white : onBackground,
         letterSpacing: -0.8,
         height: 1.1,
       ),
       displaySmall: TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.w600,
-        color: onBackground,
+        color: brightness == Brightness.dark ? Colors.white : onBackground,
         letterSpacing: -0.5,
         height: 1.2,
       ),
       headlineLarge: TextStyle(
         fontSize: 24,
         fontWeight: FontWeight.w600,
-        color: onBackground,
+        color: brightness == Brightness.dark ? Colors.white : onBackground,
         letterSpacing: -0.4,
       ),
       headlineMedium: TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: onBackground,
+        color: brightness == Brightness.dark ? Colors.white : onBackground,
         letterSpacing: -0.3,
       ),
       headlineSmall: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w600,
-        color: onBackground,
+        color: brightness == Brightness.dark ? Colors.white : onBackground,
       ),
       titleLarge: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
-        color: onBackground,
+        color: brightness == Brightness.dark ? Colors.white : onBackground,
       ),
       titleMedium: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: onBackground,
+        color: brightness == Brightness.dark ? Colors.white : onBackground,
       ),
       titleSmall: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w700,
-        color: onSurfaceVariant,
+        color: brightness == Brightness.dark ? Colors.white70 : onSurfaceVariant,
         letterSpacing: 1.2,
       ),
       bodyLarge: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w400,
-        color: onBackground,
+        color: brightness == Brightness.dark ? Colors.white : onBackground,
         height: 1.6,
       ),
       bodyMedium: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w400,
-        color: onBackground,
+        color: brightness == Brightness.dark ? Colors.white : onBackground,
         height: 1.6,
       ),
       bodySmall: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w400,
-        color: onSurfaceVariant,
+        color: brightness == Brightness.dark ? Colors.white60 : onSurfaceVariant,
         height: 1.5,
       ),
       labelLarge: TextStyle(
@@ -208,13 +278,13 @@ class AppTheme {
       labelMedium: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: onSurfaceVariant,
+        color: brightness == Brightness.dark ? Colors.white70 : onSurfaceVariant,
         letterSpacing: 0.2,
       ),
       labelSmall: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w600,
-        color: onSurfaceVariant,
+        color: brightness == Brightness.dark ? Colors.white60 : onSurfaceVariant,
         letterSpacing: 0.3,
       ),
     );
@@ -222,8 +292,8 @@ class AppTheme {
     final montserrat = GoogleFonts.montserratTextTheme(baseTextTheme);
     final inter = GoogleFonts.interTextTheme(baseTextTheme);
     final jetbrains = GoogleFonts.jetBrainsMonoTextTheme(baseTextTheme);
-    
-    final mergedTextTheme = inter.copyWith(
+
+    return inter.copyWith(
       displayLarge: montserrat.displayLarge?.copyWith(letterSpacing: -0.5),
       displayMedium: montserrat.displayMedium?.copyWith(letterSpacing: -0.5),
       displaySmall: montserrat.displaySmall?.copyWith(letterSpacing: -0.2),
@@ -236,46 +306,25 @@ class AppTheme {
       labelSmall: jetbrains.labelSmall?.copyWith(letterSpacing: 1.8, fontSize: 10),
       bodySmall: jetbrains.bodySmall?.copyWith(letterSpacing: 0.5, fontSize: 11),
     );
+  }
+
+  static ThemeData _buildTheme(TextTheme textTheme, Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
+    final colorScheme = isDark ? _darkColorScheme : _lightColorScheme;
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
-      scaffoldBackgroundColor: KiyoshiZenTokens.canvas,
-      colorScheme: const ColorScheme.light(
-        primary: AppTheme.primary,
-        primaryContainer: AppTheme.primaryContainer,
-        onPrimary: AppTheme.onPrimary,
-        onPrimaryContainer: AppTheme.onPrimaryContainer,
-        secondary: AppTheme.secondary,
-        secondaryContainer: AppTheme.secondaryContainer,
-        onSecondary: AppTheme.onSecondary,
-        onSecondaryContainer: AppTheme.onSecondaryContainer,
-        tertiary: AppTheme.tertiary,
-        tertiaryContainer: AppTheme.tertiaryContainer,
-        onTertiary: AppTheme.onTertiary,
-        onTertiaryContainer: AppTheme.onTertiaryContainer,
-        surface: AppTheme.surface,
-        surfaceContainerLow: AppTheme.surfaceContainerLow,
-        surfaceContainerLowest: AppTheme.surfaceContainerLowest,
-        surfaceContainerHigh: AppTheme.surfaceContainerHigh,
-        onSurface: AppTheme.onBackground,
-        onSurfaceVariant: AppTheme.onSurfaceVariant,
-        outline: AppTheme.outline,
-        outlineVariant: AppTheme.outlineVariant,
-        error: AppTheme.error,
-        errorContainer: AppTheme.errorContainer,
-        onError: AppTheme.onError,
-        onErrorContainer: AppTheme.onErrorContainer,
-        inversePrimary: AppTheme.inversePrimary,
-      ),
-      appBarTheme: const AppBarTheme(
+      brightness: brightness,
+      scaffoldBackgroundColor: isDark ? const Color(0xFF121212) : KiyoshiZenTokens.canvas,
+      colorScheme: colorScheme,
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: false,
         titleTextStyle: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: onBackground,
+          color: isDark ? Colors.white : onBackground,
           letterSpacing: -0.3,
         ),
       ),
@@ -284,18 +333,18 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusLarge),
-          side: const BorderSide(color: glassBorder, width: 0.5),
+          side: BorderSide(color: isDark ? const Color(0xFF333333) : glassBorder, width: 0.5),
         ),
       ),
       dividerTheme: const DividerThemeData(
         color: Colors.transparent,
         thickness: 0,
       ),
-      iconTheme: const IconThemeData(
-        color: onSurfaceVariant,
+      iconTheme: IconThemeData(
+        color: isDark ? Colors.white70 : onSurfaceVariant,
         size: 20,
       ),
-      textTheme: mergedTextTheme,
+      textTheme: textTheme,
     );
   }
   

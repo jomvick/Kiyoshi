@@ -20,7 +20,8 @@ class GlassPrismPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final radius = KiyoshiZenTokens.radiusCard;
 
-    return CustomPaint(
+    return RepaintBoundary(
+      child: CustomPaint(
       painter: spectralOutline
           ? _SpectralBorderPainter(radius: radius)
           : null,
@@ -79,6 +80,7 @@ class GlassPrismPanel extends StatelessWidget {
                 ),
               ],
             ),
+          ),
           ),
         ),
       ),

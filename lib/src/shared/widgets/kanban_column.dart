@@ -298,11 +298,12 @@ class _KanbanColumnState extends State<KanbanColumn> {
   Widget _buildTaskList() {
     return Scrollbar(
       controller: _scrollController,
-      thickness: 4.0,
+      thickness: 6.0,
       radius: const Radius.circular(8.0),
+      thumbVisibility: true,
       child: ScrollConfiguration(
         behavior: ScrollConfiguration.of(context).copyWith(
-          scrollbars: false,
+          scrollbars: true,
           physics: const BouncingScrollPhysics(),
         ),
         child: ListView.builder(

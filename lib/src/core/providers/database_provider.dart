@@ -56,7 +56,6 @@ final allWorkspacesProvider = StreamProvider<List<Workspace>>((ref) {
 
 final globalStatsProvider = StreamProvider<Map<String, dynamic>>((ref) {
   final repo = ref.watch(projectRepositoryProvider);
-  // This is a simple implementation, for production we might want a dedicated query
   return repo.watchBlocksForProject('global').map((blocks) {
     final todos = blocks.where((b) => b.type == 'todo').toList();
     final done = todos.where((t) => t.metadata['status'] == 'done').toList();
@@ -73,8 +72,7 @@ final globalStatsProvider = StreamProvider<Map<String, dynamic>>((ref) {
 final latestActivitiesProvider = StreamProvider<List<ZenBlock>>((ref) {
   final repo = ref.watch(projectRepositoryProvider);
   return repo.watchBlocksForProject('global').map((blocks) {
-    final sorted = List<ZenBlock>.from(blocks);
-    sorted.sort((a, b) => b.position.compareTo(a.position));
+    final sorted = blocks.toList()..sort((a, b) => b.position.compareTo(a.position));
     return sorted.take(10).toList();
   });
 });

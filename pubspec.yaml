@@ -64,6 +64,9 @@ dependencies:
   url_launcher: ^6.2.5
   uuid: ^4.5.3
 
+  # HTTP for updates
+  http: ^1.2.0
+
   # Local storage
   shared_preferences: ^2.2.2
   file_picker: ^11.0.2
@@ -89,10 +92,10 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
 
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - VERSION
 
   # To add assets to your application, add an assets section, like this:
   # assets:

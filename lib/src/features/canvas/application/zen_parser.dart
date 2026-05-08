@@ -178,7 +178,14 @@ class ZenParser {
   }
 
   /// Returns true if the parser detects a "slash command" intent.
-  static bool isSlashIntent(String input) => input.startsWith('/');
+  /// Only shows the menu when the user typed "/" or "/partial" (no space yet).
+  /// Once a command is selected and space follows (e.g. "/note "), the menu hides.
+  static bool isSlashIntent(String input) {
+    if (!input.startsWith('/')) return false;
+    // If there is a space after the slash-command, the command is committed — hide menu.
+    final afterSlash = input.substring(1);
+    return !afterSlash.contains(' ');
+  }
 
   /// Returns true if the parser detects a "project mention" intent (e.g., typing #).
   static bool isProjectIntent(String input) {

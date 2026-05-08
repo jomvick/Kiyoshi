@@ -11,6 +11,7 @@ import 'package:kiyoshi/src/features/dashboard/kiyoshi_zen_dashboard_view.dart';
 import 'package:kiyoshi/src/features/notes/notes_screen.dart';
 import 'package:kiyoshi/src/features/projects/presentation/projects_screen.dart';
 import 'package:kiyoshi/src/features/tasks/tasks_screen.dart';
+import 'package:kiyoshi/src/features/settings/settings_screen.dart';
 import 'package:kiyoshi/src/shared/layout/app_desktop_shell.dart';
 import 'package:kiyoshi/src/shared/widgets/command_palette.dart';
 import 'package:lucide_icons/lucide_icons.dart';
@@ -226,19 +227,19 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
   }
 
   Widget _buildSelectedScreen() {
-    switch (_selectedDestination) {
-      case AppDestination.dashboard:
-        return const KiyoshiZenDashboardView();
-      case AppDestination.projects:
-        return const ProjectsScreen();
-      case AppDestination.tasks:
-        return const TasksScreen();
-      case AppDestination.notes:
-        return const NotesScreen();
-      case AppDestination.calendar:
-        return const CalendarScreen();
-      case AppDestination.analytics:
-        return const AnalyticsScreen();
-    }
+    // Lazy loading: use IndexedStack with mainIndex (only render visible screen)
+    return IndexedStack(
+      index: _selectedDestination.ordinal,
+      sizing: StackFit.expand,
+    children: const [
+      KiyoshiZenDashboardView(),
+      ProjectsScreen(),
+      TasksScreen(),
+      NotesScreen(),
+      CalendarScreen(),
+      AnalyticsScreen(),
+      SettingsScreen(),
+    ],
+    );
   }
 }

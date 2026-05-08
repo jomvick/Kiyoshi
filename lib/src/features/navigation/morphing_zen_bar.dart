@@ -50,13 +50,16 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
   final List<String> _projectSuggestions = ['Design', 'Marketing', 'Core', 'Vision', 'Calm'];
   
   final List<Map<String, dynamic>> _slashCommands = [
-    {'icon': LucideIcons.checkSquare, 'label': 'Task',    'prefix': '/task '},
-    {'icon': LucideIcons.fileText,    'label': 'Note',    'prefix': '/note '},
-    {'icon': LucideIcons.calendar,    'label': 'Event',   'prefix': '/event '},
-    {'icon': LucideIcons.folder,      'label': 'Project', 'prefix': '/project '},
-    {'icon': LucideIcons.code,        'label': 'Code',    'prefix': '```\n\n```'},
-    {'icon': LucideIcons.link,        'label': 'Link',    'prefix': 'https://'},
+    {'icon': LucideIcons.checkSquare, 'label': 'Task',    'color': const Color(0xFF7C8CFF)},
+    {'icon': LucideIcons.fileText,    'label': 'Note',    'color': const Color(0xFF5EEAD4)},
+    {'icon': LucideIcons.calendar,    'label': 'Event',   'color': const Color(0xFFFF6B9A)},
+    {'icon': LucideIcons.folder,      'label': 'Project', 'color': const Color(0xFF86EFAC)},
+    {'icon': LucideIcons.code,        'label': 'Code',    'color': const Color(0xFFFFD700)},
+    {'icon': LucideIcons.link,        'label': 'Link',    'color': AppTheme.primary},
   ];
+
+  /// Active command mode — set when user picks a slash command from the menu.
+  Map<String, dynamic>? _activeCommand;
 
   late AnimationController _borderRotationController;
 
@@ -106,13 +109,18 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
   }
 
   void _submitTask() async {
-    final rawText = _controller.text.trim();
+    final contentText = _controller.text.trim();
+    // When in command mode, prepend the command prefix for the parser
+    final label = _activeCommand?['label']?.toString().toLowerCase() ?? '';
+    final rawText = (label.isNotEmpty && contentText.isNotEmpty)
+        ? '/$label $contentText'
+        : contentText;
+
     if (rawText.isEmpty || rawText == '/') return;
-    
+
     final parsed = ZenParser.parseRawInput(rawText);
-    
+
     if (parsed.type == 'project') {
-      // Route to project creation
       if (widget.onProjectCreated != null) {
         await widget.onProjectCreated!(parsed.content, parsed.metadata['description']);
       }
@@ -125,16 +133,17 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
     } else {
       await widget.onTaskCreated(
         parsed.content,
-        null, // Date handled differently now, but we pass null for now or extract from metadata
+        null,
         parsed.metadata['project'],
         parsed.metadata['priority'] ?? 3,
       );
     }
-    
+
     if (!mounted) return;
     setState(() {
       _currentPlaceholder = _placeholders[DateTime.now().second % _placeholders.length];
       _showSlashMenu = false;
+      _activeCommand = null;
     });
     _controller.clear();
     if (mounted) _focusNode.unfocus();
@@ -165,15 +174,14 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
   }
 
   Widget _buildPrismaticBar() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final double maxWidth = constraints.maxWidth < 640 ? constraints.maxWidth - 60 : 600;
-        final double currentWidth = _shouldBeExpanded ? maxWidth : 60;
-        
-        return AnimatedContainer(
+    // Always center and cap the bar width — never let it span the full page.
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 640),
+        child: AnimatedContainer(
           duration: const Duration(milliseconds: 400),
           curve: Curves.easeOutCubic,
-          width: currentWidth,
+          width: _shouldBeExpanded ? double.infinity : 60,
           height: 60,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
@@ -196,7 +204,7 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
                   padding: EdgeInsets.zero,
                   child: const SizedBox.expand(),
                 ),
-                
+
                 if (_isFocused)
                   IgnorePointer(
                     child: AnimatedBuilder(
@@ -216,15 +224,15 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
 
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  child: _shouldBeExpanded 
-                      ? _buildExpandedContent() 
+                  child: _shouldBeExpanded
+                      ? _buildExpandedContent()
                       : _buildCollapsedIcon(),
                 ),
               ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -241,6 +249,14 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
   }
 
   Widget _buildExpandedContent() {
+    final cmd = _activeCommand;
+    final cmdColor = cmd != null
+        ? (cmd['color'] as Color? ?? AppTheme.primary)
+        : AppTheme.primary;
+    final hintText = cmd != null
+        ? 'Write your ${cmd['label'].toString().toLowerCase()}...'
+        : _currentPlaceholder;
+
     return Container(
       key: const ValueKey('expanded'),
       width: double.infinity,
@@ -248,12 +264,53 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Logo
           BotanicalLogo(
             size: 28,
-            color: _isFocused ? AppTheme.primary : AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+            color: _isFocused
+                ? AppTheme.primary
+                : AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
             showPrismaticHalo: _isFocused,
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 10),
+
+          // Command pill — shown when user selected a slash command
+          if (cmd != null) ...[
+            GestureDetector(
+              onTap: () {
+                setState(() => _activeCommand = null);
+                _controller.clear();
+                _focusNode.requestFocus();
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: cmdColor.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: cmdColor.withValues(alpha: 0.35)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      cmd['label'].toString().toUpperCase(),
+                      style: TextStyle(
+                        color: cmdColor,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(width: 5),
+                    Icon(LucideIcons.x, size: 10, color: cmdColor.withValues(alpha: 0.7)),
+                  ],
+                ),
+              ),
+            ).animate().fade(duration: 150.ms).scale(begin: const Offset(0.85, 0.85)),
+            const SizedBox(width: 8),
+          ],
+
+          // Text field — fills remaining space
           Expanded(
             child: TextField(
               controller: _controller,
@@ -266,7 +323,7 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
                 fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
-                hintText: _currentPlaceholder,
+                hintText: hintText,
                 hintStyle: TextStyle(
                   color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4),
                   fontWeight: FontWeight.w400,
@@ -277,10 +334,14 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
               ),
             ),
           ),
-          if (_lastResult != null && _controller.text.isNotEmpty) 
-            Flexible(child: _buildVisualFeedback()),
-          if (_controller.text.isNotEmpty) ...[
-            const SizedBox(width: 12),
+
+          // Badges — only shown when NOT in command mode
+          if (cmd == null && _lastResult != null && _controller.text.isNotEmpty)
+            _buildVisualFeedback(),
+
+          // Submit button
+          if (_controller.text.isNotEmpty || cmd != null) ...[
+            const SizedBox(width: 8),
             _buildSubmitButton(),
           ],
         ],
@@ -359,19 +420,17 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
   }
 
   Widget _buildSlashItem(Map<String, dynamic> cmd) {
+    final color = cmd['color'] as Color? ?? AppTheme.primary;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          // Replace the whole field with the chosen prefix (e.g. "/task ")
-          // then re-focus AFTER the frame so Flutter places the cursor correctly.
-          _controller.value = TextEditingValue(
-            text: cmd['prefix'] as String,
-            selection: TextSelection.collapsed(
-              offset: (cmd['prefix'] as String).length,
-            ),
-          );
-          setState(() => _showSlashMenu = false);
+          // Enter command mode: pill shows in bar, text field is clear and focused
+          setState(() {
+            _activeCommand = cmd;
+            _showSlashMenu = false;
+          });
+          _controller.clear();
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _focusNode.requestFocus();
           });
@@ -382,16 +441,20 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppTheme.primary.withValues(alpha: 0.05)),
+            border: Border.all(color: color.withValues(alpha: 0.15)),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(cmd['icon'] as IconData, size: 18, color: AppTheme.primary),
+              Icon(cmd['icon'] as IconData, size: 18, color: color),
               const SizedBox(height: 6),
               Text(
                 cmd['label'] as String,
-                style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
               ),
             ],
           ),
@@ -423,19 +486,32 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
 
   Widget _buildVisualFeedback() {
     if (_lastResult == null) return const SizedBox.shrink();
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (_lastResult!.type != 'text')
-          _buildBadge(_lastResult!.type.toUpperCase(), AppTheme.primary),
-        const SizedBox(width: 4),
-        if (_lastResult!.metadata.containsKey('priority') && _lastResult!.metadata['priority'] < 3)
-          _buildBadge('P${_lastResult!.metadata['priority']}', const Color(0xFFFF4D8D)),
-        if (_lastResult!.metadata.containsKey('assignee'))
-          _buildBadge('@${_lastResult!.metadata['assignee']}', const Color(0xFF2DD4BF)),
-        if (_lastResult!.metadata.containsKey('project'))
-          _buildBadge('PROJ', AppTheme.primary),
-      ],
+    // Constrain badges to max 130px so they never crowd the submit button.
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 130),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_lastResult!.type != 'text')
+              _buildBadge(_lastResult!.type.toUpperCase(), AppTheme.primary),
+            if (_lastResult!.metadata.containsKey('priority') &&
+                _lastResult!.metadata['priority'] < 3) ...[
+              const SizedBox(width: 4),
+              _buildBadge('P${_lastResult!.metadata['priority']}', const Color(0xFFFF4D8D)),
+            ],
+            if (_lastResult!.metadata.containsKey('assignee')) ...[
+              const SizedBox(width: 4),
+              _buildBadge('@${_lastResult!.metadata['assignee']}', const Color(0xFF2DD4BF)),
+            ],
+            if (_lastResult!.metadata.containsKey('project')) ...[
+              const SizedBox(width: 4),
+              _buildBadge('PROJ', AppTheme.primary),
+            ],
+          ],
+        ),
+      ),
     ).animate().fade();
   }
 

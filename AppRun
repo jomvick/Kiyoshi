@@ -1,0 +1,10 @@
+#!/bin/bash
+# AppRun script for Kiyoshi AppImage
+
+export APPIMAGE="$(readlink -f "${0}")"
+export APRUN="$(dirname "$APPIMAGE")"
+
+export PATH="$APRUN/usr/bin:$PATH"
+export LD_LIBRARY_PATH="$APRUN/usr/lib:$APRUN/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH"
+
+exec "$APRUN/usr/bin/kiyoshi" "$@"
