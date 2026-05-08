@@ -64,20 +64,16 @@ Kiyoshi implements a unique **Zen Design System**:
 
 ```bash
 # AppImage (recommended)
-curl -L https://github.com/jomvick/kiyoshi/releases/latest/download/Kiyoshi-1.0.0-linux-x86_64.AppImage -o Kiyoshi.AppImage && chmod +x Kiyoshi.AppImage && ./Kiyoshi.AppImage
+curl -L https://github.com/jomvick/Kiyoshi/releases/latest/download/Kiyoshi-1.0.0-linux-x86_64.AppImage -o Kiyoshi.AppImage && chmod +x Kiyoshi.AppImage && ./Kiyoshi.AppImage
 ```
 
-### Option 2: Flatpak
+### Option 2: Portable Archive
 
 ```bash
-# Install flatpak-builder (first time)
-sudo dnf install flatpak-builder
-
-# Build and install
-flatpak-builder --user --install build.flatpak io.zenstudio.kiyoshi.yml
-
-# Or install from file
-flatpak install kiyoshi.flatpak
+# Download and extract
+curl -L https://github.com/jomvick/Kiyoshi/releases/latest/download/Kiyoshi-1.0.0-linux-x86_64.AppImage -o Kiyoshi.AppImage
+chmod +x Kiyoshi.AppImage
+./Kiyoshi.AppImage
 ```
 
 ### Option 3: Portable Archive
@@ -92,7 +88,7 @@ cd kiyoshi
 ./kiyoshi
 ```
 
-### Option 4: Build from Source
+### Option 3: Build from Source
 
 ```bash
 # Clone
