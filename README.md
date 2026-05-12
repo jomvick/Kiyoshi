@@ -140,6 +140,11 @@ chmod +x Kiyoshi.AppImage
 **Méthode recommandée — `appimage-builder`** (compatible toutes distros) :
 
 ```bash
+# Fedora : installer dpkg (requis par appimage-builder)
+sudo dnf install dpkg
+
+# Ubuntu/Debian : déjà disponible
+
 # Depuis la racine du projet
 pip3 install appimage-builder
 dart run build_runner build --delete-conflicting-outputs
@@ -148,17 +153,7 @@ flutter build linux --release
 # Output: Kiyoshi-1.0.0-x86_64.AppImage
 ```
 
-**Méthode alternative — `appimagetool`** :
-
-```bash
-wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
-chmod +x appimagetool-x86_64.AppImage
-sudo mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
-flutter build linux --release
-./build_appimage.sh
-```
-
-Le script `build_appimage.sh` détecte automatiquement l'outil disponible et utilise `appimage-builder` en priorité.
+Le script `build_appimage.sh` détecte et installe `dpkg` automatiquement sur Fedora, puis utilise `appimage-builder`.
 
 ### Build from Source (raw binary)
 
