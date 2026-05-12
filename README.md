@@ -207,27 +207,42 @@ Preferences are persisted via `shared_preferences` and exposed through Riverpod:
 
 ## Auto-Update
 
-Kiyoshi checks for updates automatically on startup via the GitHub Releases API. When a new version is available:
-- A notification appears in the app
-- Go to **Settings > Updates** to download
+Kiyoshi checks for updates automatically on startup via the GitHub Releases API. When a new version is available, a notification appears in the app.
 
-The update service downloads the latest release archive to your documents directory. Restart to apply.
-
-### CLI Manual Update
+### Mise à jour manuelle
 
 ```bash
-# Get download URL from latest release
+# Télécharger la dernière version
+wget https://github.com/jomvick/Kiyoshi/releases/latest/download/Kiyoshi-x86_64.AppImage
+
+# Remplacer l'ancienne
+chmod +x Kiyoshi-x86_64.AppImage
+mv Kiyoshi-x86_64.AppImage ~/Applications/Kiyoshi.AppImage
+```
+
+### Via script CLI
+
+```bash
 LATEST=$(curl -s https://api.github.com/repos/jomvick/Kiyoshi/releases/latest | \
   grep -oP '"browser_download_url":\s*"\K[^"]+(?=")' | \
-  grep -E '\.tar\.gz|\.AppImage' | head -1)
+  grep AppImage | head -1)
 
-# Download and replace
-curl -L "$LATEST" -o /tmp/kiyoshi-latest
-chmod +x /tmp/kiyoshi-latest
-# Replace your current binary (adjust path as needed)
-# cp /tmp/kiyoshi-latest /opt/kiyoshi/kiyoshi
-# Or for AppImage: mv /tmp/kiyoshi-latest ~/Kiyoshi.AppImage
+curl -L "$LATEST" -o ~/Applications/Kiyoshi.AppImage
+chmod +x ~/Applications/Kiyoshi.AppImage
 ```
+
+### Publier une mise à jour (développeur)
+
+```bash
+echo "1.1.0" > VERSION
+# Éditer pubspec.yaml : version: 1.1.0+2
+git add .
+git commit -m "release: v1.1.0"
+git tag v1.1.0
+git push origin master --tags
+```
+
+GitHub Actions build et publie l'AppImage automatiquement sur la Release.
 
 ## License
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-APPIMAGE_VERSION="1.0.0"
+APPIMAGE_VERSION="$(cat VERSION 2>/dev/null || echo "1.0.0")"
 ARCH="x86_64"
 
 echo "==> Building Kiyoshi AppImage v$APPIMAGE_VERSION..."

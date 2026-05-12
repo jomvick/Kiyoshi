@@ -16,7 +16,7 @@ jobs:
       - run: flutter build linux --release
       - run: pip3 install appimage-builder
       - run: appimage-builder --recipe AppImageBuilder.yml
-      - uses: actions/upload-artifact@v4
+      - uses: softprops/action-gh-release@v2
         with:
-          name: AppImage
-          path: '*.AppImage'
+          files: 'Kiyoshi-*.AppImage'
+          generate_release_notes: true
