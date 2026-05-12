@@ -142,6 +142,7 @@ chmod +x Kiyoshi.AppImage
 ```bash
 # Depuis la racine du projet
 pip3 install appimage-builder
+dart run build_runner build --delete-conflicting-outputs
 flutter build linux --release
 ./build_appimage.sh
 # Output: Kiyoshi-1.0.0-x86_64.AppImage

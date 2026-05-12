@@ -12,6 +12,7 @@ jobs:
         with:
           flutter-version: '3.x'
       - run: sudo apt-get install -y clang cmake ninja-build libgtk-3-dev
+      - run: dart run build_runner build --delete-conflicting-outputs
       - run: flutter build linux --release
       - run: pip3 install appimage-builder
       - run: appimage-builder --recipe AppImageBuilder.yml

@@ -9,7 +9,10 @@ echo ""
 
 # Ensure Flutter build exists
 if [ ! -f build/linux/x64/release/bundle/kiyoshi ]; then
-    echo "Flutter release build not found. Running flutter build linux --release ..."
+    echo "==> Running build_runner for Drift code generation..."
+    dart run build_runner build --delete-conflicting-outputs
+    echo ""
+    echo "==> Building Flutter release..."
     flutter build linux --release
 fi
 
