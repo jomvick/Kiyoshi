@@ -49,6 +49,7 @@ macos/Runner.xcworkspace/xcuserdata/
 
 # Generated files
 *.g.dart
+!lib/src/core/database/database.g.dart
 .dart_tool/
 build/
 .metadata
