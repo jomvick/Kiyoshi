@@ -138,8 +138,8 @@ chmod +x Kiyoshi.AppImage
 ### Build AppImage from Source
 
 ```bash
-# Prerequisites: appimagetool
-wget https://github.com/AppImage/AppImageKit/releases/latest/download/appimagetool-x86_64.AppImage
+# Prerequisites: appimagetool (from the project root)
+wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
 chmod +x appimagetool-x86_64.AppImage
 sudo mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
 
@@ -161,6 +161,8 @@ flutter pub get
 flutter build linux --release
 ./build/linux/x64/release/bundle/kiyoshi
 ```
+
+> **Note:** Toutes les commandes `flutter` et `./build_appimage.sh` doivent être exécutées depuis la racine du projet (`Kiyoshi/`).
 
 ## Keyboard Shortcuts
 
