@@ -5,7 +5,6 @@ import 'package:kiyoshi/src/core/theme/app_theme.dart';
 import 'package:kiyoshi/src/core/design_system/kiyoshi_zen_tokens.dart';
 import 'package:kiyoshi/src/shared/widgets/botanical_logo.dart';
 import 'package:kiyoshi/src/shared/widgets/prismatic_border_painter.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 
 
 class Sidebar extends StatelessWidget {
@@ -13,9 +12,9 @@ class Sidebar extends StatelessWidget {
   final List<Workspace> workspaces;
   final ValueChanged<Workspace> onWorkspaceSelected;
   final VoidCallback onCreateWorkspace;
-  final VoidCallback? onNewProjectTap;
   final AppDestination selectedDestination;
   final ValueChanged<AppDestination> onDestinationSelected;
+  final bool showPrismaticBorders;
 
   const Sidebar({
     super.key,
@@ -23,9 +22,9 @@ class Sidebar extends StatelessWidget {
     required this.workspaces,
     required this.onWorkspaceSelected,
     required this.onCreateWorkspace,
-    this.onNewProjectTap,
     this.selectedDestination = AppDestination.projects,
     required this.onDestinationSelected,
+    this.showPrismaticBorders = true,
   });
 
   @override
@@ -33,7 +32,6 @@ class Sidebar extends StatelessWidget {
     // Cache local references to avoid widget. lookups
     final dest = selectedDestination;
     final onDestSelect = onDestinationSelected;
-    final onProjectTap = onNewProjectTap;
 
     return Container(
       width: 272,
@@ -41,19 +39,19 @@ class Sidebar extends StatelessWidget {
       decoration: AppTheme.glassPanel(radius: 32),
       child: Stack(
         children: [
-          // Prismatic Border - cached static
-          Positioned.fill(
-            child: RepaintBoundary(
-              child: CustomPaint(
-                painter: PrismaticBorderPainter(
-                  animation: 0,
-                  colors: KiyoshiZenTokens.spectralColors,
-                  radius: 32,
-                  strokeWidth: 1.2,
+          if (showPrismaticBorders)
+            Positioned.fill(
+              child: RepaintBoundary(
+                child: CustomPaint(
+                  painter: PrismaticBorderPainter(
+                    animation: 0,
+                    colors: KiyoshiZenTokens.spectralColors,
+                    radius: 32,
+                    strokeWidth: 1.2,
+                  ),
                 ),
               ),
             ),
-          ),
           Padding(
             padding: const EdgeInsets.all(AppTheme.spaceLarge),
             child: Column(
@@ -144,82 +142,6 @@ class Sidebar extends StatelessWidget {
                     ),
                   );
                 }),
-                const Spacer(),
-                MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: onProjectTap,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppTheme.spaceMedium,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.primary.withValues(alpha: 0.2),
-                            blurRadius: 15,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: const Center(
-                        child: Wrap(
-                          alignment: WrapAlignment.center,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: AppTheme.spaceSmall,
-                          children: [
-                            Icon(
-                              LucideIcons.plus,
-                              size: 18,
-                              color: Colors.white,
-                            ),
-                            Text(
-                              'New Project',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppTheme.spaceLarge),
-        MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child: GestureDetector(
-            onTap: () => onDestSelect(AppDestination.settings),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppTheme.spaceMedium,
-                        vertical: 12,
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            LucideIcons.settings,
-                            size: 18,
-                            color: AppTheme.primary.withValues(alpha: 0.5),
-                          ),
-                          const SizedBox(width: AppTheme.spaceMedium),
-                          Text(
-                            'Settings',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: AppTheme.primary.withValues(alpha: 0.5),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),

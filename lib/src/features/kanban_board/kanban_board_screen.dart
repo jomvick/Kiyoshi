@@ -5,6 +5,7 @@ import 'package:kiyoshi/src/features/projects/domain/entities/workspace.dart';
 import 'package:kiyoshi/src/core/navigation/app_destination.dart';
 import 'package:kiyoshi/src/core/providers/zen_mode_provider.dart';
 import 'package:kiyoshi/src/core/providers/database_provider.dart';
+import 'package:kiyoshi/src/core/providers/preferences_provider.dart';
 import 'package:kiyoshi/src/features/analytics/analytics_screen.dart';
 import 'package:kiyoshi/src/features/calendar/calendar_screen.dart';
 import 'package:kiyoshi/src/features/dashboard/kiyoshi_zen_dashboard_view.dart';
@@ -26,13 +27,18 @@ class KanbanBoardScreen extends ConsumerStatefulWidget {
 
 class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
   Workspace? _selectedWorkspace;
-  AppDestination _selectedDestination = AppDestination.projects;
+  late AppDestination _selectedDestination;
   late final FocusNode _keyboardFocusNode;
 
   @override
   void initState() {
     super.initState();
     _keyboardFocusNode = FocusNode(debugLabel: 'kanban_keyboard_listener');
+    final defaultDest = ref.read(preferencesProvider).defaultDestination;
+    _selectedDestination = AppDestination.values.firstWhere(
+      (d) => d.name == defaultDest,
+      orElse: () => AppDestination.projects,
+    );
   }
 
   @override
@@ -157,18 +163,6 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
     }
   }
 
-  void _onNewProjectTap() {
-    setState(() {
-      _selectedDestination = AppDestination.projects;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Create new project'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final workspacesAsync = ref.watch(allWorkspacesProvider);
@@ -195,7 +189,6 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
             setState(() => _selectedWorkspace = workspace);
           },
           onCreateWorkspace: _onCreateWorkspace,
-          onNewProjectTap: _onNewProjectTap,
           selectedDestination: _selectedDestination,
           onDestinationSelected: (destination) {
             setState(() => _selectedDestination = destination);

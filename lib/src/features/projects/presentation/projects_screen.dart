@@ -8,7 +8,6 @@ import 'package:kiyoshi/src/core/providers/database_provider.dart';
 import 'package:kiyoshi/src/shared/layout/zen_studio_page_shell.dart';
 import 'package:kiyoshi/src/shared/widgets/project_card.dart';
 import 'package:kiyoshi/src/features/projects/presentation/project_detail_view.dart';
-import 'package:kiyoshi/src/shared/widgets/zen_editorial_header.dart';
 import 'package:uuid/uuid.dart';
 
 class ProjectsScreen extends ConsumerStatefulWidget {
@@ -96,27 +95,11 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
   Widget _buildWorkspaceContent(BuildContext context, Workspace workspace) {
     final projectsAsync = ref.watch(projectsForWorkspaceProvider(workspace.id));
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ZenEditorialHeader(
-          label: 'WORKSPACE',
-          title: workspace.name,
-          subtitle: workspace.description.isEmpty
-              ? 'No description'
-              : workspace.description,
-          accentColor: workspace.themeColor,
-        ),
-        const SizedBox(height: AppTheme.spaceLarge),
-        Expanded(
-          child: projectsAsync.when(
-            data: (projects) => _buildProjectsList(context, projects, workspace),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, stack) => Center(child: Text('Error: $err')),
-          ),
-        ),
-      ],
-    );
+    return projectsAsync.when(
+        data: (projects) => _buildProjectsList(context, projects, workspace),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error: $err')),
+      );
   }
 
   Widget _buildProjectsList(

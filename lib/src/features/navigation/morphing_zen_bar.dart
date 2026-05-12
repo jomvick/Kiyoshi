@@ -14,16 +14,20 @@ class MorphingZenBar extends StatefulWidget {
   final Function(String title, DateTime? date, String? project, int priority) onTaskCreated;
   final Function(String type, String content, Map<String, dynamic> metadata)? onBlockCreated;
   final Function(String title, String? description)? onProjectCreated;
+  final VoidCallback? onNavigateToCalendar;
   final FocusNode? focusNode;
   final bool isDashboard;
+  final bool showPrismaticBorders;
 
   const MorphingZenBar({
     super.key, 
     required this.onTaskCreated, 
     this.onBlockCreated,
     this.onProjectCreated,
+    this.onNavigateToCalendar,
     this.focusNode,
     this.isDashboard = true,
+    this.showPrismaticBorders = true,
   });
 
   @override
@@ -124,6 +128,8 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
       if (widget.onProjectCreated != null) {
         await widget.onProjectCreated!(parsed.content, parsed.metadata['description']);
       }
+    } else if (parsed.type == 'event') {
+      widget.onNavigateToCalendar?.call();
     } else if (parsed.type != 'todo' && widget.onBlockCreated != null) {
       await widget.onBlockCreated!(
         parsed.type,
@@ -205,7 +211,7 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
                   child: const SizedBox.expand(),
                 ),
 
-                if (_isFocused)
+                if (_isFocused && widget.showPrismaticBorders)
                   IgnorePointer(
                     child: AnimatedBuilder(
                       animation: _borderRotationController,

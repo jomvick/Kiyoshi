@@ -9,6 +9,7 @@ import 'package:kiyoshi/src/shared/widgets/kanban_column.dart';
 import 'package:kiyoshi/src/shared/layout/zen_studio_page_shell.dart';
 import 'package:kiyoshi/src/shared/widgets/zen_editorial_header.dart';
 import 'package:kiyoshi/src/core/providers/database_provider.dart';
+import 'package:kiyoshi/src/core/providers/preferences_provider.dart';
 import 'package:kiyoshi/src/features/canvas/domain/entities/zen_block.dart';
 import 'package:kiyoshi/src/features/canvas/application/zen_parser.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -375,6 +376,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   @override
   Widget build(BuildContext context) {
     final blocksAsync = ref.watch(projectBlocksProvider('global'));
+    final kanbanWidth = ref.watch(preferencesProvider.select((p) => p.kanbanColumnWidth));
 
     return ZenStudioPageShell(
       title: 'TASKS',
@@ -391,7 +393,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 progressIndicator: _buildMetricsPill(todoBlocks),
               ),
               Expanded(
-                child: _buildKanbanBoard(todoBlocks),
+                child: _buildKanbanBoard(todoBlocks, columnWidth: kanbanWidth),
               ),
             ],
           );
@@ -525,7 +527,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     );
   }
 
-  Widget _buildKanbanBoard(List<ZenBlock> blocks) {
+  Widget _buildKanbanBoard(List<ZenBlock> blocks, {double columnWidth = 320}) {
     final ScrollController scrollController = ScrollController();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.frameMargin),
@@ -542,11 +544,15 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           thickness: 6.0,
           radius: const Radius.circular(8.0),
           thumbVisibility: true,
-          child: SingleChildScrollView(
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
             controller: scrollController,
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
-            child: Row(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minWidth: constraints.maxWidth),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
             children: _boards.asMap().entries.map((entry) {
               final index = entry.key;
               final board = entry.value;
@@ -557,7 +563,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               return Padding(
                 padding: const EdgeInsets.only(right: AppTheme.spaceLarge),
                 child: SizedBox(
-                  width: 320,
+                  width: columnWidth,
                   child: KanbanColumn(
                     board: board,
                     tasks: boardTasks,
@@ -614,9 +620,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 ),
               ),
           ),
-          ),
         ),
       ),
+      ),
+    ),
+    ),
     );
   }
 }

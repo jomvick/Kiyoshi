@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:lucide_icons/lucide_icons.dart';
 import 'package:uuid/uuid.dart';
 import 'package:kiyoshi/src/features/projects/domain/entities/workspace.dart';
 import 'package:kiyoshi/src/features/projects/domain/entities/project.dart';
@@ -19,7 +18,6 @@ class AppDesktopShell extends ConsumerStatefulWidget {
   final List<Workspace> workspaces;
   final ValueChanged<Workspace> onWorkspaceSelected;
   final VoidCallback onCreateWorkspace;
-  final VoidCallback? onNewProjectTap;
   final AppDestination selectedDestination;
   final ValueChanged<AppDestination> onDestinationSelected;
   final Widget child;
@@ -30,7 +28,6 @@ class AppDesktopShell extends ConsumerStatefulWidget {
     required this.workspaces,
     required this.onWorkspaceSelected,
     required this.onCreateWorkspace,
-    this.onNewProjectTap,
     required this.selectedDestination,
     required this.onDestinationSelected,
     required this.child,
@@ -82,8 +79,8 @@ class _AppDesktopShellState extends ConsumerState<AppDesktopShell> {
                 final isMedium = screenWidth < 900;
 
 final sidebarWidth = isZenMode 
-                  ? 0.0 
-                  : (isNarrow ? 0.0 : (isMedium ? 60.0 : prefs.sidebarWidth));
+    ? 0.0 
+    : (isNarrow ? 0.0 : (isMedium ? 60.0 : (prefs.sidebarExpanded ? prefs.sidebarWidth : 0.0)));
 
                 return Row(
                   children: [
@@ -105,9 +102,9 @@ final sidebarWidth = isZenMode
                                         workspaces: widget.workspaces,
                                         onWorkspaceSelected: widget.onWorkspaceSelected,
                                         onCreateWorkspace: widget.onCreateWorkspace,
-                                        onNewProjectTap: widget.onNewProjectTap,
                                         selectedDestination: widget.selectedDestination,
                                         onDestinationSelected: widget.onDestinationSelected,
+                                        showPrismaticBorders: prefs.prismaticBorders,
                                       ),
                               ),
                             )
@@ -143,6 +140,7 @@ final sidebarWidth = isZenMode
                   child: MorphingZenBar(
                     isDashboard: true,
                     focusNode: _quickEntryFocusNode,
+                    showPrismaticBorders: prefs.prismaticBorders,
                     onTaskCreated: (title, date, project, priority) async {
                       final parsed = ParsedBlock(
                         type: 'todo',
@@ -207,6 +205,7 @@ final sidebarWidth = isZenMode
                         );
                       }
                     },
+                    onNavigateToCalendar: () => widget.onDestinationSelected(AppDestination.calendar),
                   ),
                 ),
               ),
@@ -226,10 +225,6 @@ final sidebarWidth = isZenMode
       child: Column(
         children: [
           ...AppDestination.values.map((dest) => _buildCompactNavItem(dest)),
-          const SizedBox(height: AppTheme.spaceLarge),
-          const Divider(indent: 12, endIndent: 12),
-          const SizedBox(height: AppTheme.spaceMedium),
-          _buildCompactAddButton(),
         ],
       ),
     );
@@ -264,29 +259,6 @@ final sidebarWidth = isZenMode
     );
   }
 
-  Widget _buildCompactAddButton() {
-    return Tooltip(
-      message: 'New Project',
-      child: InkWell(
-        onTap: widget.onNewProjectTap,
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        child: Container(
-          width: 44,
-          height: 44,
-          margin: const EdgeInsets.symmetric(horizontal: 8),
-          decoration: BoxDecoration(
-            color: AppTheme.primary.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-          ),
-          child: const Icon(
-            LucideIcons.plus,
-            size: 20,
-            color: AppTheme.primary,
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _BackgroundGradients extends StatelessWidget {
