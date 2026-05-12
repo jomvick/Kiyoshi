@@ -117,15 +117,42 @@ lib/
 
 ## Installation
 
-### Quick Install (AppImage)
+### Download from CLI
 
 ```bash
-curl -L https://github.com/jomvick/Kiyoshi/releases/latest/download/Kiyoshi-1.0.0-linux-x86_64.AppImage -o Kiyoshi.AppImage \
-  && chmod +x Kiyoshi.AppImage \
-  && ./Kiyoshi.AppImage
+# Get the latest release URL
+LATEST=$(curl -s https://api.github.com/repos/jomvick/Kiyoshi/releases/latest | \
+  grep -oP '"browser_download_url":\s*"\K[^"]+(?=")' | \
+  grep AppImage | head -1)
+
+# Download
+curl -L "$LATEST" -o Kiyoshi.AppImage
+
+# Make executable
+chmod +x Kiyoshi.AppImage
+
+# Run
+./Kiyoshi.AppImage
 ```
 
-### Build from Source
+### Build AppImage from Source
+
+```bash
+# Prerequisites: appimagetool
+wget https://github.com/AppImage/AppImageKit/releases/latest/download/appimagetool-x86_64.AppImage
+chmod +x appimagetool-x86_64.AppImage
+sudo mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
+
+# Build Flutter release
+flutter pub get
+flutter build linux --release
+
+# Create AppImage
+./build_appimage.sh
+# Output: Kiyoshi-1.0.0-linux-x86_64.AppImage
+```
+
+### Build from Source (raw binary)
 
 ```bash
 git clone https://github.com/jomvick/Kiyoshi.git
@@ -170,7 +197,27 @@ Preferences are persisted via `shared_preferences` and exposed through Riverpod:
 
 ## Auto-Update
 
-Kiyoshi checks for updates automatically on startup. Go to **Settings > Updates** to download new versions.
+Kiyoshi checks for updates automatically on startup via the GitHub Releases API. When a new version is available:
+- A notification appears in the app
+- Go to **Settings > Updates** to download
+
+The update service downloads the latest release archive to your documents directory. Restart to apply.
+
+### CLI Manual Update
+
+```bash
+# Get download URL from latest release
+LATEST=$(curl -s https://api.github.com/repos/jomvick/Kiyoshi/releases/latest | \
+  grep -oP '"browser_download_url":\s*"\K[^"]+(?=")' | \
+  grep -E '\.tar\.gz|\.AppImage' | head -1)
+
+# Download and replace
+curl -L "$LATEST" -o /tmp/kiyoshi-latest
+chmod +x /tmp/kiyoshi-latest
+# Replace your current binary (adjust path as needed)
+# cp /tmp/kiyoshi-latest /opt/kiyoshi/kiyoshi
+# Or for AppImage: mv /tmp/kiyoshi-latest ~/Kiyoshi.AppImage
+```
 
 ## License
 

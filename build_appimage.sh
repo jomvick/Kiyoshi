@@ -37,11 +37,28 @@ Keywords=kanban;notes;productivity;zen;
 StartupNotify=true
 EOF
 
-cp kiyoshi.desktop kiyoshi.AppDir/usr/share/applications/
+cp kiyoshi.AppDir/kiyoshi.desktop kiyoshi.AppDir/usr/share/applications/
 
 # Copier l'icône (si elle existe)
-if [ -f linux/flutter/ephemeral/.cmake/icon.png ]; then
-    cp linux/flutter/ephemeral/.cmake/icon.png kiyoshi.AppDir/kiyoshi.png
+ICON_SRC=""
+for candidate in \
+  "linux/flutter/ephemeral/.cmake/icon.png" \
+  "build/linux/x64/release/bundle/data/flutter_assets/assets/icon.png" \
+  "build/linux/x64/release/bundle/icon.png"; do
+  if [ -f "$candidate" ]; then
+    ICON_SRC="$candidate"
+    break
+  fi
+done
+
+if [ -n "$ICON_SRC" ]; then
+    cp "$ICON_SRC" kiyoshi.AppDir/kiyoshi.png
+    cp kiyoshi.AppDir/kiyoshi.png kiyoshi.AppDir/usr/share/icons/hicolor/256x256/apps/
+    echo "Icon copied from $ICON_SRC"
+else
+    echo "⚠ No icon found, creating a placeholder"
+    # Create a minimal valid PNG (1x1 transparent pixel)
+    printf '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0aIDATx\x9cc\x00\x00\x00\x02\x00\x01\xe7\xa3\x26\x37\x00\x00\x00\x00IEND\xae\x42\x60\x82' > kiyoshi.AppDir/kiyoshi.png
     cp kiyoshi.AppDir/kiyoshi.png kiyoshi.AppDir/usr/share/icons/hicolor/256x256/apps/
 fi
 

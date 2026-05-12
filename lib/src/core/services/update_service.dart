@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 
 class UpdateInfo {
   final String version;
@@ -18,8 +20,8 @@ class UpdateInfo {
 }
 
 class UpdateService {
-  static const String _owner = 'ton-github-username';
-  static const String _repo = 'kiyoshi';
+  static const String _owner = 'jomvick';
+  static const String _repo = 'Kiyoshi';
 
   String _currentVersion = '1.0.0';
 
@@ -91,8 +93,13 @@ class UpdateService {
 
   Future<bool> downloadAndInstall(UpdateInfo update) async {
     try {
+      final dir = await getApplicationDocumentsDirectory();
+      final ext = update.downloadUrl.endsWith('.tar.gz') ? '.tar.gz' : '.zip';
+      final file = File('${dir.path}/kiyoshi_update$ext');
       final response = await http.get(Uri.parse(update.downloadUrl));
       if (response.statusCode == 200) {
+        await file.writeAsBytes(response.bodyBytes);
+        debugPrint('Update downloaded to ${file.path}');
         return true;
       }
     } catch (e) {
