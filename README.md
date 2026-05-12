@@ -137,20 +137,27 @@ chmod +x Kiyoshi.AppImage
 
 ### Build AppImage from Source
 
+**Méthode recommandée — `appimage-builder`** (compatible toutes distros) :
+
 ```bash
-# Prerequisites: appimagetool (from the project root)
+# Depuis la racine du projet
+pip3 install appimage-builder
+flutter build linux --release
+./build_appimage.sh
+# Output: Kiyoshi-1.0.0-x86_64.AppImage
+```
+
+**Méthode alternative — `appimagetool`** :
+
+```bash
 wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
 chmod +x appimagetool-x86_64.AppImage
 sudo mv appimagetool-x86_64.AppImage /usr/local/bin/appimagetool
-
-# Build Flutter release
-flutter pub get
 flutter build linux --release
-
-# Create AppImage
 ./build_appimage.sh
-# Output: Kiyoshi-1.0.0-linux-x86_64.AppImage
 ```
+
+Le script `build_appimage.sh` détecte automatiquement l'outil disponible et utilise `appimage-builder` en priorité.
 
 ### Build from Source (raw binary)
 

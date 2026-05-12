@@ -1,0 +1,34 @@
+# appimage-builder recipe for Kiyoshi
+version: 1
+script:
+  - rm -rf AppDir || true
+  - cp -r build/linux/x64/release/bundle AppDir
+  - mkdir -p AppDir/usr/share/icons/hicolor/64x64/apps/
+  - mv AppDir/lib/ AppDir/usr/
+  - cp AppDir/kiyoshi AppDir/usr/bin/
+  - rm AppDir/kiyoshi
+
+AppDir:
+  path: ./AppDir
+  app_info:
+    id: com.kiyoshi.app
+    name: Kiyoshi
+    icon: kiyoshi
+    version: 1.0.0
+    exec: usr/bin/kiyoshi
+    exec_args: $@
+  apt:
+    arch: amd64
+    allow_unauthenticated: true
+    sources:
+      - sourceline: deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main
+    include:
+      - libgtk-3-0
+      - libblkid1
+      - liblzma5
+      - libegl1
+
+AppImage:
+  arch: x86_64
+  update-information: gh-releases-zsync|jomvick|Kiyoshi|latest|Kiyoshi-*x86_64.AppImage.zsync
+  sign-key: None
