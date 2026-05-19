@@ -1,14 +1,3 @@
-enum BlockType {
-  text,
-  heading,
-  todo,
-  databaseView,
-  link,
-  image,
-  file,
-  divider
-}
-
 class ZenBlock {
   final String id;
   final String projectId;

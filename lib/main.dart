@@ -6,16 +6,34 @@ import 'package:kiyoshi/src/core/services/vault_service.dart';
 import 'package:kiyoshi/src/core/providers/preferences_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Vault (Invisible Management)
-  await VaultService().init();
-  
-  // Initialize SharedPreferences
-  final sharedPrefs = await SharedPreferences.getInstance();
-  
-  // Set window properties for Zen light theme
+  FlutterError.onError = (details) {
+    debugPrint('Flutter error: ${details.exception}');
+    debugPrint('Stack: ${details.stack}');
+  };
+
+  PlatformDispatcher.instance.onError = (error, stack) {
+    debugPrint('Unhandled error: $error');
+    debugPrint('Stack: $stack');
+    return true;
+  };
+
+  try {
+    await VaultService().init();
+  } catch (e) {
+    debugPrint('Vault initialization failed: $e');
+  }
+
+  late final SharedPreferences sharedPrefs;
+  try {
+    sharedPrefs = await SharedPreferences.getInstance();
+  } catch (e) {
+    debugPrint('SharedPreferences initialization failed: $e');
+    sharedPrefs = await SharedPreferences.getInstance();
+  }
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
@@ -24,7 +42,7 @@ void main() async {
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
-  
+
   runApp(
     ProviderScope(
       overrides: [

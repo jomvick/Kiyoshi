@@ -149,7 +149,7 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
                 color: AppTheme.error.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 16),
-              Text('Error: $err'),
+              const Text('Could not load project.'),
             ],
           ),
         ),
@@ -296,10 +296,14 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
                   ),
-                  onSubmitted: (val) {
-                    ref.read(projectRepositoryProvider).updateProject(
-                      project.copyWith(title: val.trim()),
-                    );
+                  onSubmitted: (val) async {
+                    try {
+                      await ref.read(projectRepositoryProvider).updateProject(
+                        project.copyWith(title: val.trim()),
+                      );
+                    } catch (e) {
+                      debugPrint('Failed to update title: $e');
+                    }
                   },
                 ),
               ),
@@ -340,10 +344,14 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
               isDense: true,
               contentPadding: EdgeInsets.zero,
             ),
-            onSubmitted: (val) {
-              ref.read(projectRepositoryProvider).updateProject(
-                project.copyWith(description: val.trim()),
-              );
+            onSubmitted: (val) async {
+              try {
+                await ref.read(projectRepositoryProvider).updateProject(
+                  project.copyWith(description: val.trim()),
+                );
+              } catch (e) {
+                debugPrint('Failed to update description: $e');
+              }
             },
           ),
         ],
@@ -391,10 +399,11 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
       final updated = project.copyWith(status: status);
       await ref.read(projectRepositoryProvider).updateProject(updated);
     } catch (e) {
+      debugPrint('Could not update status: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Could not update status: $e'),
+          const SnackBar(
+            content: Text('Could not update status.'),
             backgroundColor: AppTheme.error,
             behavior: SnackBarBehavior.floating,
           ),
@@ -415,10 +424,11 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
         ParsedBlock(type: type, content: content, metadata: metadata),
       );
     } catch (e) {
+      debugPrint('Could not save block: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Could not save block: $e'),
+          const SnackBar(
+            content: Text('Could not save block.'),
             backgroundColor: AppTheme.error,
             behavior: SnackBarBehavior.floating,
           ),
@@ -431,32 +441,45 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
     try {
       await ref.read(blockServiceProvider).deleteBlock(block);
     } catch (e) {
+      debugPrint('Could not delete block: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not delete block: $e')),
+          const SnackBar(content: Text('Could not delete block.')),
         );
       }
     }
   }
 
-  void _handleTodoChanged(ZenBlock block, bool isChecked) {
-    final metadata = Map<String, dynamic>.from(block.metadata);
-    metadata['checked'] = isChecked;
-    ref.read(blockServiceProvider).updateBlock(
-      block.copyWith(metadata: metadata),
-    );
+  Future<void> _handleTodoChanged(ZenBlock block, bool isChecked) async {
+    try {
+      final metadata = Map<String, dynamic>.from(block.metadata);
+      metadata['checked'] = isChecked;
+      await ref.read(blockServiceProvider).updateBlock(
+        block.copyWith(metadata: metadata),
+      );
+    } catch (e) {
+      debugPrint('Failed to update todo: $e');
+    }
   }
 
-  void _handleReorder(List<ZenBlock> blocks, int oldIndex, int newIndex) {
-    ref
-        .read(blockServiceProvider)
-        .reorderBlocks(widget.project.id, oldIndex, newIndex);
+  Future<void> _handleReorder(List<ZenBlock> blocks, int oldIndex, int newIndex) async {
+    try {
+      await ref
+          .read(blockServiceProvider)
+          .reorderBlocks(widget.project.id, oldIndex, newIndex);
+    } catch (e) {
+      debugPrint('Failed to reorder blocks: $e');
+    }
   }
 
-  void _handleContentChanged(ZenBlock block, String newContent) {
-    ref.read(blockServiceProvider).updateBlock(
-          block.copyWith(content: newContent),
-        );
+  Future<void> _handleContentChanged(ZenBlock block, String newContent) async {
+    try {
+      await ref.read(blockServiceProvider).updateBlock(
+            block.copyWith(content: newContent),
+          );
+    } catch (e) {
+      debugPrint('Failed to update content: $e');
+    }
   }
 
   String _formatRelativeDate(DateTime date) {

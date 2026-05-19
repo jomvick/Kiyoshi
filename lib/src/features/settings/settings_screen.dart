@@ -177,9 +177,10 @@ class SettingsScreen extends ConsumerWidget {
                 );
               }
             } catch (e) {
+              debugPrint('Export failed: $e');
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Export failed: $e')),
+                  const SnackBar(content: Text('Export failed. Please try again.')),
                 );
               }
             }
@@ -222,9 +223,10 @@ Generated: ${DateTime.now().toIso8601String()}
                 );
               }
             } catch (e) {
+              debugPrint('Export failed: $e');
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Export failed: $e')),
+                  const SnackBar(content: Text('Export failed. Please try again.')),
                 );
               }
             }
@@ -244,9 +246,18 @@ Generated: ${DateTime.now().toIso8601String()}
               if (result != null && result.files.isNotEmpty && result.files.first.path != null) {
                 final file = File(result.files.first.path!);
                 final content = await file.readAsString();
-                final data = jsonDecode(content) as Map<String, dynamic>;
+                final decoded = jsonDecode(content);
+                if (decoded is! Map) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Invalid import file format.')),
+                    );
+                  }
+                  return;
+                }
+                final data = decoded as Map<String, dynamic>;
                 final prefsNotifier = ref.read(preferencesProvider.notifier);
-                if (data['preferences'] != null) {
+                if (data['preferences'] is Map) {
                   final imported = AppPreferences().importFromJson(data['preferences'] as Map<String, dynamic>);
                   await prefsNotifier.setSidebarExpanded(imported.sidebarExpanded);
                   await prefsNotifier.setZenModeEnabled(imported.zenModeEnabled);
@@ -267,9 +278,10 @@ Generated: ${DateTime.now().toIso8601String()}
                 }
               }
             } catch (e) {
+              debugPrint('Import failed: $e');
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Import failed: $e')),
+                  const SnackBar(content: Text('Import failed. The file may be corrupted.')),
                 );
               }
             }
@@ -293,9 +305,10 @@ Generated: ${DateTime.now().toIso8601String()}
                 );
               }
             } catch (e) {
+              debugPrint('Clear cache failed: $e');
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Clear failed: $e')),
+                  const SnackBar(content: Text('Could not clear cache. Please try again.')),
                 );
               }
             }

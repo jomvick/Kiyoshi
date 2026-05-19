@@ -83,7 +83,7 @@ class _KiyoshiZenDashboardViewState extends ConsumerState<KiyoshiZenDashboardVie
     return activitiesAsync.when(
       data: (blocks) => _ActivityTimelineCard(blocks: blocks),
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, s) => Center(child: Text('Error: $e')),
+      error: (e, s) => const Center(child: Text('Could not load activities.')),
     );
   }
 
@@ -91,7 +91,7 @@ class _KiyoshiZenDashboardViewState extends ConsumerState<KiyoshiZenDashboardVie
     return statsAsync.when(
       data: (stats) => _ProjectBreakdownCard(stats: stats),
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, s) => Center(child: Text('Error: $e')),
+      error: (e, s) => const Center(child: Text('Could not load stats.')),
     );
   }
 

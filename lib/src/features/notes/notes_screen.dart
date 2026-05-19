@@ -59,7 +59,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                 return _buildNotesList(notes);
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text('Error: $e')),
+              error: (e, _) => const Center(child: Text('Could not load notes.')),
             ),
           ),
         ],

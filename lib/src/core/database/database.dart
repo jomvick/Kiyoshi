@@ -122,6 +122,15 @@ class AppDatabase extends _$AppDatabase {
     return (select(blocks)..where((t) => t.id.equals(id))).getSingleOrNull();
   }
 
+  Future<double?> getMaxPosition(String projectId) {
+    return (select(blocks)
+          ..where((t) => t.projectId.equals(projectId))
+          ..orderBy([(t) => OrderingTerm(expression: t.position, mode: OrderingMode.desc)])
+          ..limit(1))
+        .getSingleOrNull()
+        .then((b) => b?.position);
+  }
+
   // Workspaces Queries
   Future<List<WorkspaceData>> getAllWorkspaces() => select(workspaces).get();
   Stream<List<WorkspaceData>> watchAllWorkspaces() =>

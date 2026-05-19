@@ -43,7 +43,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
           return _buildWorkspaceContent(context, _selectedWorkspace!);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (err, stack) => const Center(child: Text('Could not load workspaces.')),
       ),
     );
   }
@@ -98,7 +98,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
     return projectsAsync.when(
         data: (projects) => _buildProjectsList(context, projects, workspace),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (err, stack) => const Center(child: Text('Could not load projects.')),
       );
   }
 
@@ -267,9 +267,10 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
       try {
         await ref.read(projectRepositoryProvider).deleteProject(project.id);
       } catch (e) {
+        debugPrint('Could not delete project: $e');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Could not delete project: $e')),
+            const SnackBar(content: Text('Could not delete project.')),
           );
         }
       }
@@ -311,8 +312,17 @@ class _CreateProjectDialogState extends ConsumerState<_CreateProjectDialog> {
       deadline: _deadline,
     );
 
-    await ref.read(projectRepositoryProvider).addProject(project);
-    if (mounted) Navigator.pop(context);
+    try {
+      await ref.read(projectRepositoryProvider).addProject(project);
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      debugPrint('Failed to create project: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not create project.')),
+        );
+      }
+    }
   }
 
   @override
@@ -448,8 +458,17 @@ class _EditProjectDialogState extends ConsumerState<_EditProjectDialog> {
       status: _status,
     );
 
-    await ref.read(projectRepositoryProvider).updateProject(updated);
-    if (mounted) Navigator.pop(context);
+    try {
+      await ref.read(projectRepositoryProvider).updateProject(updated);
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      debugPrint('Failed to update project: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not update project.')),
+        );
+      }
+    }
   }
 
   @override

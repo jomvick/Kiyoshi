@@ -44,17 +44,17 @@ final blockServiceProvider = Provider<BlockService>((ref) {
 });
 
 final projectBlocksProvider =
-    StreamProvider.family<List<ZenBlock>, String>((ref, projectId) {
+    StreamProvider.autoDispose.family<List<ZenBlock>, String>((ref, projectId) {
   final service = ref.watch(blockServiceProvider);
   return service.watchBlocks(projectId);
 });
 
-final allWorkspacesProvider = StreamProvider<List<Workspace>>((ref) {
+final allWorkspacesProvider = StreamProvider.autoDispose<List<Workspace>>((ref) {
   final repo = ref.watch(projectRepositoryProvider);
   return repo.watchWorkspaces();
 });
 
-final globalStatsProvider = StreamProvider<Map<String, dynamic>>((ref) {
+final globalStatsProvider = StreamProvider.autoDispose<Map<String, dynamic>>((ref) {
   final repo = ref.watch(projectRepositoryProvider);
   return repo.watchBlocksForProject('global').map((blocks) {
     final todos = blocks.where((b) => b.type == 'todo').toList();
@@ -69,7 +69,7 @@ final globalStatsProvider = StreamProvider<Map<String, dynamic>>((ref) {
   });
 });
 
-final latestActivitiesProvider = StreamProvider<List<ZenBlock>>((ref) {
+final latestActivitiesProvider = StreamProvider.autoDispose<List<ZenBlock>>((ref) {
   final repo = ref.watch(projectRepositoryProvider);
   return repo.watchBlocksForProject('global').map((blocks) {
     final sorted = blocks.toList()..sort((a, b) => b.position.compareTo(a.position));
@@ -77,7 +77,7 @@ final latestActivitiesProvider = StreamProvider<List<ZenBlock>>((ref) {
   });
 });
 
-final calendarEventsProvider = StreamProvider<List<ZenBlock>>((ref) {
+final calendarEventsProvider = StreamProvider.autoDispose<List<ZenBlock>>((ref) {
   final repo = ref.watch(projectRepositoryProvider);
   return repo.watchBlocksForProject('global').map((blocks) {
     return blocks.where((b) => b.metadata['dueDate'] != null).toList();
@@ -86,19 +86,19 @@ final calendarEventsProvider = StreamProvider<List<ZenBlock>>((ref) {
 
 // Projects Providers
 final projectsForWorkspaceProvider =
-    StreamProvider.family<List<Project>, String>((ref, workspaceId) {
+    StreamProvider.autoDispose.family<List<Project>, String>((ref, workspaceId) {
   final repo = ref.watch(projectRepositoryProvider);
   return repo.watchProjectsForWorkspace(workspaceId);
 });
 
-final projectByIdProvider = StreamProvider.family<Project?, String>((ref, projectId) {
+final projectByIdProvider = StreamProvider.autoDispose.family<Project?, String>((ref, projectId) {
   final repo = ref.watch(projectRepositoryProvider);
   return repo.watchProjectById(projectId);
 });
 
 // Tasks Providers
 final tasksForProjectProvider =
-    StreamProvider.family<List<TodoTask>, String>((ref, projectId) {
+    StreamProvider.autoDispose.family<List<TodoTask>, String>((ref, projectId) {
   final repo = ref.watch(projectRepositoryProvider);
   return repo.watchTasksForProject(projectId);
 });

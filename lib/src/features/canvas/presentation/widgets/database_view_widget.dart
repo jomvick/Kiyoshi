@@ -253,7 +253,7 @@ class _DatabaseViewWidgetState extends ConsumerState<DatabaseViewWidget> {
                 height: 120,
                 child: Center(child: CircularProgressIndicator()),
               ),
-              error: (err, _) => Center(child: Text('Error: $err')),
+              error: (err, _) => const Center(child: Text('Could not load data.')),
             ),
           ),
         ],

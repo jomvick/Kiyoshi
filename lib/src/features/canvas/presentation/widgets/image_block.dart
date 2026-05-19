@@ -38,11 +38,48 @@ class _ImageBlockWidgetState extends State<ImageBlockWidget> {
     }
   }
 
+  static bool _isAllowedImagePath(String path) {
+    try {
+      if (path.startsWith('http://') || path.startsWith('https://')) return true;
+      final resolved = File(path).resolveSymbolicLinksSync();
+      final home = Platform.environment['HOME'] ?? '';
+      return resolved.startsWith('/home') || resolved.startsWith('/tmp');
+    } catch (_) {
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isEmpty = widget.imageUrl.isEmpty || widget.imageUrl == 'https://';
     if (isEmpty) return _buildEmptyState();
+    if (!_isAllowedImagePath(widget.imageUrl)) {
+      return _buildErrorState();
+    }
     return _buildImageView();
+  }
+
+  Widget _buildErrorState() {
+    return Container(
+      height: 160,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppTheme.error.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.error.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(LucideIcons.alertCircle, size: 32, color: AppTheme.error.withValues(alpha: 0.5)),
+          const SizedBox(height: 8),
+          Text(
+            'Image unavailable',
+            style: TextStyle(color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6), fontSize: 13),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildEmptyState() {

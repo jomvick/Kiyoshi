@@ -45,7 +45,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
                 ),
               ),
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, s) => Center(child: Text('Error: $e')),
+              error: (e, s) => const Center(child: Text('Could not load analytics.')),
             ),
           ],
         ),

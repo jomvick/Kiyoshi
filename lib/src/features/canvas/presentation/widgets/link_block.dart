@@ -48,10 +48,19 @@ class _LinkBlockWidgetState extends State<LinkBlockWidget> {
     super.dispose();
   }
 
+  static const _allowedSchemes = ['https:', 'http:', 'mailto:'];
+
+  static bool _isValidUrl(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null || !uri.hasScheme) return false;
+    return _allowedSchemes.contains(uri.scheme);
+  }
+
   Future<void> _openUrl() async {
     if (_isEditing) return;
-    final uri = Uri.tryParse(widget.url);
-    if (uri != null && await canLaunchUrl(uri)) {
+    if (!_isValidUrl(widget.url)) return;
+    final uri = Uri.parse(widget.url);
+    if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }

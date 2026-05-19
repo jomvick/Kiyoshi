@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Kiyoshi
+Comment=Zen Studio — Glassmorphic Kanban Workspace Manager
+Exec=kiyoshi
+Icon=kiyoshi
+Terminal=false
+Type=Application
+Categories=Office;ProjectManagement;
+Keywords=kanban;notes;productivity;zen;workspace;
+StartupNotify=true

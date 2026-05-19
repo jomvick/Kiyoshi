@@ -205,7 +205,7 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
                 const SizedBox(height: 16),
                 Text('Error loading data', style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 8),
-                Text('$err', style: Theme.of(context).textTheme.bodySmall),
+                Text('An unexpected error occurred.', style: Theme.of(context).textTheme.bodySmall),
                 const SizedBox(height: 16),
                 FilledButton(
                   onPressed: () => ref.invalidate(allWorkspacesProvider),

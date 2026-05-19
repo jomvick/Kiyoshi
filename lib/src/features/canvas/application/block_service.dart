@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:kiyoshi/src/features/canvas/domain/entities/zen_block.dart';
 import 'package:kiyoshi/src/features/canvas/domain/repositories/i_block_repository.dart';
@@ -32,7 +33,7 @@ class BlockService {
     final id = await _repository.addBlock(projectId, finalBlock);
 
     if (finalBlock.type == 'link') {
-      _metadataService.enrichBlockIfNeeded(id);
+      unawaited(_metadataService.enrichBlockIfNeeded(id));
     }
 
     return id;

@@ -42,7 +42,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       child: eventsAsync.when(
         data: (blocks) => _buildCalendarContent(blocks),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, s) => Center(child: Text('Error: $e')),
+        error: (e, s) => const Center(child: Text('Could not load calendar events.')),
       ),
     );
   }

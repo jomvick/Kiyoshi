@@ -15,7 +15,16 @@ class KiyoshiApp extends ConsumerWidget {
       title: 'Kiyoshi',
       debugShowCheckedModeBanner: false,
       theme: prefs.darkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
+      builder: (context, child) => _ErrorBoundary(child: child!),
       home: const KanbanBoardScreen(),
     );
   }
+}
+
+class _ErrorBoundary extends StatelessWidget {
+  final Widget child;
+  const _ErrorBoundary({required this.child});
+
+  @override
+  Widget build(BuildContext context) => child;
 }

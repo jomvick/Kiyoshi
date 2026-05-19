@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:kiyoshi/src/core/theme/app_theme.dart';
+import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
 
 class FileBlockWidget extends StatefulWidget {
@@ -37,19 +38,42 @@ class _FileBlockWidgetState extends State<FileBlockWidget> {
     }
   }
 
-  Future<void> _openFile() async {
-    final path = widget.fileName;
-    if (path.isEmpty) return;
+  static const _allowedSchemes = ['https:', 'http:', 'mailto:'];
 
-    if (path.startsWith('http')) {
-      final uri = Uri.tryParse(path);
-      if (uri != null && await canLaunchUrl(uri)) {
+  static bool _isValidUrl(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri == null || !uri.hasScheme) return false;
+    return _allowedSchemes.contains(uri.scheme);
+  }
+
+  static bool _isAllowedFilePath(String path) {
+    try {
+      final resolved = File(path).resolveSymbolicLinksSync();
+      final allowed = ['/tmp', '/home', Platform.environment['HOME'] ?? ''];
+      return allowed.any((dir) => resolved.startsWith(dir));
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _openFile() async {
+    final filePath = widget.fileName;
+    if (filePath.isEmpty) return;
+
+    if (filePath.startsWith('http')) {
+      if (!_isValidUrl(filePath)) return;
+      final uri = Uri.parse(filePath);
+      if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       }
     } else {
-      final file = File(path);
+      if (!_isAllowedFilePath(filePath)) {
+        debugPrint('Blocked access to file outside allowed directories: $filePath');
+        return;
+      }
+      final file = File(filePath);
       if (await file.exists()) {
-        final uri = Uri.file(path);
+        final uri = Uri.file(filePath);
         if (await canLaunchUrl(uri)) {
           await launchUrl(uri);
         }

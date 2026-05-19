@@ -142,67 +142,106 @@ final sidebarWidth = isZenMode
                     focusNode: _quickEntryFocusNode,
                     showPrismaticBorders: prefs.prismaticBorders,
                     onTaskCreated: (title, date, project, priority) async {
-                      final parsed = ParsedBlock(
-                        type: 'todo',
-                        content: title,
-                        metadata: {
-                          'status': 'todo',
-                          'priority': priority,
-                          'project': project,
-                          if (date != null) 'dueDate': date.toIso8601String(),
-                        },
-                      );
-                      final String targetProject = project ?? 'global';
-                      await ref.read(blockServiceProvider).addBlock(targetProject, parsed);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Task "$title" created'),
-                            backgroundColor: AppTheme.primary,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          ),
+                      try {
+                        final parsed = ParsedBlock(
+                          type: 'todo',
+                          content: title,
+                          metadata: {
+                            'status': 'todo',
+                            'priority': priority,
+                            'project': project,
+                            if (date != null) 'dueDate': date.toIso8601String(),
+                          },
                         );
+                        final String targetProject = project ?? 'global';
+                        await ref.read(blockServiceProvider).addBlock(targetProject, parsed);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Task "$title" created'),
+                              backgroundColor: AppTheme.primary,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        debugPrint('Failed to create task: $e');
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Could not create task.'),
+                              backgroundColor: AppTheme.error,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
                       }
                     },
                     onBlockCreated: (type, content, metadata) async {
-                      final parsed = ParsedBlock(
-                        type: type,
-                        content: content,
-                        metadata: metadata,
-                      );
-                      final String targetProject = metadata['project'] ?? 'global';
-                      await ref.read(blockServiceProvider).addBlock(targetProject, parsed);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${type.toUpperCase()} created in $targetProject'),
-                            backgroundColor: AppTheme.primary,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          ),
+                      try {
+                        final parsed = ParsedBlock(
+                          type: type,
+                          content: content,
+                          metadata: metadata,
                         );
+                        final String targetProject = metadata['project'] ?? 'global';
+                        await ref.read(blockServiceProvider).addBlock(targetProject, parsed);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${type.toUpperCase()} created in $targetProject'),
+                              backgroundColor: AppTheme.primary,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        debugPrint('Failed to create block: $e');
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Could not create block.'),
+                              backgroundColor: AppTheme.error,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
                       }
                     },
                     onProjectCreated: (title, description) async {
-                      if (title.trim().isEmpty) return;
-                      final workspaceId = widget.selectedWorkspace?.id ?? 'default';
-                      final project = Project.create(
-                        id: const Uuid().v4(),
-                        workspaceId: workspaceId,
-                        title: title.trim(),
-                        description: description ?? '',
-                      );
-                      await ref.read(projectRepositoryProvider).addProject(project);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('\u2728 Project "$title" created'),
-                            backgroundColor: AppTheme.primary,
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          ),
+                      try {
+                        if (title.trim().isEmpty) return;
+                        final workspaceId = widget.selectedWorkspace?.id ?? 'default';
+                        final project = Project.create(
+                          id: const Uuid().v4(),
+                          workspaceId: workspaceId,
+                          title: title.trim(),
+                          description: description ?? '',
                         );
+                        await ref.read(projectRepositoryProvider).addProject(project);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('\u2728 Project "$title" created'),
+                              backgroundColor: AppTheme.primary,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        debugPrint('Failed to create project: $e');
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Could not create project.'),
+                              backgroundColor: AppTheme.error,
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
                       }
                     },
                     onNavigateToCalendar: () => widget.onDestinationSelected(AppDestination.calendar),

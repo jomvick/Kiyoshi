@@ -25,6 +25,7 @@ class TasksScreen extends ConsumerStatefulWidget {
 }
 
 class _TasksScreenState extends ConsumerState<TasksScreen> {
+  final ScrollController _kanbanScrollController = ScrollController();
   List<Board> _boards = const [
     Board(id: 'todo', title: 'To Do', workspaceId: 'global', order: 0),
     Board(id: 'inProgress', title: 'In Progress', workspaceId: 'global', order: 1),
@@ -35,6 +36,12 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   void initState() {
     super.initState();
     _loadBoards();
+  }
+
+  @override
+  void dispose() {
+    _kanbanScrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadBoards() async {
@@ -83,12 +90,12 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       title: block.content,
       description: block.metadata['description'],
       status: status,
-      priority: _mapPriority(block.metadata['priority']),
+      priority: _mapPriority(block.metadata['priority'] as int?),
       tags: List<String>.from(block.metadata['tags'] ?? []),
     );
   }
 
-  TaskPriority _mapPriority(dynamic p) {
+  TaskPriority _mapPriority(int? p) {
     if (p == 1) return TaskPriority.high;
     if (p == 2) return TaskPriority.medium;
     return TaskPriority.low;
@@ -102,10 +109,14 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     await ref.read(blockServiceProvider).updateBlock(updatedBlock);
   }
 
-  void _onTaskToggle(ZenBlock block) async {
-    final status = block.metadata['status'] ?? 'todo';
-    final newStatus = status == 'done' ? 'todo' : 'done';
-    _onTaskMoved(block, newStatus);
+  Future<void> _onTaskToggle(ZenBlock block) async {
+    try {
+      final status = block.metadata['status'] ?? 'todo';
+      final newStatus = status == 'done' ? 'todo' : 'done';
+      await _onTaskMoved(block, newStatus);
+    } catch (e) {
+      debugPrint('Failed to toggle task: $e');
+    }
   }
 
   void _onAddTask(String status) async {
@@ -306,8 +317,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           setState(() {
                             _boards = [..._boards, newBoard];
                           });
-                  _saveBoards();
-                  Navigator.pop(dialogContext);
+                  await _saveBoards();
+                  if (dialogContext.mounted) Navigator.pop(dialogContext);
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -399,7 +410,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, s) => Center(child: Text('Error: $e')),
+        error: (e, s) => Center(child: Text('Could not load tasks.')),
       ),
     );
   }
@@ -417,7 +428,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     setState(() {
       _boards.removeWhere((b) => b.id == boardId);
     });
-    _saveBoards();
+    await _saveBoards();
   }
 
   void _onEditTask(ZenBlock block) async {
@@ -528,7 +539,6 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   Widget _buildKanbanBoard(List<ZenBlock> blocks, {double columnWidth = 320}) {
-    final ScrollController scrollController = ScrollController();
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.frameMargin),
       child: ScrollConfiguration(
@@ -540,13 +550,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           },
         ),
         child: Scrollbar(
-          controller: scrollController,
+            controller: _kanbanScrollController,
           thickness: 6.0,
           radius: const Radius.circular(8.0),
           thumbVisibility: true,
           child: LayoutBuilder(
             builder: (context, constraints) => SingleChildScrollView(
-            controller: scrollController,
+            controller: _kanbanScrollController,
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
             child: ConstrainedBox(

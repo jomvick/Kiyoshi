@@ -24,9 +24,13 @@ class ZenParser {
   static final _assigneeRegex = RegExp(r'@(\w+)');
   static final _projectRegex = RegExp(r'#(\w+)');
 
+  static String _sanitizeText(String input) {
+    return input.replaceAll(RegExp(r'[<>&"()]'), '');
+  }
+
   /// Analyzes raw input synchronously and returns a structured Block representation.
   static ParsedBlock parseRawInput(String input) {
-    String text = input.trim();
+    String text = _sanitizeText(input.trim());
     if (text.isEmpty) {
       return ParsedBlock(type: 'text', content: '');
     }

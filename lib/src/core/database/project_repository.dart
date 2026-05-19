@@ -37,11 +37,12 @@ class ProjectRepository implements IBlockRepository {
 
   @override
   Future<String> addBlock(String projectId, ParsedBlock parsedBlock) async {
-    final blocks = await _db.getBlocksForProject(projectId);
-    
-    final double nextPosition = blocks.isEmpty ? 1000.0 : (blocks.last.position + 1000.0);
+    final maxPos = await _db.getMaxPosition(projectId);
+    final double nextPosition = (maxPos ?? 0.0) + 1000.0;
 
+    final id = const Uuid().v4();
     final companion = BlocksCompanion.insert(
+      id: Value(id),
       projectId: projectId,
       type: parsedBlock.type,
       content: parsedBlock.content,
@@ -52,7 +53,7 @@ class ProjectRepository implements IBlockRepository {
     );
 
     await _db.addBlock(companion);
-    return "id-generated";
+    return id;
   }
 
   @override

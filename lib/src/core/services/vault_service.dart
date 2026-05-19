@@ -18,17 +18,23 @@ class VaultService {
     }
   }
 
-  /// Copies an external file to the vault and returns the new local path.
+  bool _isInsideVault(String path) {
+    if (_vaultDir == null) return false;
+    final resolved = File(path).resolveSymbolicLinksSync();
+    final vaultResolved = _vaultDir!.resolveSymbolicLinksSync();
+    return p.isWithin(vaultResolved, resolved);
+  }
+
   Future<String> copyToVault(String originalPath) async {
     if (_vaultDir == null) await init();
-    
-    final file = File(originalPath);
+
+    final resolved = await File(originalPath).resolveSymbolicLinks();
+    final file = File(resolved);
     if (!await file.exists()) {
       throw Exception('Original file does not exist at $originalPath');
     }
 
-    final fileName = p.basename(originalPath);
-    // Add timestamp to avoid collisions
+    final fileName = p.basename(resolved);
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final newFileName = '${timestamp}_$fileName';
     final destinationPath = p.join(_vaultDir!.path, newFileName);
@@ -37,14 +43,11 @@ class VaultService {
     return destinationPath;
   }
 
-  /// Deletes a file from the vault.
   Future<void> deleteFromVault(String vaultPath) async {
-    // Only delete if it's actually inside our vault to be safe
-    if (vaultPath.contains(_vaultFolder)) {
-      final file = File(vaultPath);
-      if (await file.exists()) {
-        await file.delete();
-      }
+    if (!_isInsideVault(vaultPath)) return;
+    final file = File(vaultPath);
+    if (await file.exists()) {
+      await file.delete();
     }
   }
 

@@ -113,36 +113,39 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
   }
 
   void _submitTask() async {
-    final contentText = _controller.text.trim();
-    // When in command mode, prepend the command prefix for the parser
-    final label = _activeCommand?['label']?.toString().toLowerCase() ?? '';
-    final rawText = (label.isNotEmpty && contentText.isNotEmpty)
-        ? '/$label $contentText'
-        : contentText;
+    try {
+      final contentText = _controller.text.trim();
+      final label = _activeCommand?['label']?.toString().toLowerCase() ?? '';
+      final rawText = (label.isNotEmpty && contentText.isNotEmpty)
+          ? '/$label $contentText'
+          : contentText;
 
-    if (rawText.isEmpty || rawText == '/') return;
+      if (rawText.isEmpty || rawText == '/') return;
 
-    final parsed = ZenParser.parseRawInput(rawText);
+      final parsed = ZenParser.parseRawInput(rawText);
 
-    if (parsed.type == 'project') {
-      if (widget.onProjectCreated != null) {
-        await widget.onProjectCreated!(parsed.content, parsed.metadata['description']);
+      if (parsed.type == 'project') {
+        if (widget.onProjectCreated != null) {
+          await widget.onProjectCreated!(parsed.content, parsed.metadata['description']);
+        }
+      } else if (parsed.type == 'event') {
+        widget.onNavigateToCalendar?.call();
+      } else if (parsed.type != 'todo' && widget.onBlockCreated != null) {
+        await widget.onBlockCreated!(
+          parsed.type,
+          parsed.content,
+          parsed.metadata,
+        );
+      } else {
+        await widget.onTaskCreated(
+          parsed.content,
+          null,
+          parsed.metadata['project'],
+          parsed.metadata['priority'] ?? 3,
+        );
       }
-    } else if (parsed.type == 'event') {
-      widget.onNavigateToCalendar?.call();
-    } else if (parsed.type != 'todo' && widget.onBlockCreated != null) {
-      await widget.onBlockCreated!(
-        parsed.type,
-        parsed.content,
-        parsed.metadata,
-      );
-    } else {
-      await widget.onTaskCreated(
-        parsed.content,
-        null,
-        parsed.metadata['project'],
-        parsed.metadata['priority'] ?? 3,
-      );
+    } catch (e) {
+      debugPrint('Failed to submit task: $e');
     }
 
     if (!mounted) return;
