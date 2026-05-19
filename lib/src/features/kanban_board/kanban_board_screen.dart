@@ -15,7 +15,7 @@ import 'package:kiyoshi/src/features/tasks/tasks_screen.dart';
 import 'package:kiyoshi/src/features/settings/settings_screen.dart';
 import 'package:kiyoshi/src/shared/layout/app_desktop_shell.dart';
 import 'package:kiyoshi/src/shared/widgets/command_palette.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:uuid/uuid.dart';
 
 class KanbanBoardScreen extends ConsumerStatefulWidget {

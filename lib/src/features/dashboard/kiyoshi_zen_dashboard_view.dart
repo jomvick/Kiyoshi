@@ -8,7 +8,7 @@ import 'package:kiyoshi/src/features/zen/the_monolith_widget.dart';
 import 'package:kiyoshi/src/core/providers/zen_mode_provider.dart';
 import 'package:kiyoshi/src/core/providers/database_provider.dart';
 import 'package:kiyoshi/src/features/canvas/domain/entities/zen_block.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class KiyoshiZenDashboardView extends ConsumerStatefulWidget {
   const KiyoshiZenDashboardView({super.key});

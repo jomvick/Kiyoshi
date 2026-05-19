@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:kiyoshi/src/core/theme/app_theme.dart';
 import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';

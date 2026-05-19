@@ -14,7 +14,7 @@ import 'package:kiyoshi/src/features/canvas/domain/entities/zen_block.dart';
 import 'package:kiyoshi/src/features/canvas/application/zen_parser.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:kiyoshi/src/shared/widgets/zen_glass_card.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TasksScreen extends ConsumerStatefulWidget {
@@ -101,7 +101,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     return TaskPriority.low;
   }
 
-  void _onTaskMoved(ZenBlock block, String newStatus) async {
+  Future<void> _onTaskMoved(ZenBlock block, String newStatus) async {
     final updatedMetadata = Map<String, dynamic>.from(block.metadata);
     updatedMetadata['status'] = newStatus;
     
@@ -119,7 +119,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     }
   }
 
-  void _onAddTask(String status) async {
+  Future<void> _onAddTask(String status) async {
     final nameController = TextEditingController();
 
     showDialog(
@@ -306,7 +306,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     ),
                     const SizedBox(width: 12),
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (nameController.text.trim().isNotEmpty) {
                           final newBoard = Board(
                             id: nameController.text.trim().toLowerCase().replaceAll(' ', '_'),
@@ -415,7 +415,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     );
   }
 
-  void _onDeleteBoard(String boardId, List<ZenBlock> boardBlocks) async {
+  Future<void> _onDeleteBoard(String boardId, List<ZenBlock> boardBlocks) async {
     // 1. Move tasks to 'todo'
     for (final block in boardBlocks) {
       final updatedMetadata = Map<String, dynamic>.from(block.metadata);
@@ -431,7 +431,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     await _saveBoards();
   }
 
-  void _onEditTask(ZenBlock block) async {
+  Future<void> _onEditTask(ZenBlock block) async {
     final nameController = TextEditingController(text: block.content);
 
     showDialog(
