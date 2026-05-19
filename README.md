@@ -4,7 +4,7 @@ A minimalist glassmorphic Kanban workspace manager with a sophisticated **Zen De
 
 ![Platform](https://img.shields.io/badge/Platform-Flutter%20Desktop-blue)
 ![Version](https://img.shields.io/badge/Version-1.0.0-green)
-![License](https://img.shields.io/badge/License-Private-red)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 ## Overview
 
@@ -241,7 +241,7 @@ GitHub Actions build et publie l'AppImage automatiquement sur la Release.
 
 ## License
 
-Private — All rights reserved
+MIT — See [LICENSE](./LICENSE) for details.
 
 ---
 

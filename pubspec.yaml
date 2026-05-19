@@ -1,8 +1,16 @@
 name: kiyoshi
-description: "Kiyoshi - A minimalist glassmorphic Kanban app"
-# The following line prevents the package from being accidentally published to
-# pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+description: "Kiyoshi — A minimalist glassmorphic Kanban workspace manager with Zen Design System. Desktop productivity tool for task management, projects, calendar, and block-based canvas."
+keywords:
+  - kanban
+  - productivity
+  - workspace
+  - glassmorphism
+  - zen
+  - task-management
+  - project-management
+  - flutter-desktop
+  - drift
+  - riverpod
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -17,6 +25,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
 version: 1.0.0+1
+
+license: MIT
 
 environment:
   sdk: ^3.11.4

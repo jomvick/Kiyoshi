@@ -381,17 +381,37 @@ Generated: ${DateTime.now().toIso8601String()}
         _SettingsInfoTile(
           icon: LucideIcons.leaf,
           title: 'Kiyoshi',
-          subtitle: 'Version 1.0.0',
+          subtitle: 'A minimalist glassmorphic Kanban workspace manager',
+        ),
+        _SettingsInfoTile(
+          icon: LucideIcons.hash,
+          title: 'Version',
+          subtitle: '1.0.0',
         ),
         _SettingsInfoTile(
           icon: LucideIcons.code,
           title: 'Built with Flutter',
-          subtitle: 'Desktop application',
+          subtitle: 'Desktop (Linux, macOS, Windows)',
         ),
         _SettingsInfoTile(
           icon: LucideIcons.palette,
           title: 'Design System',
-          subtitle: 'Zen Studio Glassmorphic',
+          subtitle: 'Zen Studio — Glassmorphic',
+        ),
+        _SettingsInfoTile(
+          icon: LucideIcons.database,
+          title: 'Database',
+          subtitle: 'Drift (SQLite)',
+        ),
+        _SettingsInfoTile(
+          icon: LucideIcons.layers,
+          title: 'State Management',
+          subtitle: 'Riverpod',
+        ),
+        _SettingsInfoTile(
+          icon: LucideIcons.shield,
+          title: 'License',
+          subtitle: 'MIT — Open Source',
         ),
       ],
     );
