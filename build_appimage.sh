@@ -52,8 +52,8 @@ EOF
 
     cp kiyoshi.AppDir/kiyoshi.desktop kiyoshi.AppDir/usr/share/applications/
 
-    printf '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x0aIDATx\x9cc\x00\x00\x00\x02\x00\x01\xe7\xa3\x26\x37\x00\x00\x00\x00IEND\xae\x42\x60\x82' > kiyoshi.AppDir/kiyoshi.png
-    cp kiyoshi.AppDir/kiyoshi.png kiyoshi.AppDir/usr/share/icons/hicolor/256x256/apps/
+    cp packaging/kiyoshi.png kiyoshi.AppDir/kiyoshi.png
+    cp packaging/kiyoshi.png kiyoshi.AppDir/usr/share/icons/hicolor/256x256/apps/
 
     appimagetool kiyoshi.AppDir "Kiyoshi-$APPIMAGE_VERSION-linux-$ARCH.AppImage"
     rm -rf kiyoshi.AppDir
