@@ -5,6 +5,8 @@ A minimalist glassmorphic Kanban workspace manager with a sophisticated **Zen De
 ![Platform](https://img.shields.io/badge/Platform-Flutter%20Desktop-blue)
 ![Version](https://img.shields.io/badge/Version-1.0.0-green)
 ![License](https://img.shields.io/badge/License-MIT-green)
+![AppImage](https://img.shields.io/badge/AppImage-ready-blue)
+![RPM](https://img.shields.io/badge/RPM-ready-blue)
 
 ## Overview
 
@@ -117,35 +119,37 @@ lib/
 
 ## Installation
 
-### Download from CLI
+Deux formats sont disponibles à chaque release :
+
+| Format | Description |
+|--------|-------------|
+| `.AppImage` | Portable, fonctionne sur toutes les distros — **recommandé** |
+| `.rpm` | Package natif Fedora/RHEL — installation system-wide |
+
+### AppImage (portable — toutes distros)
 
 ```bash
-# Get the latest release URL
+# Télécharger la dernière version
 LATEST=$(curl -s https://api.github.com/repos/jomvick/Kiyoshi/releases/latest | \
   grep -oP '"browser_download_url":\s*"\K[^"]+(?=")' | \
   grep AppImage | head -1)
-
-# Download
 curl -L "$LATEST" -o Kiyoshi.AppImage
-
-# Make executable
 chmod +x Kiyoshi.AppImage
-
-# Run
 ./Kiyoshi.AppImage
+```
+
+### RPM (Fedora / RHEL)
+
+```bash
+# Télécharger et installer
+sudo dnf install "https://github.com/jomvick/Kiyoshi/releases/latest/download/kiyoshi-1.0.0-1.x86_64.rpm"
+# Lancer
+kiyoshi
 ```
 
 ### Build AppImage from Source
 
-**Méthode recommandée — `appimage-builder`** (compatible toutes distros) :
-
 ```bash
-# Fedora : installer dpkg (requis par appimage-builder)
-sudo dnf install dpkg
-
-# Ubuntu/Debian : déjà disponible
-
-# Depuis la racine du projet
 pip3 install appimage-builder
 dart run build_runner build --delete-conflicting-outputs
 flutter build linux --release
@@ -153,7 +157,14 @@ flutter build linux --release
 # Output: Kiyoshi-1.0.0-x86_64.AppImage
 ```
 
-Le script `build_appimage.sh` détecte et installe `dpkg` automatiquement sur Fedora, puis utilise `appimage-builder`.
+### Build RPM from Source
+
+```bash
+dart run build_runner build --delete-conflicting-outputs
+flutter build linux --release
+./build_rpm.sh
+# Output: build/kiyoshi-1.0.0-1.x86_64.rpm
+```
 
 ### Build from Source (raw binary)
 
@@ -165,7 +176,8 @@ flutter build linux --release
 ./build/linux/x64/release/bundle/kiyoshi
 ```
 
-> **Note:** Toutes les commandes `flutter` et `./build_appimage.sh` doivent être exécutées depuis la racine du projet (`Kiyoshi/`).
+> **Note:** Toutes les commandes doivent être exécutées depuis la racine du projet (`Kiyoshi/`).  
+> Le SDK Flutter est requis pour toute compilation. Consultez [docs.flutter.dev](https://docs.flutter.dev/get-started/install/linux) pour l'installation.
 
 ## Keyboard Shortcuts
 
@@ -206,24 +218,18 @@ Kiyoshi checks for updates automatically on startup via the GitHub Releases API.
 
 ### Mise à jour manuelle
 
-```bash
-# Télécharger la dernière version
-wget https://github.com/jomvick/Kiyoshi/releases/latest/download/Kiyoshi-x86_64.AppImage
-
-# Remplacer l'ancienne
-chmod +x Kiyoshi-x86_64.AppImage
-mv Kiyoshi-x86_64.AppImage ~/Applications/Kiyoshi.AppImage
-```
-
-### Via script CLI
-
+**AppImage :**
 ```bash
 LATEST=$(curl -s https://api.github.com/repos/jomvick/Kiyoshi/releases/latest | \
   grep -oP '"browser_download_url":\s*"\K[^"]+(?=")' | \
   grep AppImage | head -1)
-
 curl -L "$LATEST" -o ~/Applications/Kiyoshi.AppImage
 chmod +x ~/Applications/Kiyoshi.AppImage
+```
+
+**RPM :**
+```bash
+sudo dnf upgrade "https://github.com/jomvick/Kiyoshi/releases/latest/download/kiyoshi-1.0.0-1.x86_64.rpm"
 ```
 
 ### Publier une mise à jour (développeur)
@@ -237,7 +243,7 @@ git tag v1.1.0
 git push origin master --tags
 ```
 
-GitHub Actions build et publie l'AppImage automatiquement sur la Release.
+GitHub Actions build et publie l'`.AppImage` et le `.rpm` automatiquement sur la Release.
 
 ## License
 
