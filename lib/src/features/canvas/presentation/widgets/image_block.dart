@@ -42,7 +42,6 @@ class _ImageBlockWidgetState extends State<ImageBlockWidget> {
     try {
       if (path.startsWith('http://') || path.startsWith('https://')) return true;
       final resolved = File(path).resolveSymbolicLinksSync();
-      final home = Platform.environment['HOME'] ?? '';
       return resolved.startsWith('/home') || resolved.startsWith('/tmp');
     } catch (_) {
       return false;
