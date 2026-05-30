@@ -73,8 +73,45 @@ EOF
 
 cp assets/icons/kiyoshi.png kiyoshi.AppDir/kiyoshi.png
 
+<<<<<<< HEAD
 echo "==> Packaging AppImage..."
 $APPIMAGETOOL kiyoshi.AppDir "Kiyoshi-$APPIMAGE_VERSION-linux-$ARCH.AppImage"
 rm -rf kiyoshi.AppDir
 echo ""
 echo "✓ Kiyoshi-$APPIMAGE_VERSION-linux-$ARCH.AppImage created!"
+=======
+    cp packaging/kiyoshi.png kiyoshi.AppDir/kiyoshi.png
+    cp packaging/kiyoshi.png kiyoshi.AppDir/usr/share/icons/hicolor/256x256/apps/
+
+    appimagetool kiyoshi.AppDir "Kiyoshi-$APPIMAGE_VERSION-linux-$ARCH.AppImage"
+    rm -rf kiyoshi.AppDir
+    echo ""
+    echo "✓ Kiyoshi-$APPIMAGE_VERSION-linux-$ARCH.AppImage created!"
+}
+
+# Prefer appimage-builder (recommended)
+if command -v appimage-builder &> /dev/null; then
+    if ! command -v dpkg-deb &> /dev/null; then
+        echo "==> dpkg-deb not found. Installing dpkg (needed by appimage-builder)..."
+        if command -v dnf &> /dev/null; then
+            sudo dnf install -y dpkg
+        elif command -v apt &> /dev/null; then
+            sudo apt install -y dpkg
+        elif command -v yum &> /dev/null; then
+            sudo yum install -y dpkg
+        else
+            echo "⚠ Could not install dpkg automatically."
+            echo "  Install it manually: sudo dnf install dpkg"
+            appimagetool_fallback
+            exit $?
+        fi
+    fi
+    echo "==> Using appimage-builder (recommended method)"
+    appimage-builder --recipe AppImageBuilder.yml
+    echo ""
+    echo "✓ AppImage created!"
+    exit 0
+fi
+
+appimagetool_fallback
+>>>>>>> 5c65b05d389a5e3d0e64d4e951db1419fe5edbcf

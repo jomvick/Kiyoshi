@@ -3,12 +3,21 @@ version: 1
 script:
   - rm -rf AppDir || true
   - cp -r build/linux/x64/release/bundle AppDir
+<<<<<<< HEAD
   - mkdir -p AppDir/usr/bin AppDir/usr/lib AppDir/usr/share/icons/hicolor/256x256/apps AppDir/usr/share/icons/hicolor/64x64/apps
+=======
+  - mkdir -p AppDir/usr/bin AppDir/usr/lib AppDir/usr/share/applications AppDir/usr/share/icons/hicolor/64x64/apps/
+>>>>>>> 5c65b05d389a5e3d0e64d4e951db1419fe5edbcf
   - mv AppDir/lib/* AppDir/usr/lib/
   - mv AppDir/kiyoshi AppDir/usr/bin/
   - mv AppDir/data AppDir/usr/bin/
   - rmdir AppDir/lib
+<<<<<<< HEAD
   - cp assets/icons/kiyoshi.png AppDir/usr/share/icons/hicolor/256x256/apps/kiyoshi.png
+=======
+  - cp packaging/kiyoshi.png AppDir/usr/share/icons/hicolor/64x64/apps/
+  - cp packaging/kiyoshi.desktop AppDir/usr/share/applications/com.kiyoshi.app.desktop
+>>>>>>> 5c65b05d389a5e3d0e64d4e951db1419fe5edbcf
 
 AppDir:
   path: ./AppDir
