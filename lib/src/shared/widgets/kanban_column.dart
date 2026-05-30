@@ -223,7 +223,7 @@ class _KanbanColumnState extends State<KanbanColumn> {
                       color: AppTheme.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
+                    child: const Icon(
                       LucideIcons.plus,
                       size: 16,
                       color: AppTheme.primary,

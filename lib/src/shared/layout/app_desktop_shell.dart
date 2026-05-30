@@ -6,7 +6,7 @@ import 'package:kiyoshi/src/features/projects/domain/entities/project.dart';
 import 'package:kiyoshi/src/core/navigation/app_destination.dart';
 import 'package:kiyoshi/src/core/theme/app_theme.dart';
 import 'package:kiyoshi/src/core/providers/zen_mode_provider.dart';
-import 'package:kiyoshi/src/core/providers/preferences_provider.dart';
+import 'package:kiyoshi/src/core/providers/preferences_provider.dart' show AppPreferences;
 import 'package:kiyoshi/src/core/providers/database_provider.dart';
 import 'package:kiyoshi/src/features/canvas/application/zen_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,203 +53,185 @@ class _AppDesktopShellState extends ConsumerState<AppDesktopShell> {
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
-      body: KeyboardListener(
-        focusNode: FocusNode(), // Dummy focus node for catching global events
-        autofocus: true,
-        onKeyEvent: (event) {
-          if (event is KeyDownEvent && 
-              !_quickEntryFocusNode.hasFocus && 
-              event.character != null && 
-              event.character!.isNotEmpty) {
-            _quickEntryFocusNode.requestFocus();
-          }
-        },
-        child: Stack(
+      body: _buildKeyboardListener(isZenMode, prefs),
+    );
+  }
+
+  Widget _buildKeyboardListener(bool isZenMode, AppPreferences prefs) {
+    return KeyboardListener(
+      focusNode: FocusNode(),
+      autofocus: true,
+      onKeyEvent: (event) {
+        if (event is KeyDownEvent && 
+            !_quickEntryFocusNode.hasFocus && 
+            event.character != null && 
+            event.character!.isNotEmpty) {
+          _quickEntryFocusNode.requestFocus();
+        }
+      },
+      child: Stack(
+        children: [
+          const Positioned.fill(child: _BackgroundGradients()),
+          _buildLayoutRow(isZenMode, prefs),
+          if (!isZenMode && widget.selectedDestination == AppDestination.dashboard)
+            _buildZenBar(prefs),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLayoutRow(bool isZenMode, AppPreferences prefs) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isNarrow = screenWidth < 600;
+        final isMedium = screenWidth < 900;
+
+        final sidebarWidth = isZenMode 
+            ? 0.0 
+            : (isNarrow ? 0.0 : (isMedium ? 60.0 : (prefs.sidebarExpanded ? prefs.sidebarWidth : 0.0)));
+
+        return Row(
           children: [
-            // Background Misty Gradients
-            const Positioned.fill(
-              child: _BackgroundGradients(),
-            ),
-            
-// Layout: Sidebar + Main Content
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final screenWidth = constraints.maxWidth;
-                final isNarrow = screenWidth < 600;
-                final isMedium = screenWidth < 900;
-
-final sidebarWidth = isZenMode 
-    ? 0.0 
-    : (isNarrow ? 0.0 : (isMedium ? 60.0 : (prefs.sidebarExpanded ? prefs.sidebarWidth : 0.0)));
-
-                return Row(
-                  children: [
-                    // Left Sidebar - Responsive
-                    AnimatedContainer(
-                      duration: AppTheme.animMedium,
-                      curve: Curves.easeOutCubic,
-                      width: sidebarWidth,
-                      child: sidebarWidth > 0
-                          ? SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              physics: const NeverScrollableScrollPhysics(),
-                              child: SizedBox(
-                                width: isMedium ? 60 : prefs.sidebarWidth,
-                                child: isMedium
-                                    ? _buildCompactSidebar()
-                                    : Sidebar(
-                                        selectedWorkspace: widget.selectedWorkspace,
-                                        workspaces: widget.workspaces,
-                                        onWorkspaceSelected: widget.onWorkspaceSelected,
-                                        onCreateWorkspace: widget.onCreateWorkspace,
-                                        selectedDestination: widget.selectedDestination,
-                                        onDestinationSelected: widget.onDestinationSelected,
-                                        showPrismaticBorders: prefs.prismaticBorders,
-                                      ),
-                              ),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-
-                    // Right Main Content
-                    Expanded(
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                          top: isZenMode ? 0 : AppTheme.spaceMedium,
-                          right: isZenMode ? 0 : AppTheme.spaceMedium,
-                          bottom: isZenMode ? 0 : AppTheme.spaceMedium,
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(isZenMode ? 0 : AppTheme.radiusXLarge),
-                          child: widget.child,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-    
-            // Zen Quick Entry - Only on Dashboard
-            if (!isZenMode && widget.selectedDestination == AppDestination.dashboard)
-              Positioned(
-                bottom: 48,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: MorphingZenBar(
-                    isDashboard: true,
-                    focusNode: _quickEntryFocusNode,
-                    showPrismaticBorders: prefs.prismaticBorders,
-                    onTaskCreated: (title, date, project, priority) async {
-                      try {
-                        final parsed = ParsedBlock(
-                          type: 'todo',
-                          content: title,
-                          metadata: {
-                            'status': 'todo',
-                            'priority': priority,
-                            'project': project,
-                            if (date != null) 'dueDate': date.toIso8601String(),
-                          },
-                        );
-                        final String targetProject = project ?? 'global';
-                        await ref.read(blockServiceProvider).addBlock(targetProject, parsed);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Task "$title" created'),
-                              backgroundColor: AppTheme.primary,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        debugPrint('Failed to create task: $e');
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Could not create task.'),
-                              backgroundColor: AppTheme.error,
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    onBlockCreated: (type, content, metadata) async {
-                      try {
-                        final parsed = ParsedBlock(
-                          type: type,
-                          content: content,
-                          metadata: metadata,
-                        );
-                        final String targetProject = metadata['project'] ?? 'global';
-                        await ref.read(blockServiceProvider).addBlock(targetProject, parsed);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${type.toUpperCase()} created in $targetProject'),
-                              backgroundColor: AppTheme.primary,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        debugPrint('Failed to create block: $e');
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Could not create block.'),
-                              backgroundColor: AppTheme.error,
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    onProjectCreated: (title, description) async {
-                      try {
-                        if (title.trim().isEmpty) return;
-                        final workspaceId = widget.selectedWorkspace?.id ?? 'default';
-                        final project = Project.create(
-                          id: const Uuid().v4(),
-                          workspaceId: workspaceId,
-                          title: title.trim(),
-                          description: description ?? '',
-                        );
-                        await ref.read(projectRepositoryProvider).addProject(project);
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('\u2728 Project "$title" created'),
-                              backgroundColor: AppTheme.primary,
-                              behavior: SnackBarBehavior.floating,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                            ),
-                          );
-                        }
-                      } catch (e) {
-                        debugPrint('Failed to create project: $e');
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Could not create project.'),
-                              backgroundColor: AppTheme.error,
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        }
-                      }
-                    },
-                    onNavigateToCalendar: () => widget.onDestinationSelected(AppDestination.calendar),
-                  ),
-                ),
-              ),
+            _buildSidebarSection(isNarrow, isMedium, sidebarWidth, prefs),
+            _buildContentSection(isZenMode),
           ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSidebarSection(bool isNarrow, bool isMedium, double sidebarWidth, AppPreferences prefs) {
+    return AnimatedContainer(
+      duration: AppTheme.animMedium,
+      curve: Curves.easeOutCubic,
+      width: sidebarWidth,
+      child: sidebarWidth > 0
+          ? SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              physics: const NeverScrollableScrollPhysics(),
+              child: SizedBox(
+                width: isMedium ? 60 : prefs.sidebarWidth,
+                child: isMedium
+                    ? _buildCompactSidebar()
+                    : Sidebar(
+                        selectedWorkspace: widget.selectedWorkspace,
+                        workspaces: widget.workspaces,
+                        onWorkspaceSelected: widget.onWorkspaceSelected,
+                        onCreateWorkspace: widget.onCreateWorkspace,
+                        selectedDestination: widget.selectedDestination,
+                        onDestinationSelected: widget.onDestinationSelected,
+                        showPrismaticBorders: prefs.prismaticBorders,
+                      ),
+              ),
+            )
+          : const SizedBox.shrink(),
+    );
+  }
+
+  Widget _buildContentSection(bool isZenMode) {
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: isZenMode ? 0 : AppTheme.spaceMedium,
+          right: isZenMode ? 0 : AppTheme.spaceMedium,
+          bottom: isZenMode ? 0 : AppTheme.spaceMedium,
         ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(isZenMode ? 0 : AppTheme.radiusXLarge),
+          child: widget.child,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildZenBar(AppPreferences prefs) {
+    return Positioned(
+      bottom: 48,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: MorphingZenBar(
+          isDashboard: true,
+          focusNode: _quickEntryFocusNode,
+          showPrismaticBorders: prefs.prismaticBorders,
+          onTaskCreated: (title, date, project, priority) async {
+            try {
+              final parsed = ParsedBlock(
+                type: 'todo',
+                content: title,
+                metadata: {
+                  'status': 'todo',
+                  'priority': priority,
+                  'project': project,
+                  if (date != null) 'dueDate': date.toIso8601String(),
+                },
+              );
+              final String targetProject = project ?? 'global';
+              await ref.read(blockServiceProvider).addBlock(targetProject, parsed);
+              if (context.mounted) {
+                _showSnackBar('Task "$title" created');
+              }
+            } catch (e) {
+              debugPrint('Failed to create task: $e');
+              if (context.mounted) {
+                _showSnackBar('Could not create task.', isError: true);
+              }
+            }
+          },
+          onBlockCreated: (type, content, metadata) async {
+            try {
+              final parsed = ParsedBlock(
+                type: type,
+                content: content,
+                metadata: metadata,
+              );
+              final String targetProject = metadata['project'] ?? 'global';
+              await ref.read(blockServiceProvider).addBlock(targetProject, parsed);
+              if (context.mounted) {
+                _showSnackBar('${type.toUpperCase()} created in $targetProject');
+              }
+            } catch (e) {
+              debugPrint('Failed to create block: $e');
+              if (context.mounted) {
+                _showSnackBar('Could not create block.', isError: true);
+              }
+            }
+          },
+          onProjectCreated: (title, description) async {
+            try {
+              if (title.trim().isEmpty) return;
+              final workspaceId = widget.selectedWorkspace?.id ?? 'default';
+              final project = Project.create(
+                id: const Uuid().v4(),
+                workspaceId: workspaceId,
+                title: title.trim(),
+                description: description ?? '',
+              );
+              await ref.read(projectRepositoryProvider).addProject(project);
+              if (context.mounted) {
+                _showSnackBar('\u2728 Project "$title" created');
+              }
+            } catch (e) {
+              debugPrint('Failed to create project: $e');
+              if (context.mounted) {
+                _showSnackBar('Could not create project.', isError: true);
+              }
+            }
+          },
+          onNavigateToCalendar: () => widget.onDestinationSelected(AppDestination.calendar),
+        ),
+      ),
+    );
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? AppTheme.error : AppTheme.primary,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
   }

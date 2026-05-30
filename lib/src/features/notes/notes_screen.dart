@@ -318,7 +318,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                         color: AppTheme.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(LucideIcons.edit2,
+                      child: const Icon(LucideIcons.edit2,
                           color: AppTheme.primary, size: 18),
                     ),
                     const SizedBox(width: 14),

@@ -51,7 +51,7 @@ class _TodoBlockWidgetState extends State<TodoBlockWidget> {
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
+        duration: AppTheme.animFastest,
         padding: const EdgeInsets.symmetric(
           horizontal: AppTheme.spaceMedium,
           vertical: 4,

@@ -4,7 +4,7 @@ import 'package:kiyoshi/src/features/canvas/domain/entities/zen_block.dart';
 void main() {
   group('ZenBlock', () {
     test('creates with required fields only', () {
-      final block = ZenBlock(
+      const block = ZenBlock(
         id: '1',
         projectId: 'proj1',
         type: 'text',
@@ -22,7 +22,7 @@ void main() {
     });
 
     test('creates with all fields', () {
-      final block = ZenBlock(
+      const block = ZenBlock(
         id: '2',
         projectId: 'proj2',
         type: 'todo',
@@ -40,7 +40,7 @@ void main() {
     });
 
     test('copyWith creates new instance with updated fields', () {
-      final original = ZenBlock(
+      const original = ZenBlock(
         id: '1',
         projectId: 'proj1',
         type: 'text',
@@ -68,7 +68,7 @@ void main() {
     });
 
     test('copyWith preserves unchanged fields', () {
-      final original = ZenBlock(
+      const original = ZenBlock(
         id: '1',
         projectId: 'proj1',
         type: 'link',
@@ -103,7 +103,7 @@ void main() {
     });
 
     test('handles complex metadata', () {
-      final block = ZenBlock(
+      const block = ZenBlock(
         id: '1',
         projectId: 'proj1',
         type: 'todo',
@@ -128,7 +128,7 @@ void main() {
     });
 
     test('has expected properties with correct types', () {
-      final block = ZenBlock(
+      const block = ZenBlock(
         id: 'test-id',
         projectId: 'project-id',
         type: 'text',

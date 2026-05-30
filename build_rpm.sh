@@ -23,7 +23,7 @@ mkdir -p "$RPMBUILD_DIR"/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
 
 # Step 3: Create source tarball (binary + libs + data)
 TARBALL_DIR="$RPMBUILD_DIR/kiyoshi-$APP_VERSION"
-mkdir -p "$TARBALL_DIR"
+mkdir -p "$TARBALL_DIR/lib"
 cp build/linux/x64/release/bundle/kiyoshi "$TARBALL_DIR/"
 cp build/linux/x64/release/bundle/lib/*.so "$TARBALL_DIR/lib/"
 cp -r build/linux/x64/release/bundle/data "$TARBALL_DIR/"
@@ -37,9 +37,9 @@ cp "$SCRIPT_DIR/packaging/kiyoshi.sh" "$RPMBUILD_DIR/SOURCES/"
 cp "$SCRIPT_DIR/packaging/kiyoshi.desktop" "$RPMBUILD_DIR/SOURCES/"
 cp "$SCRIPT_DIR/packaging/kiyoshi.spec" "$RPMBUILD_DIR/SPECS/"
 
-# Step 5: Build RPM
+# Step 5: Build RPM (allow Flutter's build-path RPATHs in .so files)
 echo "==> Building RPM..."
-rpmbuild -bb \
+QA_RPATHS=$(( 0x0002 )) rpmbuild -bb \
     --define "_topdir $RPMBUILD_DIR" \
     "$RPMBUILD_DIR/SPECS/kiyoshi.spec"
 

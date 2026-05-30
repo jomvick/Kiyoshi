@@ -113,7 +113,7 @@ class _FileBlockWidgetState extends State<FileBlockWidget> {
         onEnter: (_) => setState(() => _isHovered = true),
         onExit: (_) => setState(() => _isHovered = false),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
+          duration: AppTheme.animFastest,
           padding: const EdgeInsets.all(AppTheme.spaceLarge),
           decoration: BoxDecoration(
             color: _isHovered
@@ -158,7 +158,7 @@ class _FileBlockWidgetState extends State<FileBlockWidget> {
       child: GestureDetector(
         onTap: _openFile,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
+          duration: AppTheme.animFastest,
           padding: const EdgeInsets.all(AppTheme.spaceMedium),
           decoration: BoxDecoration(
             color: _isHovered

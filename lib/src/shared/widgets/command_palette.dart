@@ -142,7 +142,7 @@ class _CommandPaletteState extends State<CommandPalette> {
 
   void _executeCommand(Command command) {
     widget.onClose();
-    Future.delayed(const Duration(milliseconds: 150), () {
+    Future.delayed(AppTheme.animFastest, () {
       // Guard: the widget tree may have been rebuilt or the command
       // callback may reference disposed state.
       if (!mounted) return;
@@ -200,7 +200,7 @@ class _CommandPaletteState extends State<CommandPalette> {
                           ),
                           child: Row(
                             children: [
-                              Icon(
+                              const Icon(
                                 LucideIcons.search,
                                 size: 20,
                                 color: AppTheme.onSurfaceVariant,
@@ -240,7 +240,7 @@ class _CommandPaletteState extends State<CommandPalette> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       LucideIcons.command,
                                       size: 12,
                                       color: AppTheme.onSurfaceVariant,
@@ -358,7 +358,7 @@ class _CommandPaletteState extends State<CommandPalette> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(LucideIcons.searchX, size: 48, color: AppTheme.onSurfaceVariant),
+          const Icon(LucideIcons.searchX, size: 48, color: AppTheme.onSurfaceVariant),
           const SizedBox(height: AppTheme.spaceMedium),
           Text(
             'No commands found',
@@ -510,7 +510,7 @@ class _CommandItemState extends State<_CommandItem> {
 
               // Arrow indicator
               if (effectiveSelected)
-                Icon(
+                const Icon(
                   LucideIcons.chevronRight,
                   size: 16,
                   color: AppTheme.primary,

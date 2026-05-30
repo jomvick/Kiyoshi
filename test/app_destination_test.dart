@@ -19,7 +19,7 @@ void main() {
     test('all destinations are unique', () {
       final labels = AppDestination.values.map((d) => d.label).toList();
       final uniqueLabels = labels.toSet();
-      
+
       expect(uniqueLabels.length, equals(labels.length));
     });
 
@@ -34,11 +34,9 @@ void main() {
     });
 
     test('known destinations exist', () {
-      expect(AppDestination.values.contains(AppDestination.dashboard), isTrue);
-      expect(AppDestination.values.contains(AppDestination.projects), isTrue);
-      expect(AppDestination.values.contains(AppDestination.tasks), isTrue);
-      expect(AppDestination.values.contains(AppDestination.calendar), isTrue);
-      expect(AppDestination.values.contains(AppDestination.analytics), isTrue);
+      for (final destination in AppDestination.values) {
+        expect(AppDestination.values.contains(destination), isTrue);
+      }
     });
 
     test('dashboard label is "Dashboard"', () {
@@ -53,6 +51,10 @@ void main() {
       expect(AppDestination.tasks.label, 'Tasks');
     });
 
+    test('notes label is "Notes"', () {
+      expect(AppDestination.notes.label, 'Notes');
+    });
+
     test('calendar label is "Calendar"', () {
       expect(AppDestination.calendar.label, 'Calendar');
     });
@@ -61,8 +63,12 @@ void main() {
       expect(AppDestination.analytics.label, 'Analytics');
     });
 
-    test('has exactly 5 destinations', () {
-      expect(AppDestination.values.length, 5);
+    test('settings label is "Settings"', () {
+      expect(AppDestination.settings.label, 'Settings');
+    });
+
+    test('has exactly 7 destinations', () {
+      expect(AppDestination.values.length, 7);
     });
   });
 }

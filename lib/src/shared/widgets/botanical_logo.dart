@@ -75,7 +75,7 @@ class BotanicalLogoPainter extends CustomPainter {
 
   void _drawPrismaticHalo(Canvas canvas) {
     const center = Offset(50, 50);
-    final rect = const Rect.fromLTWH(0, 0, 100, 100);
+    const rect = Rect.fromLTWH(0, 0, 100, 100);
 
     final glow = Paint()
       ..color = KiyoshiZenTokens.spectralColors[0].withValues(alpha: 0.35)
@@ -85,7 +85,7 @@ class BotanicalLogoPainter extends CustomPainter {
     canvas.drawCircle(center, 46, glow);
 
     final ring = Paint()
-      ..shader = SweepGradient(
+      ..shader = const SweepGradient(
         colors: KiyoshiZenTokens.spectralColors,
       ).createShader(rect)
       ..style = PaintingStyle.stroke

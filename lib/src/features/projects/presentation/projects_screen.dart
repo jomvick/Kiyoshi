@@ -201,7 +201,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
           ),
           child: Text(
             count.toString(),
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,
               color: AppTheme.primary,
@@ -367,7 +367,7 @@ class _CreateProjectDialogState extends ConsumerState<_CreateProjectDialog> {
               children: [
                 const Icon(LucideIcons.calendar, size: 18),
                 const SizedBox(width: 8),
-                Text(
+                const Text(
                   'Deadline',
                   style: TextStyle(
                     color: AppTheme.onSurfaceVariant,

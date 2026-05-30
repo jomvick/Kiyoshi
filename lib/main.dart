@@ -10,16 +10,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  FlutterError.onError = (details) {
-    debugPrint('Flutter error: ${details.exception}');
-    debugPrint('Stack: ${details.stack}');
-  };
+  if (kDebugMode) {
+    FlutterError.onError = (details) {
+      debugPrint('Flutter error: ${details.exception}');
+      debugPrint('Stack: ${details.stack}');
+    };
 
-  PlatformDispatcher.instance.onError = (error, stack) {
-    debugPrint('Unhandled error: $error');
-    debugPrint('Stack: $stack');
-    return true;
-  };
+    PlatformDispatcher.instance.onError = (error, stack) {
+      debugPrint('Unhandled error: $error');
+      debugPrint('Stack: $stack');
+      return true;
+    };
+  }
 
   try {
     await VaultService().init();

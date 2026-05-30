@@ -24,13 +24,13 @@ class AmbientZenBackground extends StatelessWidget {
             children: [
               const ColoredBox(color: KiyoshiZenTokens.canvas),
               ..._buildOrbs(),
-              CustomPaint(
+              const CustomPaint(
                 painter: _ZenNoisePainter(
                   opacity: 0.010,
                   seed: 42,
                   density: 0.04,
                 ),
-                child: const SizedBox.expand(),
+                child: SizedBox.expand(),
               ),
             ],
           ),

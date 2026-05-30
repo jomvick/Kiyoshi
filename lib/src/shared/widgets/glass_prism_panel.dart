@@ -18,7 +18,7 @@ class GlassPrismPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = KiyoshiZenTokens.radiusCard;
+    const radius = KiyoshiZenTokens.radiusCard;
 
     return RepaintBoundary(
       child: CustomPaint(
@@ -108,7 +108,7 @@ class _SpectralBorderPainter extends CustomPainter {
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
 
     final borderPaint = Paint()
-      ..shader = SweepGradient(
+      ..shader = const SweepGradient(
         colors: KiyoshiZenTokens.spectralColors,
       ).createShader(rect)
       ..style = PaintingStyle.stroke

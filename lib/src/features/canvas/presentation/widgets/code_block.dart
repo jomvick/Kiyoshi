@@ -69,13 +69,13 @@ class _CodeBlockWidgetState extends State<CodeBlockWidget> {
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             child: Row(
               children: [
-                Row(
+                const Row(
                   children: [
-                    _Dot(color: const Color(0xFFFF6058)),
-                    const SizedBox(width: 6),
-                    _Dot(color: const Color(0xFFFFBC2E)),
-                    const SizedBox(width: 6),
-                    _Dot(color: const Color(0xFF2ACA44)),
+                    _Dot(color: Color(0xFFFF6058)),
+                    SizedBox(width: 6),
+                    _Dot(color: Color(0xFFFFBC2E)),
+                    SizedBox(width: 6),
+                    _Dot(color: Color(0xFF2ACA44)),
                   ],
                 ),
                 const Spacer(),

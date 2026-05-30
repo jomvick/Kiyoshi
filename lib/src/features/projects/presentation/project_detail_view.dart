@@ -120,7 +120,7 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
                               color: AppTheme.error.withValues(alpha: 0.5),
                             ),
                             const SizedBox(height: 16),
-                            Text(
+                            const Text(
                               'Error loading blocks',
                               style: TextStyle(
                                 color: AppTheme.onSurfaceVariant,

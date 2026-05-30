@@ -89,7 +89,7 @@ class _ImageBlockWidgetState extends State<ImageBlockWidget> {
         onEnter: (_) => setState(() => _isHovered = true),
         onExit: (_) => setState(() => _isHovered = false),
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
+          duration: AppTheme.animFastest,
           height: 160,
           width: double.infinity,
           decoration: BoxDecoration(
@@ -263,7 +263,7 @@ class _SizeBar extends StatelessWidget {
           return GestureDetector(
             onTap: () => onSelect?.call(value),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
+              duration: AppTheme.animFastest,
               margin: const EdgeInsets.symmetric(horizontal: 2),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(

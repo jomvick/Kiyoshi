@@ -20,8 +20,8 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: Sidebar(
-            selectedWorkspace: Workspace(id: '1', name: 'Studio'),
-            workspaces: [Workspace(id: '1', name: 'Studio')],
+            selectedWorkspace: const Workspace(id: '1', name: 'Studio'),
+            workspaces: [const Workspace(id: '1', name: 'Studio')],
             onWorkspaceSelected: (_) {},
             onCreateWorkspace: () {},
             onDestinationSelected: (_) {},

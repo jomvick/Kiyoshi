@@ -65,7 +65,7 @@ class _UpdateScreenState extends ConsumerState<UpdateScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
+              const Icon(
                 LucideIcons.download,
                 size: 64,
                 color: AppTheme.primary,

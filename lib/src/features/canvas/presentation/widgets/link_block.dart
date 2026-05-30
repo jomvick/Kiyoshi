@@ -74,7 +74,7 @@ class _LinkBlockWidgetState extends State<LinkBlockWidget> {
       child: GestureDetector(
         onTap: _openUrl,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
+          duration: AppTheme.animFastest,
           padding: const EdgeInsets.all(AppTheme.spaceMedium),
           decoration: BoxDecoration(
             color: _isHovered
@@ -107,14 +107,14 @@ class _LinkBlockWidgetState extends State<LinkBlockWidget> {
                           cacheWidth: 40, // Small icons don't need big buffers
                           cacheHeight: 40,
                           fit: BoxFit.contain,
-                          errorBuilder: (_, _, _) => Icon(
+                          errorBuilder: (_, _, _) => const Icon(
                             LucideIcons.link,
                             size: 18,
                             color: AppTheme.primary,
                           ),
                         ),
                       )
-                    : Icon(LucideIcons.link2, size: 18, color: AppTheme.primary),
+                    : const Icon(LucideIcons.link2, size: 18, color: AppTheme.primary),
               ),
               const SizedBox(width: AppTheme.spaceMedium),
               Expanded(

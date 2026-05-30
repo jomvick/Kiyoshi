@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 void main() {
   group('Workspace', () {
     test('creates with required fields only', () {
-      final workspace = Workspace(
+      const workspace = Workspace(
         id: '1',
         name: 'Test Workspace',
       );
@@ -20,7 +20,7 @@ void main() {
     });
 
     test('creates with all fields', () {
-      final workspace = Workspace(
+      const workspace = Workspace(
         id: '2',
         name: 'Full Workspace',
         description: 'A complete workspace',
@@ -40,7 +40,7 @@ void main() {
     });
 
     test('copyWith creates new instance with updated fields', () {
-      final original = Workspace(
+      const original = Workspace(
         id: '1',
         name: 'Original',
         progress: 0.5,
@@ -61,7 +61,7 @@ void main() {
     });
 
     test('copyWith preserves unchanged fields', () {
-      final original = Workspace(
+      const original = Workspace(
         id: '1',
         name: 'Original',
         description: 'Description',
@@ -81,7 +81,7 @@ void main() {
     });
 
     test('has expected properties', () {
-      final workspace = Workspace(
+      const workspace = Workspace(
         id: 'test-id',
         name: 'Test Name',
         description: 'Test Description',

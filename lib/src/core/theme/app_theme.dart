@@ -80,25 +80,25 @@ class AppTheme {
   
   // === SHADOWS (Crisp, Apple-style Drop Shadows) ===
   static List<BoxShadow> ambientShadow = [
-    BoxShadow(
-      color: const Color(0x0A000000), // 4% pure black
+    const BoxShadow(
+      color: Color(0x0A000000), // 4% pure black
       blurRadius: 10,
-      offset: const Offset(0, 4),
+      offset: Offset(0, 4),
       spreadRadius: 0,
     ),
-    BoxShadow(
-      color: const Color(0x05000000), // 2% black for rim
+    const BoxShadow(
+      color: Color(0x05000000), // 2% black for rim
       blurRadius: 2,
-      offset: const Offset(0, 1),
+      offset: Offset(0, 1),
       spreadRadius: 0,
     ),
   ];
   
   static List<BoxShadow> ambientShadowHover = [
-    BoxShadow(
-      color: const Color(0x14000000), // 8% black
+    const BoxShadow(
+      color: Color(0x14000000), // 8% black
       blurRadius: 20,
-      offset: const Offset(0, 10),
+      offset: Offset(0, 10),
       spreadRadius: -2,
     ),
   ];
@@ -121,6 +121,7 @@ class AppTheme {
   static const double frameMargin = 40.0; // "Frame within a Frame"
   
   // === ANIMATIONS ===
+  static const Duration animFastest = Duration(milliseconds: 150);
   static const Duration animFast = Duration(milliseconds: 200);
   static const Duration animMedium = Duration(milliseconds: 350);
   static const Duration animSlow = Duration(milliseconds: 500);
@@ -166,7 +167,7 @@ class AppTheme {
   );
 
   static ColorScheme get _darkColorScheme {
-    return ColorScheme(
+    return const ColorScheme(
       brightness: Brightness.dark,
       primary: primary,
       onPrimary: onPrimary,
@@ -180,19 +181,19 @@ class AppTheme {
       onTertiary: onTertiary,
       tertiaryContainer: tertiaryContainer,
       onTertiaryContainer: onTertiaryContainer,
-      surface: const Color(0xFF1E1E1E),
+      surface: Color(0xFF1E1E1E),
       onSurface: Colors.white,
-      surfaceContainerLowest: const Color(0xFF1A1A1A),
-      surfaceContainerLow: const Color(0xFF252525),
-      surfaceContainer: const Color(0xFF2A2A2A),
-      surfaceContainerHigh: const Color(0xFF333333),
+      surfaceContainerLowest: Color(0xFF1A1A1A),
+      surfaceContainerLow: Color(0xFF252525),
+      surfaceContainer: Color(0xFF2A2A2A),
+      surfaceContainerHigh: Color(0xFF333333),
       onSurfaceVariant: Colors.white70,
       error: error,
       onError: onError,
       errorContainer: errorContainer,
       onErrorContainer: onErrorContainer,
-      outline: const Color(0xFF444444),
-      outlineVariant: const Color(0xFF333333),
+      outline: Color(0xFF444444),
+      outlineVariant: Color(0xFF333333),
     );
   }
 
@@ -270,7 +271,7 @@ class AppTheme {
         color: brightness == Brightness.dark ? Colors.white60 : onSurfaceVariant,
         height: 1.5,
       ),
-      labelLarge: TextStyle(
+      labelLarge: const TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w500,
         color: primary,
@@ -420,10 +421,10 @@ class AppTheme {
         width: 1,
       ),
       boxShadow: [
-        BoxShadow(
-          color: const Color(0x0A000000),
+        const BoxShadow(
+          color: Color(0x0A000000),
           blurRadius: 4,
-          offset: const Offset(0, 2),
+          offset: Offset(0, 2),
         ),
       ],
     );

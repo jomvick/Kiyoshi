@@ -1,5 +1,6 @@
 %global appname kiyoshi
 %global appver  1.0.0
+%global debug_package %{nil}
 
 Name:          %{appname}
 Version:       %{appver}

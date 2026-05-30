@@ -144,7 +144,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         color: AppTheme.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(LucideIcons.penTool, color: AppTheme.primary, size: 20),
+                      child: const Icon(LucideIcons.penTool, color: AppTheme.primary, size: 20),
                     ),
                     const SizedBox(width: 16),
                     Text(
@@ -265,7 +265,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         color: AppTheme.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(LucideIcons.layout, color: AppTheme.primary, size: 20),
+                      child: const Icon(LucideIcons.layout, color: AppTheme.primary, size: 20),
                     ),
                     const SizedBox(width: 16),
                     Text(
@@ -343,11 +343,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   Widget _buildMetricsPill(List<ZenBlock> blocks) {
-    int total = blocks.length;
-    int done = blocks.where((b) => (b.metadata['status'] ?? 'todo') == 'done').length;
-    int inProgress = blocks.where((b) => b.metadata['status'] == 'inProgress').length;
+    final int total = blocks.length;
+    final int done = blocks.where((b) => (b.metadata['status'] ?? 'todo') == 'done').length;
+    final int inProgress = blocks.where((b) => b.metadata['status'] == 'inProgress').length;
     
-    double progress = total == 0 ? 0 : (done / total);
+    final double progress = total == 0 ? 0 : (done / total);
 
     return Container(
       margin: const EdgeInsets.only(top: 16),
@@ -410,7 +410,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, s) => Center(child: Text('Could not load tasks.')),
+        error: (e, s) => const Center(child: Text('Could not load tasks.')),
       ),
     );
   }
@@ -456,7 +456,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         color: AppTheme.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(LucideIcons.pencil, color: AppTheme.primary, size: 20),
+                      child: const Icon(LucideIcons.pencil, color: AppTheme.primary, size: 20),
                     ),
                     const SizedBox(width: 16),
                     Text(

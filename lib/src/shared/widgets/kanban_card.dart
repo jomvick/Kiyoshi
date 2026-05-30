@@ -352,13 +352,13 @@ class _KanbanCardState extends State<KanbanCard>
                     ),
                   ),
                 if (widget.onDelete != null)
-                  PopupMenuItem(
+                  const PopupMenuItem(
                     value: 'delete',
                     child: Row(
                       children: [
-                        const Icon(LucideIcons.trash2, size: 14, color: Colors.redAccent),
-                        const SizedBox(width: 8),
-                        const Text('Delete', style: TextStyle(fontSize: 13, color: Colors.redAccent)),
+                        Icon(LucideIcons.trash2, size: 14, color: Colors.redAccent),
+                        SizedBox(width: 8),
+                        Text('Delete', style: TextStyle(fontSize: 13, color: Colors.redAccent)),
                       ],
                     ),
                   ),

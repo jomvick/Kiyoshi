@@ -11,10 +11,10 @@ void main() {
     late AppDestination selectedDestination;
 
     setUp(() {
-      testWorkspace = Workspace(id: '1', name: 'Studio');
+      testWorkspace = const Workspace(id: '1', name: 'Studio');
       testWorkspaces = [
-        Workspace(id: '1', name: 'Studio'),
-        Workspace(id: '2', name: 'Work'),
+        const Workspace(id: '1', name: 'Studio'),
+        const Workspace(id: '2', name: 'Work'),
       ];
       selectedDestination = AppDestination.dashboard;
     });

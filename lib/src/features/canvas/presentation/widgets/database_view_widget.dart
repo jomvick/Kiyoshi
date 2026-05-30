@@ -80,7 +80,7 @@ class _DatabaseViewWidgetState extends ConsumerState<DatabaseViewWidget> {
                         color: AppTheme.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(LucideIcons.penTool, color: AppTheme.primary, size: 20),
+                      child: const Icon(LucideIcons.penTool, color: AppTheme.primary, size: 20),
                     ),
                     const SizedBox(width: 16),
                     Text(
@@ -198,11 +198,11 @@ class _DatabaseViewWidgetState extends ConsumerState<DatabaseViewWidget> {
             ),
             child: Row(
               children: [
-                Icon(LucideIcons.layoutGrid, size: 16, color: AppTheme.primary),
+                const Icon(LucideIcons.layoutGrid, size: 16, color: AppTheme.primary),
                 const SizedBox(width: 8),
-                Text(
+                const Text(
                   'Board View',
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                 ),
                 const Spacer(),
                 if (widget.onDelete != null)

@@ -31,7 +31,7 @@ class SettingsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ZenEditorialHeader(
+            const ZenEditorialHeader(
               label: 'Configuration',
               title: 'Settings',
               subtitle: 'Customize your Zen Studio experience.',
@@ -258,7 +258,7 @@ Generated: ${DateTime.now().toIso8601String()}
                 final data = decoded as Map<String, dynamic>;
                 final prefsNotifier = ref.read(preferencesProvider.notifier);
                 if (data['preferences'] is Map) {
-                  final imported = AppPreferences().importFromJson(data['preferences'] as Map<String, dynamic>);
+                  final imported = const AppPreferences().importFromJson(data['preferences'] as Map<String, dynamic>);
                   await prefsNotifier.setSidebarExpanded(imported.sidebarExpanded);
                   await prefsNotifier.setZenModeEnabled(imported.zenModeEnabled);
                   await prefsNotifier.setDefaultDestination(imported.defaultDestination);
@@ -319,7 +319,7 @@ Generated: ${DateTime.now().toIso8601String()}
   }
 
   Widget _buildShortcutsSection(BuildContext context) {
-    return _SettingsSection(
+    return const _SettingsSection(
       title: 'KEYBOARD SHORTCUTS',
       icon: LucideIcons.keyboard,
       children: [
@@ -387,7 +387,7 @@ Generated: ${DateTime.now().toIso8601String()}
   }
 
   Widget _buildAboutSection(BuildContext context) {
-    return _SettingsSection(
+    return const _SettingsSection(
       title: 'ABOUT',
       icon: LucideIcons.info,
       children: [
@@ -654,7 +654,7 @@ class _SettingsDropdownTile extends StatelessWidget {
             child: DropdownButton<String>(
               value: value,
               underline: const SizedBox.shrink(),
-              icon: Icon(LucideIcons.chevronDown, size: 14, color: AppTheme.primary),
+              icon: const Icon(LucideIcons.chevronDown, size: 14, color: AppTheme.primary),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: AppTheme.primary,

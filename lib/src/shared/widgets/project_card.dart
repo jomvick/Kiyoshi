@@ -156,7 +156,7 @@ class _ProjectCardState extends State<ProjectCard> {
   Widget _buildTitle() {
     return Text(
       widget.project.title,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w700,
         color: AppTheme.onBackground,
