@@ -24,7 +24,7 @@ keywords:
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.1+1
 
 license: MIT
 
@@ -41,57 +41,31 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Google Fonts for Inter typography
-  google_fonts: 6.1.0
-
-  # Icons
-  lucide_icons_flutter: 3.1.14
-
-  # Animations
-  flutter_animate: 4.5.0
-  animations: 2.0.11
-
-  # State management
-  flutter_riverpod: 2.5.1
-
-  # Calendar
-  table_calendar: 3.1.2
-
-  # Internationalization for date formatting
-  intl: 0.19.0
-
-  # Database
-  drift: 2.14.1
-  sqlite3_flutter_libs: 0.5.18
-  path_provider: 2.1.2
-  path: 1.9.0
-
-  # Metadata fetching for links
-  metadata_fetch: 0.4.2
-  url_launcher: 6.2.5
-  uuid: 4.5.3
-
-  # HTTP for updates
-  http: 1.2.0
-
-  # Local storage
-  shared_preferences: 2.2.2
-  file_picker: 11.0.2
+  google_fonts: ^8.1.0
+  lucide_icons_flutter: ^3.1.14
+  flutter_animate: ^4.5.0
+  animations: ^2.0.11
+  flutter_riverpod: ^3.3.1
+  table_calendar: ^3.1.2
+  intl: ^0.20.2
+  drift: ^2.14.1
+  sqlite3_flutter_libs: ^0.6.0+eol
+  path_provider: ^2.1.2
+  path: ^1.9.1
+  metadata_fetch: ^0.4.2
+  url_launcher: ^6.2.5
+  uuid: ^4.5.3
+  http: ^1.6.0
+  shared_preferences: ^2.2.2
+  file_picker: ^11.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
-  flutter_lints: 6.0.0
-
-  # Database generation
-  drift_dev: 2.14.1
-  build_runner: 2.4.8
+  flutter_lints: ^6.0.0
+  drift_dev: ^2.14.1
+  build_runner: ^2.4.8
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

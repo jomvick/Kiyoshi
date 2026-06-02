@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-APP_VERSION="$(cat VERSION 2>/dev/null || echo "1.0.0")"
+APP_VERSION="$(cat VERSION 2>/dev/null || echo "1.0.1")"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "==> Building Kiyoshi RPM v$APP_VERSION..."

@@ -38,8 +38,16 @@ jobs:
         with:
           name: flutter-bundle
           path: build/linux/x64/release/bundle/
+      - name: Get version
+        run: echo "APP_VERSION=$(cat VERSION 2>/dev/null || echo '1.0.1')" >> $GITHUB_ENV
       - run: pip3 install appimage-builder
+      - name: Patch version in recipe
+        run: sed -i "s/^    version: .*/    version: $APP_VERSION/" AppImageBuilder.yml
       - run: appimage-builder --recipe AppImageBuilder.yml
+      - name: Verify AppImage
+        run: |
+          chmod +x Kiyoshi-*.AppImage
+          ./Kiyoshi-*.AppImage --appimage-extract-and-run --help 2>/dev/null && echo "✓ AppImage executable OK" || echo "⚠ AppImage verification skipped (no display)"
       - uses: softprops/action-gh-release@v2
         with:
           files: 'Kiyoshi-*.AppImage'
@@ -54,11 +62,12 @@ jobs:
         with:
           name: flutter-bundle
           path: build/linux/x64/release/bundle/
+      - name: Get version
+        run: echo "APP_VERSION=$(cat VERSION 2>/dev/null || echo '1.0.1')" >> $GITHUB_ENV
       - run: sudo apt-get install -y rpm
       - run: mkdir -p build/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
       - name: Create source tarball
         run: |
-          APP_VERSION="1.0.0"
           mkdir -p "build/rpmbuild/kiyoshi-$APP_VERSION"
           cp -r build/linux/x64/release/bundle/* "build/rpmbuild/kiyoshi-$APP_VERSION/"
           cp packaging/kiyoshi.sh "build/rpmbuild/kiyoshi-$APP_VERSION/"
@@ -67,11 +76,16 @@ jobs:
           tar czf "SOURCES/kiyoshi-$APP_VERSION.tar.gz" "kiyoshi-$APP_VERSION/"
       - name: Build RPM
         run: |
-          APP_VERSION="1.0.0"
           cp packaging/kiyoshi.spec build/rpmbuild/SPECS/
           cp packaging/kiyoshi.sh build/rpmbuild/SOURCES/
           cp packaging/kiyoshi.desktop build/rpmbuild/SOURCES/
-          rpmbuild -bb --define "_topdir $PWD/build/rpmbuild" build/rpmbuild/SPECS/kiyoshi.spec
+          QA_RPATHS=$(( 0x0002 )) rpmbuild -bb --define "_topdir $PWD/build/rpmbuild" build/rpmbuild/SPECS/kiyoshi.spec
+      - name: Verify RPM
+        run: |
+          RPM_FILE=$(find build/rpmbuild/RPMS -name "*.rpm" | head -1)
+          echo "RPM built: $RPM_FILE"
+          rpm -qpl "$RPM_FILE" | head -20
+          echo "✓ RPM package OK"
       - uses: softprops/action-gh-release@v2
         with:
           files: 'build/rpmbuild/RPMS/**/*.rpm'

@@ -22,19 +22,12 @@ chmod +x build_appimage.sh
 ./build_appimage.sh
 ```
 
-Cela crée: `Kiyoshi-1.0.0-linux-x86_64.AppImage`
+Cela crée: `Kiyoshi-1.0.1-linux-x86_64.AppImage`
 
-## Usage
+chmod +x Kiyoshi-1.0.1-linux-x86_64.AppImage
+./Kiyoshi-1.0.1-linux-x86_64.AppImage
 
-```bash
-# Rendre exécutable
-chmod +x Kiyoshi-1.0.0-linux-x86_64.AppImage
-
-# Lancer
-./Kiyoshi-1.0.0-linux-x86_64.AppImage
-
-# Ou installer (Optionnel)
-sudo cp Kiyoshi-1.0.0-linux-x86_64.AppImage /opt/kiyoshi.AppImage
+sudo cp Kiyoshi-1.0.1-linux-x86_64.AppImage /opt/kiyoshi.AppImage
 sudo ln -s /opt/kiyoshi.AppImage /usr/local/bin/kiyoshi
 kiyoshi
 ```

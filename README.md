@@ -3,7 +3,7 @@
 A minimalist glassmorphic Kanban workspace manager with a sophisticated **Zen Design System** aesthetic. Built with Flutter for desktop (Linux, macOS, Windows).
 
 ![Platform](https://img.shields.io/badge/Platform-Flutter%20Desktop-blue)
-![Version](https://img.shields.io/badge/Version-1.0.0-green)
+![Version](https://img.shields.io/badge/Version-1.0.1-green)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![AppImage](https://img.shields.io/badge/AppImage-ready-blue)
 ![RPM](https://img.shields.io/badge/RPM-ready-blue)
@@ -142,7 +142,7 @@ chmod +x Kiyoshi.AppImage
 
 ```bash
 # Télécharger et installer
-sudo dnf install "https://github.com/jomvick/Kiyoshi/releases/latest/download/kiyoshi-1.0.0-1.x86_64.rpm"
+sudo dnf install "https://github.com/jomvick/Kiyoshi/releases/latest/download/kiyoshi-1.0.1-1.x86_64.rpm"
 # Lancer
 kiyoshi
 ```
@@ -154,7 +154,7 @@ pip3 install appimage-builder
 dart run build_runner build --delete-conflicting-outputs
 flutter build linux --release
 ./build_appimage.sh
-# Output: Kiyoshi-1.0.0-x86_64.AppImage
+# Output: Kiyoshi-1.0.1-x86_64.AppImage
 ```
 
 ### Build RPM from Source
@@ -163,7 +163,7 @@ flutter build linux --release
 dart run build_runner build --delete-conflicting-outputs
 flutter build linux --release
 ./build_rpm.sh
-# Output: build/kiyoshi-1.0.0-1.x86_64.rpm
+# Output: build/kiyoshi-1.0.1-1.x86_64.rpm
 ```
 
 ### Build from Source (raw binary)
@@ -229,7 +229,7 @@ chmod +x ~/Applications/Kiyoshi.AppImage
 
 **RPM :**
 ```bash
-sudo dnf upgrade "https://github.com/jomvick/Kiyoshi/releases/latest/download/kiyoshi-1.0.0-1.x86_64.rpm"
+sudo dnf upgrade "https://github.com/jomvick/Kiyoshi/releases/latest/download/kiyoshi-1.0.1-1.x86_64.rpm"
 ```
 
 ### Publier une mise à jour (développeur)

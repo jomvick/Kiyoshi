@@ -4,7 +4,7 @@
 
 **Kiyoshi** est une application de productivité desktop Flutter avec un design "glassmorphic zen" unique. Elle combine gestion de tâches Kanban, blocs atomiques, calendrier et analytics dans un environnement minimaliste inspiré de l'esthétique japonaise.
 
-**Version** : 1.0.0+1  
+**Version** : 1.0.1+1  
 **Stack** : Flutter 3.11+ / Dart 3.11+ / Drift (SQLite) / Riverpod
 
 ---

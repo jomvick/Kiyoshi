@@ -1,5 +1,5 @@
 %global appname kiyoshi
-%global appver  1.0.0
+%global appver  1.0.1
 %global debug_package %{nil}
 
 Name:          %{appname}
@@ -58,5 +58,10 @@ update-desktop-database &>/dev/null || :
 update-desktop-database &>/dev/null || :
 
 %changelog
+* Tue Jun 02 2026 jomvick <jomvick@users.noreply.github.com> - 1.0.1-1
+- Fixed AppImage build scripts (merge conflicts resolved, icon paths fixed)
+- Added automatic version detection from VERSION file
+- Improved CI with build verification steps
+
 * Tue May 19 2026 jomvick <jomvick@users.noreply.github.com> - 1.0.0-1
 - Initial RPM release of Kiyoshi
