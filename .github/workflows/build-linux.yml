@@ -42,7 +42,8 @@ jobs:
         run: echo "APP_VERSION=$(cat VERSION 2>/dev/null || echo '1.0.1')" >> $GITHUB_ENV
       - run: pip3 install appimage-builder
       - name: Patch version in recipe
-        run: sed -i "s/^    version: .*/    version: $APP_VERSION/" AppImageBuilder.yml
+        run: |
+          sed -i "s/^    version: .*/    version: $APP_VERSION/" AppImageBuilder.yml
       - run: appimage-builder --recipe AppImageBuilder.yml
       - name: Verify AppImage
         run: |
