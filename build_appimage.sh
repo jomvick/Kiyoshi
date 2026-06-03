@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+# Export APPIMAGE_EXTRACT_AND_RUN=1 to run appimagetool in environments without FUSE (like Docker or CI)
+export APPIMAGE_EXTRACT_AND_RUN=1
+
 APPIMAGE_VERSION="$(cat VERSION 2>/dev/null || echo "1.0.1")"
 ARCH="x86_64"
 
@@ -26,27 +29,7 @@ else
     APPIMAGETOOL="appimagetool"
 fi
 
-# Try appimage-builder first (requires dpkg-deb for Debian-based deps)
-if command -v appimage-builder &> /dev/null && command -v dpkg-deb &> /dev/null; then
-    echo "==> Using appimage-builder..."
-    appimage-builder --recipe AppImageBuilder.yml
-    echo ""
-    echo "✓ AppImage created!"
-    exit 0
-fi
-
-if command -v appimage-builder &> /dev/null && ! command -v dpkg-deb &> /dev/null; then
-    echo "==> dpkg-deb not found. appimage-builder needs it for Debian deps."
-    echo "  Attempting to install dpkg..."
-    DOWNLOAD_OK=false
-    if command -v dnf &> /dev/null; then
-        dnf download dpkg --destdir=/tmp 2>/dev/null && DOWNLOAD_OK=true
-    fi
-    if [ "$DOWNLOAD_OK" = true ]; then
-        rpm -i --nodeps /tmp/dpkg-*.rpm 2>/dev/null && echo "  dpkg installed successfully." && appimage-builder --recipe AppImageBuilder.yml && echo "" && echo "✓ AppImage created!" && exit 0
-    fi
-    echo "  Could not install dpkg. Falling back to appimagetool method."
-fi
+# Create AppDir manually using appimagetool (more reliable and portable than appimage-builder)
 
 # Create AppDir manually
 echo "==> Creating AppDir..."

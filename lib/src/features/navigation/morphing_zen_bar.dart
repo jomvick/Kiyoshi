@@ -52,7 +52,7 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
   }
 
   @override
-  void _onFocusChanged() {
+  void onFocusChanged() {
     if (!mounted) return;
     setState(() {
       isFocused = focusNode.hasFocus;
@@ -113,11 +113,7 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
         if (showSlashMenu && _shouldBeExpanded)
           ZenBarSlashMenu(commands: slashCommands, onCommandSelected: onSlashCommandSelected),
         _buildPrismaticBar(),
-        if (_shouldBeExpanded && !isFocused && controller.text.isEmpty)
-          Padding(
-            padding: const EdgeInsets.only(top: 20),
-            child: ZenBarSuggestiveChips(onChipTap: onChipTap),
-          ),
+        
       ],
     );
   }

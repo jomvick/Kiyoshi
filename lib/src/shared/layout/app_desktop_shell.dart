@@ -5,8 +5,7 @@ import 'package:kiyoshi/src/features/projects/domain/entities/workspace.dart';
 import 'package:kiyoshi/src/features/projects/domain/entities/project.dart';
 import 'package:kiyoshi/src/core/navigation/app_destination.dart';
 import 'package:kiyoshi/src/core/theme/app_theme.dart';
-import 'package:kiyoshi/src/core/providers/zen_mode_provider.dart';
-import 'package:kiyoshi/src/core/providers/preferences_provider.dart' show AppPreferences;
+import 'package:kiyoshi/src/core/providers/preferences_provider.dart';
 import 'package:kiyoshi/src/core/providers/database_provider.dart';
 import 'package:kiyoshi/src/features/canvas/application/zen_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,6 +38,7 @@ class AppDesktopShell extends ConsumerStatefulWidget {
 
 class _AppDesktopShellState extends ConsumerState<AppDesktopShell> {
   final FocusNode _quickEntryFocusNode = FocusNode();
+  static const double compactWidth = 76.0;
 
   @override
   void dispose() {
@@ -48,8 +48,8 @@ class _AppDesktopShellState extends ConsumerState<AppDesktopShell> {
 
   @override
   Widget build(BuildContext context) {
-    final isZenMode = ref.watch(zenModeProvider);
     final prefs = ref.watch(preferencesProvider);
+    final isZenMode = prefs.zenModeEnabled;
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundColor,
@@ -85,15 +85,17 @@ class _AppDesktopShellState extends ConsumerState<AppDesktopShell> {
       builder: (context, constraints) {
         final screenWidth = constraints.maxWidth;
         final isNarrow = screenWidth < 600;
-        final isMedium = screenWidth < 900;
 
-        final sidebarWidth = isZenMode 
-            ? 0.0 
-            : (isNarrow ? 0.0 : (isMedium ? 60.0 : (prefs.sidebarExpanded ? prefs.sidebarWidth : 0.0)));
+        final sidebarWidth = isZenMode
+            ? 0.0
+            : (isNarrow
+                ? 0.0
+                : (prefs.sidebarExpanded ? prefs.sidebarWidth : compactWidth));
 
         return Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildSidebarSection(isNarrow, isMedium, sidebarWidth, prefs),
+            _buildSidebarSection(isNarrow, sidebarWidth, prefs),
             _buildContentSection(isZenMode),
           ],
         );
@@ -101,29 +103,21 @@ class _AppDesktopShellState extends ConsumerState<AppDesktopShell> {
     );
   }
 
-  Widget _buildSidebarSection(bool isNarrow, bool isMedium, double sidebarWidth, AppPreferences prefs) {
+  Widget _buildSidebarSection(bool isNarrow, double sidebarWidth, AppPreferences prefs) {
     return AnimatedContainer(
       duration: AppTheme.animMedium,
       curve: Curves.easeOutCubic,
       width: sidebarWidth,
       child: sidebarWidth > 0
-          ? SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const NeverScrollableScrollPhysics(),
-              child: SizedBox(
-                width: isMedium ? 60 : prefs.sidebarWidth,
-                child: isMedium
-                    ? _buildCompactSidebar()
-                    : Sidebar(
-                        selectedWorkspace: widget.selectedWorkspace,
-                        workspaces: widget.workspaces,
-                        onWorkspaceSelected: widget.onWorkspaceSelected,
-                        onCreateWorkspace: widget.onCreateWorkspace,
-                        selectedDestination: widget.selectedDestination,
-                        onDestinationSelected: widget.onDestinationSelected,
-                        showPrismaticBorders: prefs.prismaticBorders,
-                      ),
-              ),
+          ? Sidebar(
+              isExpanded: prefs.sidebarExpanded,
+              selectedWorkspace: widget.selectedWorkspace,
+              workspaces: widget.workspaces,
+              onWorkspaceSelected: widget.onWorkspaceSelected,
+              onCreateWorkspace: widget.onCreateWorkspace,
+              selectedDestination: widget.selectedDestination,
+              onDestinationSelected: widget.onDestinationSelected,
+              showPrismaticBorders: prefs.prismaticBorders,
             )
           : const SizedBox.shrink(),
     );
@@ -236,49 +230,7 @@ class _AppDesktopShellState extends ConsumerState<AppDesktopShell> {
     );
   }
 
-  Widget _buildCompactSidebar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceMedium),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLow.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-      ),
-      child: Column(
-        children: [
-          ...AppDestination.values.map((dest) => _buildCompactNavItem(dest)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCompactNavItem(AppDestination dest) {
-    final isSelected = widget.selectedDestination == dest;
-    return Tooltip(
-      message: dest.label,
-      child: InkWell(
-        onTap: () => widget.onDestinationSelected(dest),
-        borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        child: Container(
-          width: 44,
-          height: 44,
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: isSelected 
-                ? AppTheme.primary.withValues(alpha: 0.15)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-          ),
-          child: Icon(
-            dest.icon,
-            size: 20,
-            color: isSelected 
-                ? AppTheme.primary 
-                : AppTheme.onSurfaceVariant,
-          ),
-        ),
-      ),
-    );
-  }
+  // Compact sidebar methods removed in favor of unified Sidebar widget
 
 }
 

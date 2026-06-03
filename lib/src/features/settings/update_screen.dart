@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:kiyoshi/src/core/services/update_service.dart';
 import 'package:kiyoshi/src/core/theme/app_theme.dart';
 import 'package:kiyoshi/src/shared/widgets/zen_glass_card.dart';

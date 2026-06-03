@@ -5,6 +5,8 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:kiyoshi/src/core/theme/app_theme.dart';
 import 'package:kiyoshi/src/core/providers/database_provider.dart';
 import 'package:kiyoshi/src/features/canvas/domain/entities/zen_block.dart';
+import 'package:kiyoshi/src/features/canvas/application/zen_parser.dart';
+import 'package:kiyoshi/src/features/notes/note_detail_screen.dart';
 import 'package:kiyoshi/src/shared/widgets/zen_glass_card.dart';
 import 'package:intl/intl.dart';
 
@@ -18,11 +20,38 @@ class NotesScreen extends ConsumerStatefulWidget {
 class _NotesScreenState extends ConsumerState<NotesScreen> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  final TextEditingController _noteInputController = TextEditingController();
 
   @override
   void dispose() {
     _searchController.dispose();
+    _noteInputController.dispose();
     super.dispose();
+  }
+
+  Future<void> _createNote(String content) async {
+    if (content.trim().isEmpty) return;
+    final parsed = ParsedBlock(
+      type: 'text',
+      content: content.trim(),
+      metadata: {},
+    );
+    try {
+      await ref.read(blockServiceProvider).addBlock('global', parsed);
+      _noteInputController.clear();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Note created'),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            backgroundColor: AppTheme.primary,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Failed to create note: $e');
+    }
   }
 
   @override
@@ -36,6 +65,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
         children: [
           _buildHeader(context),
           _buildSearchBar(),
+          _buildNoteInput(),
           Expanded(
             child: blocksAsync.when(
               data: (blocks) {
@@ -158,30 +188,61 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     ).animate().fadeIn(delay: 100.ms, duration: 300.ms);
   }
 
+  Widget _buildNoteInput() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          AppTheme.frameMargin, AppTheme.spaceMedium, AppTheme.frameMargin, 0),
+      child: ZenGlassCard(
+        radius: 18,
+        opacity: 0.5,
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+        child: Row(
+          children: [
+            Icon(LucideIcons.feather,
+                size: 18,
+                color: AppTheme.primary.withValues(alpha: 0.6)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                controller: _noteInputController,
+                onSubmitted: _createNote,
+                style: Theme.of(context).textTheme.bodyMedium,
+                decoration: InputDecoration(
+                  hintText: 'Write a quick note…',
+                  hintStyle: TextStyle(
+                      color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4)),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+            GestureDetector(
+              onTap: () => _createNote(_noteInputController.text),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppTheme.primary,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(LucideIcons.arrowUp,
+                    size: 16, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ).animate().fadeIn(delay: 100.ms, duration: 300.ms);
+  }
+
   Widget _buildNotesList(List<ZenBlock> notes) {
     return Padding(
       padding: const EdgeInsets.all(AppTheme.frameMargin),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // Masonry-style 2 or 3 column grid depending on width
-          final crossAxisCount = constraints.maxWidth > 1000 ? 3 : 2;
-          return CustomScrollView(
-            slivers: [
-              SliverGrid(
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: crossAxisCount,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1.6,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (ctx, i) => _buildNoteCard(notes[i], i),
-                  childCount: notes.length,
-                ),
-              ),
-            ],
-          );
-        },
+      child: ListView.separated(
+        itemCount: notes.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 12),
+        itemBuilder: (ctx, i) => _buildNoteCard(notes[i], i),
       ),
     );
   }
@@ -191,47 +252,41 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
       DateTime.fromMillisecondsSinceEpoch(note.position.toInt() * 1000),
     );
 
-    return ZenGlassCard(
-      radius: 20,
-      opacity: 0.45,
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Note content
-          Expanded(
-            child: Text(
+    return GestureDetector(
+      onTap: () => _openNoteDetail(note),
+      child: ZenGlassCard(
+        radius: 20,
+        opacity: 0.45,
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
               note.content,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppTheme.onBackground.withValues(alpha: 0.85),
-                    height: 1.6,
+                    height: 1.7,
                   ),
-              overflow: TextOverflow.fade,
             ),
-          ),
-          const SizedBox(height: 12),
-          // Footer row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                date,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppTheme.onSurfaceVariant.withValues(alpha: 0.45),
-                    ),
-              ),
-              Row(
-                children: [
-                  _buildIconButton(LucideIcons.edit2, () => _onEditNote(note)),
-                  const SizedBox(width: 8),
-                  _buildIconButton(
-                      LucideIcons.trash2, () => _onDeleteNote(note),
-                      danger: true),
-                ],
-              ),
-            ],
-          ),
-        ],
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  date,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppTheme.onSurfaceVariant.withValues(alpha: 0.45),
+                      ),
+                ),
+                _buildIconButton(
+                    LucideIcons.trash2, () => _onDeleteNote(note),
+                    danger: true),
+              ],
+            ),
+          ],
+        ),
       ),
     )
         .animate(delay: Duration(milliseconds: 40 * index))
@@ -294,92 +349,14 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
     ).animate().fadeIn(duration: 500.ms);
   }
 
-  void _onEditNote(ZenBlock note) {
-    final controller = TextEditingController(text: note.content);
-    showDialog(
-      context: context,
-      builder: (ctx) => Dialog(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        child: ZenGlassCard(
-          radius: 28,
-          padding: const EdgeInsets.all(28),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 480),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(LucideIcons.edit2,
-                          color: AppTheme.primary, size: 18),
-                    ),
-                    const SizedBox(width: 14),
-                    Text('Edit Note',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            )),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                TextField(
-                  controller: controller,
-                  autofocus: true,
-                  maxLines: 5,
-                  cursorColor: AppTheme.primary,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  decoration: InputDecoration(
-                    hintText: 'Your note…',
-                    filled: true,
-                    fillColor: Colors.white.withValues(alpha: 0.5),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: const EdgeInsets.all(16),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Cancel'),
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton(
-                      onPressed: () async {
-                        if (controller.text.trim().isNotEmpty) {
-                          final updated = note.copyWith(
-                              content: controller.text.trim());
-                          await ref
-                              .read(blockServiceProvider)
-                              .updateBlock(updated);
-                          if (mounted) Navigator.of(context).pop();
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primary,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: const Text('Save'),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
+  void _openNoteDetail(ZenBlock note) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            NoteDetailScreen(note: note),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            FadeTransition(opacity: animation, child: child),
+        transitionDuration: const Duration(milliseconds: 300),
       ),
     );
   }

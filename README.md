@@ -119,15 +119,22 @@ lib/
 
 ## Installation
 
-Deux formats sont disponibles à chaque release :
+Kiyoshi est disponible en téléchargement pour Linux, Windows et macOS depuis la page des [Releases GitHub](https://github.com/jomvick/Kiyoshi/releases).
 
-| Format | Description |
-|--------|-------------|
-| `.AppImage` | Portable, fonctionne sur toutes les distros — **recommandé** |
-| `.rpm` | Package natif Fedora/RHEL — installation system-wide |
+### Formats pris en charge
 
-### AppImage (portable — toutes distros)
+| Plateforme | Format de fichier | Description |
+|------------|-------------------|-------------|
+| **Linux** | `.AppImage` | Portable, fonctionne sur toutes les distributions (Recommandé) |
+| **Linux** | `.rpm` | Paquet natif pour Fedora, RedHat, CentOS (Installation système) |
+| **Windows** | `.zip` | Archive portable, à décompresser et lancer (Sans installation) |
+| **macOS** | `.dmg` | Image disque classique, binaire universel (Apple Silicon et Intel) |
 
+---
+
+### 🐧 Linux
+
+#### Option 1 : AppImage (portable — toutes distributions)
 ```bash
 # Télécharger la dernière version
 LATEST=$(curl -s https://api.github.com/repos/jomvick/Kiyoshi/releases/latest | \
@@ -138,117 +145,131 @@ chmod +x Kiyoshi.AppImage
 ./Kiyoshi.AppImage
 ```
 
-### RPM (Fedora / RHEL)
-
+#### Option 2 : RPM (Fedora / RHEL / CentOS)
 ```bash
-# Télécharger et installer
+# Installer le paquet RPM natif
 sudo dnf install "https://github.com/jomvick/Kiyoshi/releases/latest/download/kiyoshi-1.0.1-1.x86_64.rpm"
-# Lancer
+
+# Lancer l'application
 kiyoshi
 ```
 
-### Build AppImage from Source
+---
 
+### 🪟 Windows
+
+1. Téléchargez le fichier ZIP `Kiyoshi-1.0.1-windows-x64.zip` depuis les Releases.
+2. Extrayez l'archive dans le dossier de votre choix (ex: `C:\Program Files\Kiyoshi` ou votre dossier utilisateur).
+3. Double-cliquez sur `kiyoshi.exe` pour lancer l'application.
+
+> [!NOTE]
+> **Windows SmartScreen** : Lors du premier lancement, Windows peut afficher un avertissement de sécurité car l'exécutable n'est pas signé numériquement. Cliquez sur **Informations complémentaires** puis sur **Exécuter quand même**.
+
+---
+
+### 🍏 macOS
+
+1. Téléchargez le fichier DMG `Kiyoshi-1.0.1-macos.dmg`.
+2. Ouvrez le fichier DMG et glissez-déposez **Kiyoshi** dans votre dossier **Applications**.
+3. Lancez l'application depuis votre Launchpad ou votre dossier Applications.
+
+> [!IMPORTANT]
+> **Contourner macOS Gatekeeper** : L'application n'étant pas signée avec un certificat de développeur Apple payant, macOS bloquera le premier lancement avec un message d'erreur.
+> * **Méthode graphique** : Faites un **clic droit** (ou `Ctrl+clic`) sur l'icône de l'application Kiyoshi, sélectionnez **Ouvrir**, puis confirmez l'ouverture dans la boîte de dialogue.
+> * **Méthode Terminal** : Si le blocage persiste, exécutez la commande suivante dans le Terminal pour lever la quarantaine :
+>   ```bash
+>   xattr -d com.apple.quarantine /Applications/Kiyoshi.app
+>   ```
+
+---
+
+## Compilation depuis les sources
+
+Pour compiler Kiyoshi vous-même, vous devez avoir installé le **SDK Flutter** ainsi que les outils de build de votre plateforme.
+
+### Prérequis communs
+Avant de compiler, exécutez la génération de code Drift :
 ```bash
-pip3 install appimage-builder
-dart run build_runner build --delete-conflicting-outputs
-flutter build linux --release
-./build_appimage.sh
-# Output: Kiyoshi-1.0.1-x86_64.AppImage
-```
-
-### Build RPM from Source
-
-```bash
-dart run build_runner build --delete-conflicting-outputs
-flutter build linux --release
-./build_rpm.sh
-# Output: build/kiyoshi-1.0.1-1.x86_64.rpm
-```
-
-### Build from Source (raw binary)
-
-```bash
-git clone https://github.com/jomvick/Kiyoshi.git
-cd Kiyoshi
 flutter pub get
-flutter build linux --release
-./build/linux/x64/release/bundle/kiyoshi
+dart run build_runner build --delete-conflicting-outputs
 ```
 
-> **Note:** Toutes les commandes doivent être exécutées depuis la racine du projet (`Kiyoshi/`).  
-> Le SDK Flutter est requis pour toute compilation. Consultez [docs.flutter.dev](https://docs.flutter.dev/get-started/install/linux) pour l'installation.
-
-## Keyboard Shortcuts
-
-| Shortcut | Action |
-|----------|--------|
-| `Cmd+K` | Open Command Palette |
-| `Cmd+F` | Toggle Focus / Zen Mode |
-| `/` | Begin slash command in Quick Entry |
-
-## Testing
-
+### 🐧 Linux
 ```bash
-flutter test
-flutter test test/widget_test.dart
+# Installer les dépendances système de build
+sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libblkid-dev libjsoncpp-dev libsecret-1-dev
+
+# Compiler le binaire
+flutter build linux --release
+
+# Optionnel : Créer l'AppImage
+./build_appimage.sh
+
+# Optionnel : Créer le paquet RPM
+./build_rpm.sh
 ```
+
+### 🪟 Windows
+```bash
+# Compiler l'application pour Windows
+flutter build windows --release
+
+# Les fichiers compilés se trouvent dans : build\windows\x64\runner\Release\
+```
+
+### 🍏 macOS
+```bash
+# Compiler l'application pour macOS (produit un binaire universel x64/arm64)
+flutter build macos --release
+
+# Optionnel : Créer l'image disque DMG
+hdiutil create -volname "Kiyoshi" -srcfolder "build/macos/Build/Products/Release/kiyoshi.app" -ov -format UDZO "Kiyoshi-macos.dmg"
+```
+
+---
+
+## Raccourcis Clavier
+
+| Raccourci | Action |
+|-----------|--------|
+| `Cmd+K` / `Ctrl+K` | Ouvrir la palette de commandes |
+| `Cmd+F` / `Ctrl+F` | Activer/Désactiver le mode Zen / Focus |
+| `/` | Démarrer une commande slash dans la barre de saisie rapide |
 
 ## Configuration
 
-Preferences are persisted via `shared_preferences` and exposed through Riverpod:
+Les préférences utilisateur sont persistées localement et modifiables via l'onglet Settings.
 
-| Setting | Type | Default | Description |
-|---------|------|---------|-------------|
-| Sidebar Expanded | bool | true | Show/hide the full sidebar |
-| Sidebar Width | double | 280px | Adjustable sidebar width (200-400px) |
-| Dark Mode | bool | false | Switch between light/dark themes |
-| Prismatic Borders | bool | true | Animated rainbow borders on focus |
-| Zen Mode Default | bool | false | Start app in focus mode |
-| Notifications | bool | true | Show snackbar feedback |
-| Default Page | string | projects | Startup destination |
-| Auto-save | bool | true | Save changes automatically |
-| Kanban Column Width | double | 300px | Default column width (250-500px) |
-| Show Grid | bool | true | Display canvas grid lines |
-| Snap to Grid | bool | true | Align blocks to grid |
+---
 
-## Auto-Update
+## 🚀 Publier une mise à jour (Développeurs)
 
-Kiyoshi checks for updates automatically on startup via the GitHub Releases API. When a new version is available, a notification appears in the app.
+Le processus de release est entièrement automatisé à l'aide de GitHub Actions. Dès qu'un tag de version est poussé, le workflow compile et package l'application pour tous les OS.
 
-### Mise à jour manuelle
+1. Mettez à jour le fichier `VERSION` (ex: `1.0.2`).
+2. Mettez à jour la version dans le fichier `pubspec.yaml` (ex: `version: 1.0.2+2`).
+3. Créez un commit et un tag git :
+   ```bash
+   git add .
+   git commit -m "release: v1.0.2"
+   git tag v1.0.2
+   ```
+4. Poussez le commit et le tag sur GitHub :
+   ```bash
+   git push origin master --tags
+   ```
 
-**AppImage :**
-```bash
-LATEST=$(curl -s https://api.github.com/repos/jomvick/Kiyoshi/releases/latest | \
-  grep -oP '"browser_download_url":\s*"\K[^"]+(?=")' | \
-  grep AppImage | head -1)
-curl -L "$LATEST" -o ~/Applications/Kiyoshi.AppImage
-chmod +x ~/Applications/Kiyoshi.AppImage
-```
-
-**RPM :**
-```bash
-sudo dnf upgrade "https://github.com/jomvick/Kiyoshi/releases/latest/download/kiyoshi-1.0.1-1.x86_64.rpm"
-```
-
-### Publier une mise à jour (développeur)
-
-```bash
-echo "1.1.0" > VERSION
-# Éditer pubspec.yaml : version: 1.1.0+2
-git add .
-git commit -m "release: v1.1.0"
-git tag v1.1.0
-git push origin master --tags
-```
-
-GitHub Actions build et publie l'`.AppImage` et le `.rpm` automatiquement sur la Release.
+GitHub Actions prendra le relais pour :
+* Compiler pour Linux (génère `.AppImage` et `.rpm`).
+* Compiler pour Windows (génère `.zip`).
+* Compiler pour macOS (génère `.dmg` universel).
+* Créer une Release GitHub et y attacher automatiquement tous ces packages.
 
 ## License
 
-MIT — See [LICENSE](./LICENSE) for details.
+MIT — Voir [LICENSE](./LICENSE) pour plus de détails.
 
 ---
 
 Built with Flutter
+

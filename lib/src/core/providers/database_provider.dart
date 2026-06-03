@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:kiyoshi/src/core/database/database.dart';
 import 'package:kiyoshi/src/features/canvas/domain/entities/zen_block.dart';
 import 'package:kiyoshi/src/features/projects/domain/entities/workspace.dart';

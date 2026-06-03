@@ -5,8 +5,8 @@ import 'package:kiyoshi/src/core/theme/app_theme.dart';
 import 'package:kiyoshi/src/shared/layout/zen_studio_page_shell.dart';
 import 'package:kiyoshi/src/shared/widgets/glass_prism_panel.dart';
 import 'package:kiyoshi/src/features/zen/the_monolith_widget.dart';
-import 'package:kiyoshi/src/core/providers/zen_mode_provider.dart';
 import 'package:kiyoshi/src/core/providers/database_provider.dart';
+import 'package:kiyoshi/src/core/providers/preferences_provider.dart';
 import 'package:kiyoshi/src/features/canvas/domain/entities/zen_block.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -22,13 +22,13 @@ class _KiyoshiZenDashboardViewState extends ConsumerState<KiyoshiZenDashboardVie
   Widget build(BuildContext context) {
     final activitiesAsync = ref.watch(latestActivitiesProvider);
     final statsAsync = ref.watch(globalStatsProvider);
-    final isZenMode = ref.watch(zenModeProvider);
+    final isZenMode = ref.watch(preferencesProvider.select((p) => p.zenModeEnabled));
 
     if (isZenMode) {
       return TheMonolith(
         taskTitle: "Deep Focus Session",
         onComplete: () {
-          ref.read(zenModeProvider.notifier).state = false;
+          ref.read(preferencesProvider.notifier).setZenModeEnabled(false);
         },
       );
     }
@@ -132,7 +132,7 @@ class _KiyoshiZenDashboardViewState extends ConsumerState<KiyoshiZenDashboardVie
                   ),
                 ),
               ),
-              _ZenModeButton(onPressed: () => ref.read(zenModeProvider.notifier).state = true),
+              _ZenModeButton(onPressed: () => ref.read(preferencesProvider.notifier).setZenModeEnabled(true)),
             ],
           ),
         ],

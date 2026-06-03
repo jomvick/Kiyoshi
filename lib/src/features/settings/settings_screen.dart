@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kiyoshi/src/core/theme/app_theme.dart';
 import 'package:kiyoshi/src/core/providers/preferences_provider.dart';
-import 'package:kiyoshi/src/core/providers/zen_mode_provider.dart';
 import 'package:kiyoshi/src/core/navigation/app_destination.dart';
 import 'package:kiyoshi/src/shared/layout/zen_studio_page_shell.dart';
 import 'package:kiyoshi/src/shared/widgets/zen_editorial_header.dart';
@@ -63,19 +62,10 @@ class SettingsScreen extends ConsumerWidget {
       children: [
         _SettingsSwitchTile(
           icon: LucideIcons.layoutTemplate,
-          title: 'Sidebar Expanded',
+          title: 'Sidebar Extended',
           subtitle: 'Show full sidebar with labels',
           value: prefs.sidebarExpanded,
           onChanged: (v) => ref.read(preferencesProvider.notifier).setSidebarExpanded(v),
-        ),
-        _SettingsSliderTile(
-          icon: LucideIcons.moveHorizontal,
-          title: 'Sidebar Width',
-          subtitle: '${prefs.sidebarWidth.toInt()}px',
-          value: prefs.sidebarWidth,
-          min: 200,
-          max: 400,
-          onChanged: (v) => ref.read(preferencesProvider.notifier).setSidebarWidth(v),
         ),
         _SettingsSwitchTile(
           icon: LucideIcons.moon,
@@ -96,7 +86,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildBehaviorSection(BuildContext context, WidgetRef ref, AppPreferences prefs) {
-    final isZenMode = ref.watch(zenModeProvider);
+    final isZenMode = ref.watch(preferencesProvider.select((p) => p.zenModeEnabled));
 
     return _SettingsSection(
       title: 'BEHAVIOR',
@@ -109,7 +99,6 @@ class SettingsScreen extends ConsumerWidget {
           value: prefs.zenModeEnabled,
           onChanged: (v) {
             ref.read(preferencesProvider.notifier).setZenModeEnabled(v);
-            ref.read(zenModeProvider.notifier).state = v;
           },
         ),
         _SettingsSwitchTile(
@@ -118,7 +107,6 @@ class SettingsScreen extends ConsumerWidget {
           subtitle: isZenMode ? 'Minimal UI is on' : 'Full UI is visible',
           value: isZenMode,
           onChanged: (v) {
-            ref.read(zenModeProvider.notifier).state = v;
             ref.read(preferencesProvider.notifier).setZenModeEnabled(v);
           },
         ),

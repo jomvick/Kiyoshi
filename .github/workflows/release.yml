@@ -1,0 +1,164 @@
+name: Release Kiyoshi
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux:
+    name: Build Linux (AppImage & RPM)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config \
+            libgtk-3-dev liblzma-dev libblkid-dev libjsoncpp-dev \
+            libsecret-1-dev libstdc++-12-dev rpm
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Code Generation (Drift)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build Flutter Linux Release
+        run: |
+          flutter config --enable-linux-desktop
+          flutter build linux --release
+
+      - name: Build AppImage
+        run: |
+          chmod +x build_appimage.sh
+          ./build_appimage.sh
+
+      - name: Build RPM
+        run: |
+          chmod +x build_rpm.sh
+          ./build_rpm.sh
+
+      - name: Upload Linux Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-packages
+          path: |
+            Kiyoshi-*.AppImage
+            build/*.rpm
+          if-no-files-found: error
+
+  build-windows:
+    name: Build Windows (ZIP)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Code Generation (Drift)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build Flutter Windows Release
+        run: |
+          flutter config --enable-windows-desktop
+          flutter build windows --release
+
+      - name: Package Windows ZIP
+        shell: powershell
+        run: |
+          $version = Get-Content VERSION -ErrorAction SilentlyContinue
+          if (!$version) { $version = "1.0.1" }
+          $version = $version.Trim()
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "Kiyoshi-$version-windows-x64.zip"
+
+      - name: Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-package
+          path: Kiyoshi-*-windows-x64.zip
+          if-no-files-found: error
+
+  build-macos:
+    name: Build macOS (DMG)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Code Generation (Drift)
+        run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Build Flutter macOS Release
+        run: |
+          flutter config --enable-macos-desktop
+          flutter build macos --release
+
+      - name: Package macOS DMG
+        run: |
+          APP_VERSION=$(cat VERSION 2>/dev/null | xargs || echo '1.0.1')
+          hdiutil create -volname "Kiyoshi" -srcfolder "build/macos/Build/Products/Release/kiyoshi.app" -ov -format UDZO "Kiyoshi-$APP_VERSION-macos.dmg"
+
+      - name: Upload macOS Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-package
+          path: Kiyoshi-*-macos.dmg
+          if-no-files-found: error
+
+  publish:
+    name: Publish Github Release
+    needs: [build-linux, build-windows, build-macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Display Downloaded Files
+        run: ls -l dist/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/Kiyoshi-*.AppImage
+            dist/kiyoshi-*.rpm
+            dist/Kiyoshi-*.zip
+            dist/Kiyoshi-*.dmg
+          generate_release_notes: true
+          draft: false
+          prerelease: false

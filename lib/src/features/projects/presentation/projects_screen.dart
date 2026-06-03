@@ -29,7 +29,11 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
       actions: [
         IconButton(
           icon: const Icon(LucideIcons.plus),
-          onPressed: _showCreateProjectDialog,
+          onPressed: () {
+            if (_selectedWorkspace != null) {
+              _showCreateProjectDialog(workspace: _selectedWorkspace);
+            }
+          },
         ),
       ],
       child: workspacesAsync.when(
@@ -83,7 +87,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
           ),
           const SizedBox(height: 32),
           ElevatedButton.icon(
-            onPressed: _showCreateProjectDialog,
+            onPressed: _showCreateWorkspaceDialog,
             icon: const Icon(LucideIcons.plus, size: 18),
             label: const Text('CREATE WORKSPACE'),
           ),
@@ -230,6 +234,63 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
       builder: (context) => _CreateProjectDialog(
         workspaceId: workspaceId,
         workspace: workspace ?? _selectedWorkspace,
+      ),
+    );
+  }
+
+  void _showCreateWorkspaceDialog() {
+    final nameController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: 400,
+          padding: const EdgeInsets.all(AppTheme.spaceLarge),
+          decoration: AppTheme.glassPanel(radius: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('NEW WORKSPACE',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 2.0,
+                      )),
+              const SizedBox(height: AppTheme.spaceLarge),
+              TextField(
+                controller: nameController,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'Workspace Name',
+                  hintText: 'Enter workspace name',
+                ),
+              ),
+              const SizedBox(height: AppTheme.spaceLarge),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('CANCEL')),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if (nameController.text.trim().isEmpty) return;
+                      final repo = ref.read(projectRepositoryProvider);
+                      await repo.addWorkspace(Workspace(
+                        id: const Uuid().v4(),
+                        name: nameController.text.trim(),
+                      ));
+                      if (ctx.mounted) Navigator.pop(ctx);
+                    },
+                    child: const Text('CREATE'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

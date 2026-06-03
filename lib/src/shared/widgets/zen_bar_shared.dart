@@ -307,7 +307,7 @@ mixin ZenBarSharedState<T extends StatefulWidget> on State<T>, TickerProviderSta
     );
 
     controller.addListener(_onTextChanged);
-    focusNode.addListener(_onFocusChanged);
+    focusNode.addListener(onFocusChanged);
   }
 
   void disposeZenBar() {
@@ -326,7 +326,7 @@ mixin ZenBarSharedState<T extends StatefulWidget> on State<T>, TickerProviderSta
     });
   }
 
-  void _onFocusChanged();
+  void onFocusChanged();
 
   void onSlashCommandSelected(Map<String, dynamic> cmd) {
     setState(() {

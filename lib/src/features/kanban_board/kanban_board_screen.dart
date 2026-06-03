@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kiyoshi/src/features/projects/domain/entities/workspace.dart';
 import 'package:kiyoshi/src/core/navigation/app_destination.dart';
-import 'package:kiyoshi/src/core/providers/zen_mode_provider.dart';
 import 'package:kiyoshi/src/core/providers/database_provider.dart';
 import 'package:kiyoshi/src/core/providers/preferences_provider.dart';
 import 'package:kiyoshi/src/features/analytics/analytics_screen.dart';
@@ -112,8 +111,8 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
   }
 
   void _toggleFocusMode() {
-    final isZen = ref.read(zenModeProvider);
-    ref.read(zenModeProvider.notifier).state = !isZen;
+    final isZen = ref.read(preferencesProvider).zenModeEnabled;
+    ref.read(preferencesProvider.notifier).setZenModeEnabled(!isZen);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(isZen ? 'Exited focus mode' : 'Entered focus mode'),
