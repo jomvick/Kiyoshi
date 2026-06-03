@@ -147,8 +147,11 @@ chmod +x Kiyoshi.AppImage
 
 #### Option 2 : RPM (Fedora / RHEL / CentOS)
 ```bash
-# Installer le paquet RPM natif
-sudo dnf install "https://github.com/jomvick/Kiyoshi/releases/latest/download/kiyoshi-1.0.1-1.x86_64.rpm"
+# Télécharger et installer la dernière version
+LATEST_RPM=$(curl -s https://api.github.com/repos/jomvick/Kiyoshi/releases/latest | \
+  grep -oP '"browser_download_url":\s*"\K[^"]+(?=")' | \
+  grep '\.rpm' | head -1)
+sudo dnf install "$LATEST_RPM"
 
 # Lancer l'application
 kiyoshi
