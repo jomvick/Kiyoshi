@@ -37,6 +37,9 @@ cp "$SCRIPT_DIR/packaging/kiyoshi.sh" "$RPMBUILD_DIR/SOURCES/"
 cp "$SCRIPT_DIR/packaging/kiyoshi.desktop" "$RPMBUILD_DIR/SOURCES/"
 cp "$SCRIPT_DIR/packaging/kiyoshi.spec" "$RPMBUILD_DIR/SPECS/"
 
+# Dynamically update the version in the spec file to match APP_VERSION
+sed -i "s/^%global appver  .*/%global appver  $APP_VERSION/" "$RPMBUILD_DIR/SPECS/kiyoshi.spec"
+
 # Step 5: Build RPM (allow Flutter's build-path RPATHs in .so files)
 echo "==> Building RPM..."
 QA_RPATHS=$(( 0x0002 )) rpmbuild -bb \
