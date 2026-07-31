@@ -52,10 +52,25 @@ static void my_application_activate(GApplication* application) {
     gtk_window_set_title(window, "kiyoshi");
   }
 
-  // Set application window icon for desktop taskbar and window frame
-  g_autoptr(GError) icon_error = nullptr;
-  if (!gtk_window_set_icon_from_file(window, "assets/icons/kiyoshi.png", &icon_error)) {
-    gtk_window_set_icon_from_file(window, "packaging/kiyoshi.png", nullptr);
+  // Set application window icon for desktop taskbar and window frame (Release & Debug)
+  g_autofree gchar* exe_path = g_file_read_link("/proc/self/exe", nullptr);
+  if (exe_path) {
+    g_autofree gchar* exe_dir = g_path_get_dirname(exe_path);
+    g_autofree gchar* bundle_icon = g_build_filename(exe_dir, "data", "flutter_assets", "assets", "icons", "kiyoshi.png", nullptr);
+    if (!gtk_window_set_icon_from_file(window, bundle_icon, nullptr)) {
+      g_autofree gchar* appdir_icon = g_build_filename(exe_dir, "kiyoshi.png", nullptr);
+      gtk_window_set_icon_from_file(window, appdir_icon, nullptr);
+    }
+  }
+
+  if (gtk_window_get_icon(window) == nullptr) {
+    if (!gtk_window_set_icon_from_file(window, "data/flutter_assets/assets/icons/kiyoshi.png", nullptr)) {
+      if (!gtk_window_set_icon_from_file(window, "assets/icons/kiyoshi.png", nullptr)) {
+        if (!gtk_window_set_icon_from_file(window, "/usr/share/pixmaps/kiyoshi.png", nullptr)) {
+          gtk_window_set_icon_name(window, "kiyoshi");
+        }
+      }
+    }
   }
 
   gtk_window_set_default_size(window, 1280, 720);

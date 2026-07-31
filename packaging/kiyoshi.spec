@@ -12,6 +12,7 @@ URL:           https://github.com/jomvick/Kiyoshi
 Source0:       %{name}-%{version}.tar.gz
 Source1:       %{name}.sh
 Source2:       %{name}.desktop
+Source3:       %{name}.png
 
 Requires:      gtk3
 Requires:      mesa-libEGL
@@ -37,12 +38,16 @@ install -d %{buildroot}%{_datadir}/%{appname}/lib
 install -d %{buildroot}%{_datadir}/%{appname}/data
 install -d %{buildroot}%{_bindir}
 install -d %{buildroot}%{_datadir}/applications
+install -d %{buildroot}%{_datadir}/pixmaps
+install -d %{buildroot}%{_datadir}/icons/hicolor/512x512/apps
 
 install -m 0755 %{appname} %{buildroot}%{_datadir}/%{appname}/%{appname}
 install -m 0644 lib/*.so %{buildroot}%{_datadir}/%{appname}/lib/
 cp -r data/* %{buildroot}%{_datadir}/%{appname}/data/
 install -m 0755 %{_sourcedir}/%{appname}.sh %{buildroot}%{_bindir}/%{appname}
 install -m 0644 %{_sourcedir}/%{appname}.desktop %{buildroot}%{_datadir}/applications/%{appname}.desktop
+install -m 0644 %{_sourcedir}/%{appname}.png %{buildroot}%{_datadir}/pixmaps/%{appname}.png
+install -m 0644 %{_sourcedir}/%{appname}.png %{buildroot}%{_datadir}/icons/hicolor/512x512/apps/%{appname}.png
 
 %files
 %{_bindir}/%{appname}
@@ -50,12 +55,16 @@ install -m 0644 %{_sourcedir}/%{appname}.desktop %{buildroot}%{_datadir}/applica
 %{_datadir}/%{appname}/lib/*.so
 %{_datadir}/%{appname}/data/
 %{_datadir}/applications/%{appname}.desktop
+%{_datadir}/pixmaps/%{appname}.png
+%{_datadir}/icons/hicolor/512x512/apps/%{appname}.png
 
 %post
 update-desktop-database &>/dev/null || :
+gtk-update-icon-cache -f -t %{_datadir}/icons/hicolor &>/dev/null || :
 
 %postun
 update-desktop-database &>/dev/null || :
+gtk-update-icon-cache -f -t %{_datadir}/icons/hicolor &>/dev/null || :
 
 %changelog
 * Tue Jun 02 2026 jomvick <jomvick@users.noreply.github.com> - 1.0.1-1

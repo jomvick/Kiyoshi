@@ -35,6 +35,7 @@ rm -rf "kiyoshi-$APP_VERSION"
 # Step 4: Copy additional sources
 cp "$SCRIPT_DIR/packaging/kiyoshi.sh" "$RPMBUILD_DIR/SOURCES/"
 cp "$SCRIPT_DIR/packaging/kiyoshi.desktop" "$RPMBUILD_DIR/SOURCES/"
+cp "$SCRIPT_DIR/packaging/kiyoshi.png" "$RPMBUILD_DIR/SOURCES/"
 cp "$SCRIPT_DIR/packaging/kiyoshi.spec" "$RPMBUILD_DIR/SPECS/"
 
 # Dynamically update the version in the spec file to match APP_VERSION
