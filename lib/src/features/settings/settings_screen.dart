@@ -70,7 +70,7 @@ class SettingsScreen extends ConsumerWidget {
         _SettingsSwitchTile(
           icon: LucideIcons.moon,
           title: 'Dark Mode',
-          subtitle: 'Switch to dark theme (coming soon)',
+          subtitle: 'Warm charcoal theme, easy on the eyes',
           value: prefs.darkMode,
           onChanged: (v) => ref.read(preferencesProvider.notifier).setDarkMode(v),
         ),
@@ -432,17 +432,18 @@ class _SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(icon, size: 16, color: AppTheme.primary.withValues(alpha: 0.7)),
+            Icon(icon, size: 16, color: primary.withValues(alpha: 0.7)),
             const SizedBox(width: 10),
             Text(
               title,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppTheme.primary,
+                color: primary,
                 letterSpacing: 2.0,
                 fontWeight: FontWeight.w700,
               ),
@@ -473,16 +474,17 @@ class _SettingsSwitchTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spaceSmall),
       padding: const EdgeInsets.all(AppTheme.spaceMedium),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLow,
+        color: scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppTheme.primary),
+          Icon(icon, size: 18, color: scheme.primary),
           const SizedBox(width: AppTheme.spaceMedium),
           Expanded(
             child: Column(
@@ -497,7 +499,7 @@ class _SettingsSwitchTile extends StatelessWidget {
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.onSurfaceVariant,
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -506,7 +508,7 @@ class _SettingsSwitchTile extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: AppTheme.primary,
+            activeThumbColor: scheme.primary,
           ),
         ],
       ),
@@ -535,18 +537,19 @@ class _SettingsSliderTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spaceSmall),
       padding: const EdgeInsets.all(AppTheme.spaceMedium),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLow,
+        color: scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: AppTheme.primary),
+              Icon(icon, size: 18, color: scheme.primary),
               const SizedBox(width: AppTheme.spaceMedium),
               Expanded(
                 child: Column(
@@ -561,7 +564,7 @@ class _SettingsSliderTile extends StatelessWidget {
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.onSurfaceVariant,
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -575,7 +578,7 @@ class _SettingsSliderTile extends StatelessWidget {
             min: min,
             max: max,
             onChanged: onChanged,
-            activeColor: AppTheme.primary,
+            activeColor: scheme.primary,
           ),
         ],
       ),
@@ -602,16 +605,17 @@ class _SettingsDropdownTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spaceSmall),
       padding: const EdgeInsets.all(AppTheme.spaceMedium),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLow,
+        color: scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppTheme.primary),
+          Icon(icon, size: 18, color: scheme.primary),
           const SizedBox(width: AppTheme.spaceMedium),
           Expanded(
             child: Column(
@@ -626,7 +630,7 @@ class _SettingsDropdownTile extends StatelessWidget {
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.onSurfaceVariant,
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -636,16 +640,16 @@ class _SettingsDropdownTile extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.08),
+              color: scheme.primary.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
             ),
             child: DropdownButton<String>(
               value: value,
               underline: const SizedBox.shrink(),
-              icon: const Icon(LucideIcons.chevronDown, size: 14, color: AppTheme.primary),
+              icon: Icon(LucideIcons.chevronDown, size: 14, color: scheme.primary),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
-                color: AppTheme.primary,
+                color: scheme.primary,
               ),
               items: items.map((item) => DropdownMenuItem<String>(
                 value: item.value,
@@ -675,16 +679,17 @@ class _SettingsInfoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spaceSmall),
       padding: const EdgeInsets.all(AppTheme.spaceMedium),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLow,
+        color: scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppTheme.primary),
+          Icon(icon, size: 18, color: scheme.primary),
           const SizedBox(width: AppTheme.spaceMedium),
           Expanded(
             child: Column(
@@ -699,7 +704,7 @@ class _SettingsInfoTile extends StatelessWidget {
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.onSurfaceVariant,
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -728,16 +733,17 @@ class _SettingsActionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spaceSmall),
       padding: const EdgeInsets.all(AppTheme.spaceMedium),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLow,
+        color: scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppTheme.primary),
+          Icon(icon, size: 18, color: scheme.primary),
           const SizedBox(width: AppTheme.spaceMedium),
           Expanded(
             child: Column(
@@ -752,7 +758,7 @@ class _SettingsActionTile extends StatelessWidget {
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.onSurfaceVariant,
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -762,8 +768,8 @@ class _SettingsActionTile extends StatelessWidget {
           TextButton(
             onPressed: onTap,
             style: TextButton.styleFrom(
-              backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
-              foregroundColor: AppTheme.primary,
+              backgroundColor: scheme.primary.withValues(alpha: 0.1),
+              foregroundColor: scheme.primary,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

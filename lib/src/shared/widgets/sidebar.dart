@@ -34,11 +34,12 @@ class Sidebar extends StatelessWidget {
     // Cache local references to avoid widget. lookups
     final dest = selectedDestination;
     final onDestSelect = onDestinationSelected;
+    final scheme = Theme.of(context).colorScheme;
 
     return Container(
       width: isExpanded ? 272 : 76,
       margin: const EdgeInsets.all(AppTheme.spaceMedium),
-      decoration: AppTheme.glassPanel(radius: 32),
+      decoration: AppTheme.glassPanel(radius: 32, context: context),
       child: Stack(
         children: [
           if (showPrismaticBorders)
@@ -67,8 +68,8 @@ class Sidebar extends StatelessWidget {
                 Row(
                   mainAxisAlignment: isExpanded ? MainAxisAlignment.start : MainAxisAlignment.center,
                   children: [
-                    const BotanicalLogo(
-                      color: AppTheme.primary,
+                    BotanicalLogo(
+                      color: scheme.primary,
                       size: 40,
                       showPrismaticHalo: true,
                     ),
@@ -89,13 +90,13 @@ class Sidebar extends StatelessWidget {
                                         'Kiyoshi',
                                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                           fontWeight: FontWeight.w700,
-                                          color: AppTheme.onBackground,
+                                          color: scheme.onSurface,
                                         ),
                                       ),
                                       Text(
                                         'ZEN STUDIO',
                                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                          color: AppTheme.primary.withValues(alpha: 0.5),
+                                          color: scheme.primary.withValues(alpha: 0.5),
                                           letterSpacing: 2.0,
                                           fontSize: 10,
                                           fontWeight: FontWeight.w700,
@@ -154,6 +155,7 @@ class _SidebarNavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -173,7 +175,7 @@ class _SidebarNavItem extends StatelessWidget {
               alignment: isExpanded ? Alignment.centerLeft : Alignment.center,
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppTheme.primary.withValues(alpha: isExpanded ? 0.1 : 0.15)
+                    ? scheme.primary.withValues(alpha: isExpanded ? 0.1 : 0.15)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -184,8 +186,8 @@ class _SidebarNavItem extends StatelessWidget {
                     destination.icon,
                     size: isExpanded ? 18 : 20,
                     color: isSelected
-                        ? AppTheme.primary
-                        : (isExpanded ? AppTheme.primary.withValues(alpha: 0.5) : AppTheme.onSurfaceVariant),
+                        ? scheme.primary
+                        : (isExpanded ? scheme.primary.withValues(alpha: 0.5) : scheme.onSurfaceVariant),
                   ),
                   ClipRect(
                     child: AnimatedSize(
@@ -202,8 +204,8 @@ class _SidebarNavItem extends StatelessWidget {
                                   overflow: TextOverflow.clip,
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: isSelected
-                                        ? AppTheme.onBackground
-                                        : AppTheme.primary.withValues(alpha: 0.6),
+                                        ? scheme.onSurface
+                                        : scheme.primary.withValues(alpha: 0.6),
                                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                                     letterSpacing: 0.5,
                                   ),

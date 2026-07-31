@@ -96,6 +96,7 @@ class _KiyoshiZenDashboardViewState extends ConsumerState<KiyoshiZenDashboardVie
   }
 
   Widget _buildEditorialHeader(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.frameMargin),
       child: Column(
@@ -104,7 +105,7 @@ class _KiyoshiZenDashboardViewState extends ConsumerState<KiyoshiZenDashboardVie
           Text(
             'STUDIO OVERVIEW',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppTheme.primary.withValues(alpha: 0.6),
+                  color: scheme.primary.withValues(alpha: 0.6),
                   letterSpacing: 4.0,
                   fontWeight: FontWeight.w700,
                 ),
@@ -117,7 +118,7 @@ class _KiyoshiZenDashboardViewState extends ConsumerState<KiyoshiZenDashboardVie
                 'Zen Workspace',
                 style: Theme.of(context).textTheme.displaySmall?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: AppTheme.onBackground,
+                      color: scheme.onSurface,
                     ),
               ),
               const SizedBox(width: AppTheme.spaceLarge),
@@ -127,7 +128,7 @@ class _KiyoshiZenDashboardViewState extends ConsumerState<KiyoshiZenDashboardVie
                   child: Text(
                     'Your personal sanctuary of productivity and focus.',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.onSurfaceVariant.withValues(alpha: 0.8),
+                          color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
                         ),
                   ),
                 ),
@@ -185,6 +186,7 @@ class _TimelineRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppTheme.spaceMedium),
       child: Row(
@@ -195,13 +197,13 @@ class _TimelineRow extends StatelessWidget {
               Container(
                 width: 10,
                 height: 10,
-                decoration: const BoxDecoration(
-                  color: AppTheme.primary,
+                decoration: BoxDecoration(
+                  color: scheme.primary,
                   shape: BoxShape.circle,
                 ),
               ),
               if (showLine)
-                Container(width: 2, height: 40, color: AppTheme.primary.withValues(alpha: 0.1)),
+                Container(width: 2, height: 40, color: scheme.primary.withValues(alpha: 0.1)),
             ],
           ),
           const SizedBox(width: AppTheme.spaceMedium),
@@ -212,7 +214,7 @@ class _TimelineRow extends StatelessWidget {
                 Text(
                   block.type.toUpperCase(),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppTheme.primary,
+                        color: scheme.primary,
                         fontWeight: FontWeight.w800,
                       ),
                 ),
@@ -225,7 +227,7 @@ class _TimelineRow extends StatelessWidget {
                 Text(
                   'Just now',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
                       ),
                 ),
               ],
@@ -244,6 +246,7 @@ class _ProjectBreakdownCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return GlassPrismPanel(
       padding: const EdgeInsets.all(AppTheme.spaceLarge),
       child: Column(
@@ -265,8 +268,8 @@ class _ProjectBreakdownCard extends StatelessWidget {
           const SizedBox(height: AppTheme.spaceXLarge),
           LinearProgressIndicator(
             value: (stats['efficiency'] as double),
-            backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
-            valueColor: const AlwaysStoppedAnimation(AppTheme.primary),
+            backgroundColor: scheme.primary.withValues(alpha: 0.1),
+            valueColor: AlwaysStoppedAnimation(scheme.primary),
             minHeight: 8,
             borderRadius: BorderRadius.circular(4),
           ),
@@ -274,7 +277,7 @@ class _ProjectBreakdownCard extends StatelessWidget {
           Text(
             'Sanctuary Efficiency',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
           ),
         ],
@@ -309,6 +312,7 @@ class _FocusOfTheDayWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 40),
@@ -317,7 +321,7 @@ class _FocusOfTheDayWidget extends StatelessWidget {
           Text(
             'CURRENT FOCUS',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppTheme.primary.withValues(alpha: 0.5),
+                  color: scheme.primary.withValues(alpha: 0.5),
                   letterSpacing: 3.0,
                   fontWeight: FontWeight.w700,
                 ),
@@ -344,22 +348,23 @@ class _ZenModeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onPressed,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: AppTheme.primary.withValues(alpha: 0.1),
+          color: scheme.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
-            const Icon(LucideIcons.flame, size: 16, color: AppTheme.primary),
+            Icon(LucideIcons.flame, size: 16, color: scheme.primary),
             const SizedBox(width: 8),
             Text(
               'ENTER ZEN',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppTheme.primary,
+                    color: scheme.primary,
                     fontWeight: FontWeight.w700,
                   ),
             ),

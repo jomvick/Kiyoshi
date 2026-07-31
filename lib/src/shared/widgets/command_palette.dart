@@ -152,6 +152,8 @@ class _CommandPaletteState extends State<CommandPalette> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       type: MaterialType.transparency,
       child: KeyboardListener(
@@ -164,15 +166,17 @@ class _CommandPaletteState extends State<CommandPalette> {
                   width: 600,
                   constraints: const BoxConstraints(maxHeight: 500),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: isDark
+                        ? scheme.surfaceContainerHigh.withValues(alpha: 0.92)
+                        : Colors.white.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                     border: Border.all(
-                      color: AppTheme.primary.withValues(alpha: 0.2),
+                      color: scheme.primary.withValues(alpha: 0.2),
                       width: 1.5,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.2),
+                        color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.2),
                         blurRadius: 50,
                         offset: const Offset(0, 20),
                       ),
@@ -194,16 +198,16 @@ class _CommandPaletteState extends State<CommandPalette> {
                           decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: AppTheme.outlineVariant.withValues(alpha: 0.3),
+                                color: scheme.outlineVariant.withValues(alpha: 0.3),
                               ),
                             ),
                           ),
                           child: Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 LucideIcons.search,
                                 size: 20,
-                                color: AppTheme.onSurfaceVariant,
+                                color: scheme.onSurfaceVariant,
                               ),
                               const SizedBox(width: AppTheme.spaceSmall),
                               Expanded(
@@ -217,7 +221,7 @@ class _CommandPaletteState extends State<CommandPalette> {
                                         .textTheme
                                         .bodyLarge
                                         ?.copyWith(
-                                          color: AppTheme.onSurfaceVariant,
+                                          color: scheme.onSurfaceVariant,
                                         ),
                                     border: InputBorder.none,
                                     contentPadding: EdgeInsets.zero,
@@ -231,19 +235,19 @@ class _CommandPaletteState extends State<CommandPalette> {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppTheme.surfaceContainerLow,
+                                  color: scheme.surfaceContainerLow,
                                   borderRadius: BorderRadius.circular(4),
                                   border: Border.all(
-                                    color: AppTheme.outlineVariant.withValues(alpha: 0.3),
+                                    color: scheme.outlineVariant.withValues(alpha: 0.3),
                                   ),
                                 ),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       LucideIcons.command,
                                       size: 12,
-                                      color: AppTheme.onSurfaceVariant,
+                                      color: scheme.onSurfaceVariant,
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
@@ -252,7 +256,7 @@ class _CommandPaletteState extends State<CommandPalette> {
                                           .textTheme
                                           .labelSmall
                                           ?.copyWith(
-                                            color: AppTheme.onSurfaceVariant,
+                                            color: scheme.onSurfaceVariant,
                                           ),
                                     ),
                                   ],
@@ -278,7 +282,7 @@ class _CommandPaletteState extends State<CommandPalette> {
                           decoration: BoxDecoration(
                             border: Border(
                               top: BorderSide(
-                                color: AppTheme.outlineVariant.withValues(alpha: 0.3),
+                                color: scheme.outlineVariant.withValues(alpha: 0.3),
                               ),
                             ),
                           ),
@@ -303,7 +307,7 @@ class _CommandPaletteState extends State<CommandPalette> {
                                 '${_filteredCommands.length} commands',
                                 style: Theme.of(context).textTheme.labelSmall
                                     ?.copyWith(
-                                      color: AppTheme.onSurfaceVariant,
+                                      color: scheme.onSurfaceVariant,
                                     ),
                               ),
                             ],
@@ -353,54 +357,64 @@ class _CommandPaletteState extends State<CommandPalette> {
   }
 
   Widget _buildEmptyState() {
-    return Container(
-      padding: const EdgeInsets.all(AppTheme.spaceXLarge),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(LucideIcons.searchX, size: 48, color: AppTheme.onSurfaceVariant),
-          const SizedBox(height: AppTheme.spaceMedium),
-          Text(
-            'No commands found',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(color: AppTheme.onSurfaceVariant),
+    return Builder(
+      builder: (context) {
+        final scheme = Theme.of(context).colorScheme;
+        return Container(
+          padding: const EdgeInsets.all(AppTheme.spaceXLarge),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(LucideIcons.searchX, size: 48, color: scheme.onSurfaceVariant),
+              const SizedBox(height: AppTheme.spaceMedium),
+              Text(
+                'No commands found',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: AppTheme.spaceSmall),
+              Text(
+                'Try a different search term',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+            ],
           ),
-          const SizedBox(height: AppTheme.spaceSmall),
-          Text(
-            'Try a different search term',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppTheme.onSurfaceVariant),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
   Widget _buildFooterHint({required IconData icon, required String label}) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: AppTheme.surfaceContainerLow,
-            borderRadius: BorderRadius.circular(4),
-            border: Border.all(
-              color: AppTheme.outlineVariant.withValues(alpha: 0.3),
+    return Builder(
+      builder: (context) {
+        final scheme = Theme.of(context).colorScheme;
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: scheme.outlineVariant.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Icon(icon, size: 12, color: scheme.onSurfaceVariant),
             ),
-          ),
-          child: Icon(icon, size: 12, color: AppTheme.onSurfaceVariant),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          label,
-          style: Theme.of(
-            context,
-          ).textTheme.labelSmall?.copyWith(color: AppTheme.onSurfaceVariant),
-        ),
-      ],
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: scheme.onSurfaceVariant),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -426,6 +440,7 @@ class _CommandItemState extends State<_CommandItem> {
   @override
   Widget build(BuildContext context) {
     final effectiveSelected = widget.isSelected || _isHovering;
+    final scheme = Theme.of(context).colorScheme;
 
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
@@ -444,12 +459,12 @@ class _CommandItemState extends State<_CommandItem> {
           ),
           decoration: BoxDecoration(
             color: effectiveSelected
-                ? AppTheme.primary.withValues(alpha: 0.1)
+                ? scheme.primary.withValues(alpha: 0.1)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             border: effectiveSelected
                 ? Border.all(
-                    color: AppTheme.primary.withValues(alpha: 0.2),
+                    color: scheme.primary.withValues(alpha: 0.2),
                     width: 1,
                   )
                 : null,
@@ -465,9 +480,9 @@ class _CommandItemState extends State<_CommandItem> {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      (widget.command.accentColor ?? AppTheme.primary)
+                      (widget.command.accentColor ?? scheme.primary)
                           .withValues(alpha: 0.3),
-                      (widget.command.accentColor ?? AppTheme.primary)
+                      (widget.command.accentColor ?? scheme.primary)
                           .withValues(alpha: 0.05),
                     ],
                   ),
@@ -476,7 +491,7 @@ class _CommandItemState extends State<_CommandItem> {
                 child: Icon(
                   widget.command.icon,
                   size: 18,
-                  color: widget.command.accentColor ?? AppTheme.primary,
+                  color: widget.command.accentColor ?? scheme.primary,
                 ),
               ),
 
@@ -494,14 +509,14 @@ class _CommandItemState extends State<_CommandItem> {
                             ? FontWeight.w600
                             : FontWeight.w500,
                         color: effectiveSelected
-                            ? AppTheme.onBackground
-                            : AppTheme.onSurfaceVariant,
+                            ? scheme.onSurface
+                            : scheme.onSurfaceVariant,
                       ),
                     ),
                     Text(
                       widget.command.subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.onSurfaceVariant,
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -510,10 +525,10 @@ class _CommandItemState extends State<_CommandItem> {
 
               // Arrow indicator
               if (effectiveSelected)
-                const Icon(
+                Icon(
                   LucideIcons.chevronRight,
                   size: 16,
-                  color: AppTheme.primary,
+                  color: scheme.primary,
                 ),
             ],
           ),

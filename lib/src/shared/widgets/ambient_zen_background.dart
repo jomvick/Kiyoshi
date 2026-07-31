@@ -2,9 +2,15 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:kiyoshi/src/core/constants/zen_colors.dart';
 import 'package:kiyoshi/src/core/design_system/kiyoshi_zen_tokens.dart';
 
 /// Misty forest depth: matte canvas + large soft sage/mint orbs + light noise.
+///
+/// Dark mode uses a warm charcoal canvas (Claude-inspired, not near-black)
+/// with brighter orbs so the ambient glow still reads against the darker
+/// backdrop, plus light-colored noise instead of dark noise (dark specks
+/// on a dark canvas are invisible).
 class AmbientZenBackground extends StatelessWidget {
   final Widget child;
 
@@ -15,6 +21,8 @@ class AmbientZenBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Stack(
       fit: StackFit.expand,
       children: [
@@ -22,15 +30,16 @@ class AmbientZenBackground extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              const ColoredBox(color: KiyoshiZenTokens.canvas),
-              ..._buildOrbs(),
-              const CustomPaint(
+              ColoredBox(color: isDark ? ZenColors.darkCanvas : KiyoshiZenTokens.canvas),
+              ..._buildOrbs(isDark),
+              CustomPaint(
                 painter: _ZenNoisePainter(
-                  opacity: 0.010,
+                  opacity: isDark ? 0.020 : 0.010,
                   seed: 42,
                   density: 0.04,
+                  color: isDark ? Colors.white : Colors.black,
                 ),
-                child: SizedBox.expand(),
+                child: const SizedBox.expand(),
               ),
             ],
           ),
@@ -40,7 +49,11 @@ class AmbientZenBackground extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildOrbs() {
+  List<Widget> _buildOrbs(bool isDark) {
+    // Dark mode: slightly higher alpha so the sage/mint glow still reads
+    // as an ambient light source against the warm charcoal canvas instead
+    // of disappearing into it.
+    final boost = isDark ? 1.35 : 1.0;
     return [
       _Orb(
         top: -120,
@@ -48,7 +61,7 @@ class AmbientZenBackground extends StatelessWidget {
         width: 420,
         height: 380,
         colors: [
-          KiyoshiZenTokens.sage.withValues(alpha: 0.32),
+          KiyoshiZenTokens.sage.withValues(alpha: 0.32 * boost),
           KiyoshiZenTokens.mintTeal.withValues(alpha: 0.0),
         ],
         blur: 60,
@@ -59,7 +72,7 @@ class AmbientZenBackground extends StatelessWidget {
         width: 480,
         height: 440,
         colors: [
-          KiyoshiZenTokens.mintTeal.withValues(alpha: 0.28),
+          KiyoshiZenTokens.mintTeal.withValues(alpha: 0.28 * boost),
           KiyoshiZenTokens.sage.withValues(alpha: 0.0),
         ],
         blur: 70,
@@ -70,8 +83,8 @@ class AmbientZenBackground extends StatelessWidget {
         width: 520,
         height: 360,
         colors: [
-          KiyoshiZenTokens.sage.withValues(alpha: 0.22),
-          KiyoshiZenTokens.mintTeal.withValues(alpha: 0.08),
+          KiyoshiZenTokens.sage.withValues(alpha: 0.22 * boost),
+          KiyoshiZenTokens.mintTeal.withValues(alpha: isDark ? 0.12 : 0.08),
         ],
         blur: 55,
       ),
@@ -81,7 +94,7 @@ class AmbientZenBackground extends StatelessWidget {
         width: 300,
         height: 300,
         colors: [
-          KiyoshiZenTokens.mintTeal.withValues(alpha: 0.20),
+          KiyoshiZenTokens.mintTeal.withValues(alpha: 0.20 * boost),
           KiyoshiZenTokens.sage.withValues(alpha: 0.0),
         ],
         blur: 45,
@@ -142,11 +155,13 @@ class _ZenNoisePainter extends CustomPainter {
   final double opacity;
   final int seed;
   final double density;
+  final Color color;
 
   const _ZenNoisePainter({
     required this.opacity,
     required this.seed,
     required this.density,
+    this.color = Colors.black,
   });
 
   @override
@@ -154,7 +169,7 @@ class _ZenNoisePainter extends CustomPainter {
     final rnd = math.Random(seed);
     final count = (size.width * size.height * density).clamp(800.0, 12000.0);
     final paint = Paint()
-      ..color = Colors.black.withValues(alpha: opacity)
+      ..color = color.withValues(alpha: opacity)
       ..strokeWidth = 1
       ..strokeCap = StrokeCap.round;
 
@@ -169,6 +184,7 @@ class _ZenNoisePainter extends CustomPainter {
   bool shouldRepaint(covariant _ZenNoisePainter oldDelegate) {
     return opacity != oldDelegate.opacity ||
         seed != oldDelegate.seed ||
-        density != oldDelegate.density;
+        density != oldDelegate.density ||
+        color != oldDelegate.color;
   }
 }

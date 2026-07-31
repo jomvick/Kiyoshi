@@ -127,21 +127,28 @@ class _KanbanCardState extends State<KanbanCard>
     ThemeData theme,
     bool isOverdue,
   ) {
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    // Warm charcoal frost in dark mode instead of a bright white card
+    // floating on a dark canvas.
+    final surfaceBase = isDark ? const Color(0xFF34332F) : Colors.white;
+    final surfaceBorder = isDark ? Colors.white : Colors.white;
+
     return Container(
       constraints: const BoxConstraints(maxWidth: 340),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
         border: Border.all(
           color: _isFocused
-              ? AppTheme.primary.withValues(alpha: 0.8)
+              ? scheme.primary.withValues(alpha: 0.8)
               : (widget.task.priority == TaskPriority.high
-                  ? AppTheme.primary.withValues(alpha: 0.4)
-                  : AppTheme.outline.withValues(alpha: 0.25)),
+                  ? scheme.primary.withValues(alpha: 0.4)
+                  : scheme.outline.withValues(alpha: 0.25)),
           width: _isFocused ? 2 : 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withValues(alpha: _isHovering ? 0.15 : 0.08),
+            color: scheme.primary.withValues(alpha: _isHovering ? 0.15 : 0.08),
             blurRadius: _isHovering ? 20 : 10,
             offset: Offset(0, _isHovering ? 8 : 4),
           ),
@@ -173,10 +180,10 @@ class _KanbanCardState extends State<KanbanCard>
                 child: Container(
                   padding: const EdgeInsets.all(AppTheme.spaceLarge),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: isDone ? 0.5 : 0.8),
+                    color: surfaceBase.withValues(alpha: isDone ? (isDark ? 0.55 : 0.5) : (isDark ? 0.85 : 0.8)),
                     borderRadius: BorderRadius.circular(AppTheme.radiusLarge - 1),
                     border: Border.all(
-                      color: Colors.white.withValues(alpha: isDone ? 0.5 : 0.7),
+                      color: surfaceBorder.withValues(alpha: isDark ? 0.08 : (isDone ? 0.5 : 0.7)),
                       width: 1,
                     ),
                   ),
@@ -201,11 +208,11 @@ class _KanbanCardState extends State<KanbanCard>
                               widget.task.title,
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w700,
-                                color: AppTheme.onBackground,
+                                color: scheme.onSurface,
                                 decoration:
                                     isDone ? TextDecoration.lineThrough : null,
                                 decorationColor:
-                                    AppTheme.primary.withValues(alpha: 0.3),
+                                    scheme.primary.withValues(alpha: 0.3),
                                 letterSpacing: -0.4,
                                 fontSize: 17,
                               ),
@@ -219,7 +226,7 @@ class _KanbanCardState extends State<KanbanCard>
                         Text(
                           widget.task.description!,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppTheme.onSurfaceVariant.withValues(alpha: 0.8),
+                            color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
                             height: 1.5,
                           ),
                           maxLines: 2,
@@ -315,6 +322,7 @@ class _KanbanCardState extends State<KanbanCard>
   }
 
   Widget _buildActionButtons(ThemeData theme) {
+    final scheme = theme.colorScheme;
     return AnimatedOpacity(
       opacity: _isHovering ? 1.0 : 0.0,
       duration: AppTheme.animFast,
@@ -334,9 +342,9 @@ class _KanbanCardState extends State<KanbanCard>
               icon: Icon(
                 LucideIcons.moreHorizontal,
                 size: 16,
-                color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
               ),
-              color: Colors.white,
+              color: scheme.surfaceContainerHigh,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               offset: const Offset(0, 30),
               itemBuilder: (context) => [
@@ -345,9 +353,9 @@ class _KanbanCardState extends State<KanbanCard>
                     value: 'edit',
                     child: Row(
                       children: [
-                        Icon(LucideIcons.pencil, size: 14, color: AppTheme.onBackground.withValues(alpha: 0.7)),
+                        Icon(LucideIcons.pencil, size: 14, color: scheme.onSurface.withValues(alpha: 0.7)),
                         const SizedBox(width: 8),
-                        Text('Edit Task', style: TextStyle(fontSize: 13, color: AppTheme.onBackground.withValues(alpha: 0.8))),
+                        Text('Edit Task', style: TextStyle(fontSize: 13, color: scheme.onSurface.withValues(alpha: 0.8))),
                       ],
                     ),
                   ),
@@ -395,13 +403,14 @@ class _KanbanCardState extends State<KanbanCard>
         if (widget.task.tags.isEmpty) const Spacer(),
 
         // Status indicator dot
-        _buildStatusIndicator(),
+        _buildStatusIndicator(theme),
       ],
     );
   }
 
   Widget _buildProgressSection(ThemeData theme) {
     final progress = widget.task.progress!.clamp(0, 100);
+    final scheme = theme.colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -411,7 +420,7 @@ class _KanbanCardState extends State<KanbanCard>
             Text(
               'PROGRESS',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: AppTheme.primary.withValues(alpha: 0.5),
+                color: scheme.primary.withValues(alpha: 0.5),
                 letterSpacing: 2.0,
                 fontWeight: FontWeight.w700,
               ),
@@ -420,7 +429,7 @@ class _KanbanCardState extends State<KanbanCard>
             Text(
               '$progress%',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: AppTheme.primary,
+                color: scheme.primary,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -432,13 +441,13 @@ class _KanbanCardState extends State<KanbanCard>
           child: Container(
             height: 4,
             width: double.infinity,
-            color: AppTheme.primary.withValues(alpha: 0.1),
+            color: scheme.primary.withValues(alpha: 0.1),
             child: FractionallySizedBox(
               alignment: Alignment.centerLeft,
               widthFactor: progress / 100,
               child: Container(
                 decoration: BoxDecoration(
-                  color: AppTheme.primary,
+                  color: scheme.primary,
                   borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                 ),
               ),
@@ -467,16 +476,20 @@ class _KanbanCardState extends State<KanbanCard>
   }
 
   Widget _buildDueDateChip(ThemeData theme, bool isOverdue) {
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final dateColor = isOverdue
-        ? AppTheme.error.withValues(alpha: 0.8)
-        : AppTheme.primary;
+        ? scheme.error.withValues(alpha: 0.8)
+        : scheme.primary;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: AppTheme.mintTeal.withValues(alpha: 0.4),
+        color: isDark
+            ? scheme.primary.withValues(alpha: 0.10)
+            : AppTheme.mintTeal.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.1), width: 0.5),
+        border: Border.all(color: scheme.primary.withValues(alpha: 0.1), width: 0.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -499,6 +512,9 @@ class _KanbanCardState extends State<KanbanCard>
   Widget _buildTags(ThemeData theme) {
     final tagsToShow = widget.task.tags.take(2).toList();
     final hasMore = widget.task.tags.length > 2;
+    final scheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final chipColor = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.white.withValues(alpha: 0.26);
 
     return Wrap(
       spacing: 4,
@@ -508,7 +524,7 @@ class _KanbanCardState extends State<KanbanCard>
           (tag) => Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.26),
+              color: chipColor,
               borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             ),
             child: Text(
@@ -517,6 +533,7 @@ class _KanbanCardState extends State<KanbanCard>
                 fontSize: 11,
                 fontWeight: FontWeight.w500,
                 letterSpacing: 0.2,
+                color: scheme.onSurface,
               ),
             ),
           ),
@@ -525,7 +542,7 @@ class _KanbanCardState extends State<KanbanCard>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.26),
+              color: chipColor,
               borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             ),
             child: Text(
@@ -533,6 +550,7 @@ class _KanbanCardState extends State<KanbanCard>
               style: theme.textTheme.labelSmall?.copyWith(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
+                color: scheme.onSurface,
               ),
             ),
           ),
@@ -540,13 +558,14 @@ class _KanbanCardState extends State<KanbanCard>
     );
   }
 
-  Widget _buildStatusIndicator() {
+  Widget _buildStatusIndicator(ThemeData theme) {
+    final scheme = theme.colorScheme;
     Color indicatorColor;
     switch (widget.task.status) {
       case TaskStatus.todo:
-        indicatorColor = AppTheme.onSurfaceVariant.withValues(alpha: 0.3);
+        indicatorColor = scheme.onSurfaceVariant.withValues(alpha: 0.3);
       case TaskStatus.inProgress:
-        indicatorColor = AppTheme.primary.withValues(alpha: 0.8);
+        indicatorColor = scheme.primary.withValues(alpha: 0.8);
       case TaskStatus.done:
         indicatorColor = const Color(0xFF34C759).withValues(alpha: 0.8);
     }
@@ -627,6 +646,8 @@ class _ZenCheckboxState extends State<_ZenCheckbox> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: _handleTap,
       child: AnimatedContainer(
@@ -638,9 +659,9 @@ class _ZenCheckboxState extends State<_ZenCheckbox> {
           shape: BoxShape.circle,
           color: _checked
               ? const Color(0xFF34C759)
-              : AppTheme.surfaceContainerLowest,
+              : (isDark ? scheme.surfaceContainerHigh : scheme.surfaceContainerLowest),
           border: Border.all(
-            color: _checked ? const Color(0xFF34C759) : AppTheme.outline,
+            color: _checked ? const Color(0xFF34C759) : scheme.outline,
             width: _checked ? 0 : 1.5,
           ),
           boxShadow: _checked

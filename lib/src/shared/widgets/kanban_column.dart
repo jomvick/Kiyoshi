@@ -53,6 +53,7 @@ class _KanbanColumnState extends State<KanbanColumn> {
   @override
   Widget build(BuildContext context) {
     final isEmpty = widget.tasks.isEmpty && !_isDropTarget;
+    final scheme = Theme.of(context).colorScheme;
 
     return DragTarget<Task>(
       onWillAcceptWithDetails: (_) {
@@ -77,19 +78,19 @@ class _KanbanColumnState extends State<KanbanColumn> {
             ),
             decoration: BoxDecoration(
               color: _isDropTarget
-                  ? AppTheme.primary.withValues(alpha: 0.1)
-                  : AppTheme.surfaceContainerLow.withValues(alpha: 0.4),
+                  ? scheme.primary.withValues(alpha: 0.1)
+                  : scheme.surfaceContainerLow.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(AppTheme.radiusXLarge),
               border: Border.all(
                 color: _isDropTarget
-                    ? AppTheme.primary.withValues(alpha: 0.6)
-                    : AppTheme.outline.withValues(alpha: 0.2),
+                    ? scheme.primary.withValues(alpha: 0.6)
+                    : scheme.outline.withValues(alpha: 0.2),
                 width: _isDropTarget ? 2.0 : 1.5,
               ),
               boxShadow: [
                 if (_isDropTarget)
                   BoxShadow(
-                    color: AppTheme.primary.withValues(alpha: 0.2),
+                    color: scheme.primary.withValues(alpha: 0.2),
                     blurRadius: 40,
                     spreadRadius: 2,
                     offset: const Offset(0, 4),
@@ -106,10 +107,10 @@ class _KanbanColumnState extends State<KanbanColumn> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(isEmpty),
+                _buildHeader(context, isEmpty),
                 Expanded(
                   child: isEmpty 
-                    ? _buildEmptyState() 
+                    ? _buildEmptyState(context) 
                     : _buildTaskList(),
                 ),
               ],
@@ -120,7 +121,8 @@ class _KanbanColumnState extends State<KanbanColumn> {
     );
   }
 
-  Widget _buildHeader(bool isEmpty) {
+  Widget _buildHeader(BuildContext context, bool isEmpty) {
+    final scheme = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.only(bottom: isEmpty ? 0 : AppTheme.spaceLarge),
       child: ClipRRect(
@@ -133,10 +135,10 @@ class _KanbanColumnState extends State<KanbanColumn> {
               vertical: AppTheme.spaceMedium,
             ),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.05),
+              color: scheme.primary.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
               border: Border.all(
-                color: AppTheme.primary.withValues(alpha: 0.15),
+                color: scheme.primary.withValues(alpha: 0.15),
                 width: 1,
               ),
             ),
@@ -147,7 +149,7 @@ class _KanbanColumnState extends State<KanbanColumn> {
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                     letterSpacing: 2.0,
-                    color: AppTheme.onBackground.withValues(alpha: 0.8),
+                    color: scheme.onSurface.withValues(alpha: 0.8),
                   ),
                 ),
                 if (!isEmpty) ...[
@@ -155,13 +157,13 @@ class _KanbanColumnState extends State<KanbanColumn> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.15),
+                      color: scheme.primary.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(AppTheme.radiusFull),
                     ),
                     child: Text(
                       '${widget.tasks.length}',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppTheme.primary,
+                        color: scheme.primary,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -175,7 +177,7 @@ class _KanbanColumnState extends State<KanbanColumn> {
                       showDialog(
                         context: context,
                         builder: (ctx) => AlertDialog(
-                          backgroundColor: Colors.white,
+                          backgroundColor: Theme.of(ctx).colorScheme.surfaceContainerHigh,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                           title: const Text('Delete Column', style: TextStyle(fontWeight: FontWeight.bold)),
                           content: const Text('Are you sure you want to delete this column? All tasks will be moved to "To Do".'),
@@ -220,13 +222,13 @@ class _KanbanColumnState extends State<KanbanColumn> {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withValues(alpha: 0.1),
+                      color: scheme.primary.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       LucideIcons.plus,
                       size: 16,
-                      color: AppTheme.primary,
+                      color: scheme.primary,
                     ),
                   ),
                 ).animate().scale(duration: 200.ms, curve: Curves.easeOutBack),
@@ -238,7 +240,8 @@ class _KanbanColumnState extends State<KanbanColumn> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     IconData icon;
     String message;
     
@@ -265,14 +268,14 @@ class _KanbanColumnState extends State<KanbanColumn> {
           Icon(
             icon,
             size: 32,
-            color: AppTheme.primary.withValues(alpha: 0.3),
+            color: scheme.primary.withValues(alpha: 0.3),
           ).animate(onPlay: (controller) => controller.repeat(reverse: true))
            .moveY(begin: -4, end: 4, duration: 2.seconds, curve: Curves.easeInOutSine),
           const SizedBox(height: 16),
           Text(
             message,
             style: TextStyle(
-              color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+              color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
               fontSize: 14,
               fontWeight: FontWeight.w500,
               fontStyle: FontStyle.italic,
@@ -284,8 +287,8 @@ class _KanbanColumnState extends State<KanbanColumn> {
             icon: const Icon(LucideIcons.plus, size: 16),
             label: const Text('Add Task'),
             style: TextButton.styleFrom(
-              foregroundColor: AppTheme.primary.withValues(alpha: 0.8),
-              backgroundColor: AppTheme.primary.withValues(alpha: 0.05),
+              foregroundColor: scheme.primary.withValues(alpha: 0.8),
+              backgroundColor: scheme.primary.withValues(alpha: 0.05),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -363,48 +366,53 @@ class _KanbanColumnState extends State<KanbanColumn> {
       onTap: widget.onAddTask,
       child: MouseRegion(
         cursor: SystemMouseCursors.click,
-        child: Container(
-          margin: const EdgeInsets.only(
-            top: AppTheme.spaceMedium,
-            bottom: AppTheme.spaceMedium,
-          ),
-          height: 48,
-          decoration: BoxDecoration(
-            color: _isHovering
-                ? AppTheme.surfaceContainerLow.withValues(alpha: 0.3)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-            border: Border.all(
-              color: _isHovering
-                  ? AppTheme.outline.withValues(alpha: 0.15)
-                  : AppTheme.outline.withValues(alpha: 0.05),
-              width: 1,
-            ),
-          ),
-          child: Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  LucideIcons.plus,
-                  size: 16,
-                  color: AppTheme.onSurfaceVariant.withValues(
-                    alpha: _isHovering ? 0.7 : 0.4,
-                  ),
+        child: Builder(
+          builder: (context) {
+            final scheme = Theme.of(context).colorScheme;
+            return Container(
+              margin: const EdgeInsets.only(
+                top: AppTheme.spaceMedium,
+                bottom: AppTheme.spaceMedium,
+              ),
+              height: 48,
+              decoration: BoxDecoration(
+                color: _isHovering
+                    ? scheme.surfaceContainerLow.withValues(alpha: 0.3)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                border: Border.all(
+                  color: _isHovering
+                      ? scheme.outline.withValues(alpha: 0.15)
+                      : scheme.outline.withValues(alpha: 0.05),
+                  width: 1,
                 ),
-                const SizedBox(width: AppTheme.spaceMedium),
-                Text(
-                  'Add a task',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.onSurfaceVariant.withValues(alpha: _isHovering ? 0.7 : 0.4),
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
+              ),
+              child: Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      LucideIcons.plus,
+                      size: 16,
+                      color: scheme.onSurfaceVariant.withValues(
+                        alpha: _isHovering ? 0.7 : 0.4,
+                      ),
+                    ),
+                    const SizedBox(width: AppTheme.spaceMedium),
+                    Text(
+                      'Add a task',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant.withValues(alpha: _isHovering ? 0.7 : 0.4),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

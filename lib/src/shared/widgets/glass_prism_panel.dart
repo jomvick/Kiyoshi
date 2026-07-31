@@ -19,6 +19,30 @@ class GlassPrismPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const radius = KiyoshiZenTokens.radiusCard;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Warm charcoal frost in dark mode instead of a white panel floating
+    // on a dark canvas; sage tint kept subtle either way.
+    final fillColor = isDark
+        ? const Color(0xFF383734).withValues(alpha: 0.58)
+        : Colors.white.withValues(alpha: 0.52);
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.10)
+        : const Color(0xFF94A3B8).withValues(alpha: 0.28);
+    final gradientColors = isDark
+        ? [
+            KiyoshiZenTokens.mintTeal.withValues(alpha: 0.05),
+            Colors.white.withValues(alpha: 0.04),
+            KiyoshiZenTokens.sage.withValues(alpha: 0.05),
+          ]
+        : [
+            KiyoshiZenTokens.mintTeal.withValues(alpha: 0.06),
+            Colors.white.withValues(alpha: 0.14),
+            KiyoshiZenTokens.sage.withValues(alpha: 0.04),
+          ];
+    final shadowColor = isDark
+        ? Colors.black.withValues(alpha: 0.24)
+        : Colors.black.withValues(alpha: 0.06);
 
     return RepaintBoundary(
       child: CustomPaint(
@@ -36,19 +60,19 @@ class GlassPrismPanel extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(radius),
               // Stronger base fill so text and controls stay legible on misty bg.
-              color: Colors.white.withValues(alpha: 0.52),
+              color: fillColor,
               border: Border.all(
-                color: const Color(0xFF94A3B8).withValues(alpha: 0.28),
+                color: borderColor,
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.06),
+                  color: shadowColor,
                   blurRadius: 20,
                   offset: const Offset(0, 8),
                 ),
                 BoxShadow(
-                  color: KiyoshiZenTokens.sage.withValues(alpha: 0.10),
+                  color: KiyoshiZenTokens.sage.withValues(alpha: isDark ? 0.06 : 0.10),
                   blurRadius: 24,
                   offset: const Offset(0, 12),
                 ),
@@ -63,11 +87,7 @@ class GlassPrismPanel extends StatelessWidget {
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [
-                            KiyoshiZenTokens.mintTeal.withValues(alpha: 0.06),
-                            Colors.white.withValues(alpha: 0.14),
-                            KiyoshiZenTokens.sage.withValues(alpha: 0.04),
-                          ],
+                          colors: gradientColors,
                           stops: const [0.0, 0.5, 1.0],
                         ),
                       ),

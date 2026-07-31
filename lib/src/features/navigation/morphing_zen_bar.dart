@@ -179,22 +179,28 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
   }
 
   Widget _buildCollapsedIcon() {
-    return Container(
-      key: const ValueKey('collapsed'),
-      alignment: Alignment.center,
-      child: const BotanicalLogo(
-        size: 32,
-        color: AppTheme.primary,
-        showPrismaticHalo: false,
-      ),
+    return Builder(
+      builder: (context) {
+        final scheme = Theme.of(context).colorScheme;
+        return Container(
+          key: const ValueKey('collapsed'),
+          alignment: Alignment.center,
+          child: BotanicalLogo(
+            size: 32,
+            color: scheme.primary,
+            showPrismaticHalo: false,
+          ),
+        );
+      },
     );
   }
 
   Widget _buildExpandedContent() {
+    final scheme = Theme.of(context).colorScheme;
     final cmd = activeCommand;
     final cmdColor = cmd != null
-        ? (cmd['color'] as Color? ?? AppTheme.primary)
-        : AppTheme.primary;
+        ? (cmd['color'] as Color? ?? scheme.primary)
+        : scheme.primary;
     final hintText = cmd != null
         ? 'Write your ${cmd['label'].toString().toLowerCase()}...'
         : currentPlaceholder;
@@ -209,8 +215,8 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
           BotanicalLogo(
             size: 28,
             color: isFocused
-                ? AppTheme.primary
-                : AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                ? scheme.primary
+                : scheme.onSurfaceVariant.withValues(alpha: 0.6),
             showPrismaticHalo: isFocused,
           ),
           const SizedBox(width: 10),
@@ -224,15 +230,15 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
               focusNode: focusNode,
               textAlignVertical: TextAlignVertical.center,
               onSubmitted: (_) => _submitTask(),
-              cursorColor: AppTheme.primary,
+              cursorColor: scheme.primary,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppTheme.onBackground,
+                color: scheme.onSurface,
                 fontWeight: FontWeight.w500,
               ),
               decoration: InputDecoration(
                 hintText: hintText,
                 hintStyle: TextStyle(
-                  color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4),
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.4),
                   fontWeight: FontWeight.w400,
                 ),
                 border: InputBorder.none,
@@ -255,6 +261,8 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
   List<String> get _projectSuggestions => ['Design', 'Marketing', 'Core', 'Vision', 'Calm'];
 
   Widget _buildGhostMenu() {
+    final scheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final query = ZenParser.getProjectQuery(controller.text);
     final filtered = _projectSuggestions.where((p) => p.toLowerCase().contains(query)).toList();
     if (filtered.isEmpty) return const SizedBox.shrink();
@@ -263,10 +271,10 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
       width: 240,
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? scheme.surfaceContainerHigh : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 30)],
-        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.1)),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1), blurRadius: 30)],
+        border: Border.all(color: scheme.primary.withValues(alpha: 0.1)),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20),
@@ -279,6 +287,7 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
   }
 
   Widget _buildGhostItem(String label) {
+    final scheme = Theme.of(context).colorScheme;
     return InkWell(
       onTap: () {
         final parts = controller.text.split('#');
@@ -290,7 +299,7 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         child: Row(
           children: [
-            const Icon(LucideIcons.hash, size: 14, color: AppTheme.primary),
+            Icon(LucideIcons.hash, size: 14, color: scheme.primary),
             const SizedBox(width: 14),
             Text(label, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
           ],

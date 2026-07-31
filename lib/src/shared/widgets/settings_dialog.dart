@@ -23,7 +23,7 @@ class SettingsDialog extends ConsumerWidget {
       child: Container(
         width: 480,
         constraints: const BoxConstraints(maxHeight: 600),
-        decoration: AppTheme.glassPanel(radius: 32),
+        decoration: AppTheme.glassPanel(radius: 32, context: context),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -110,12 +110,13 @@ class SettingsDialog extends ConsumerWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(AppTheme.spaceLarge),
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(
-            color: AppTheme.outlineVariant.withValues(alpha: 0.3),
+            color: scheme.outlineVariant.withValues(alpha: 0.3),
           ),
         ),
       ),
@@ -124,12 +125,12 @@ class SettingsDialog extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.1),
+              color: scheme.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               LucideIcons.settings,
-              color: AppTheme.primary,
+              color: scheme.primary,
               size: 20,
             ),
           ),
@@ -147,7 +148,7 @@ class SettingsDialog extends ConsumerWidget {
                 Text(
                   'Customize your Zen Studio experience',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.onSurfaceVariant,
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -173,7 +174,7 @@ class SettingsDialog extends ConsumerWidget {
         Text(
           title,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: AppTheme.primary,
+            color: Theme.of(context).colorScheme.primary,
             letterSpacing: 1.5,
             fontWeight: FontWeight.w700,
           ),
@@ -192,16 +193,17 @@ class SettingsDialog extends ConsumerWidget {
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spaceSmall),
       padding: const EdgeInsets.all(AppTheme.spaceMedium),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLow,
+        color: scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppTheme.primary),
+          Icon(icon, size: 18, color: scheme.primary),
           const SizedBox(width: AppTheme.spaceMedium),
           Expanded(
             child: Column(
@@ -216,7 +218,7 @@ class SettingsDialog extends ConsumerWidget {
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.onSurfaceVariant,
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -225,7 +227,7 @@ class SettingsDialog extends ConsumerWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeThumbColor: AppTheme.primary,
+            activeThumbColor: scheme.primary,
           ),
         ],
       ),
@@ -242,18 +244,19 @@ class SettingsDialog extends ConsumerWidget {
     required double max,
     required ValueChanged<double> onChanged,
   }) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spaceSmall),
       padding: const EdgeInsets.all(AppTheme.spaceMedium),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLow,
+        color: scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: AppTheme.primary),
+              Icon(icon, size: 18, color: scheme.primary),
               const SizedBox(width: AppTheme.spaceMedium),
               Expanded(
                 child: Column(
@@ -268,7 +271,7 @@ class SettingsDialog extends ConsumerWidget {
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.onSurfaceVariant,
+                        color: scheme.onSurfaceVariant,
                       ),
                     ),
                   ],
@@ -282,7 +285,7 @@ class SettingsDialog extends ConsumerWidget {
             min: min,
             max: max,
             onChanged: onChanged,
-            activeColor: AppTheme.primary,
+            activeColor: scheme.primary,
           ),
         ],
       ),
@@ -295,16 +298,17 @@ class SettingsDialog extends ConsumerWidget {
     required String title,
     required String subtitle,
   }) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: AppTheme.spaceSmall),
       padding: const EdgeInsets.all(AppTheme.spaceMedium),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLow,
+        color: scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppTheme.primary),
+          Icon(icon, size: 18, color: scheme.primary),
           const SizedBox(width: AppTheme.spaceMedium),
           Expanded(
             child: Column(
@@ -319,7 +323,7 @@ class SettingsDialog extends ConsumerWidget {
                 Text(
                   subtitle,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.onSurfaceVariant,
+                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -336,7 +340,7 @@ class SettingsDialog extends ConsumerWidget {
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: AppTheme.outlineVariant.withValues(alpha: 0.3),
+            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
           ),
         ),
       ),

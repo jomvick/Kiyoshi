@@ -66,10 +66,27 @@ class AppTheme {
   static const Color priorityLow = Color(0xFF5E5F5F);
   
   // === GLASSMORPHISM (Enhanced for Zen Studio) ===
+  // NOTE: these are the LIGHT-mode glass values, kept as static consts for
+  // backward compatibility with call sites that don't have a BuildContext.
+  // Prefer `AppTheme.glassFillOf(context)` / `glassBorderOf(context)` (or the
+  // `context:`-aware decoration helpers below) so glass panels adapt to dark mode.
   static const Color glassFill = ZenColors.glassFill;
   static const Color glassBorder = ZenColors.glassBorder;
-  static const double blurStrength = 20.0; // Polished 20px blur
-  
+  static const double blurStrength = 20.0; // Polished 20px blur, single source of truth (see KiyoshiZenTokens.blurSigma — to be unified)
+
+  /// True when the current theme is dark. Use instead of checking
+  /// `Theme.of(context).brightness` directly for consistency.
+  static bool isDark(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
+
+  /// Brightness-aware glass fill — warm frosted charcoal in dark mode
+  /// instead of a bright white rectangle on a dark canvas.
+  static Color glassFillOf(BuildContext context) =>
+      isDark(context) ? ZenColors.darkGlassFill : ZenColors.glassFill;
+
+  /// Brightness-aware glass border.
+  static Color glassBorderOf(BuildContext context) =>
+      isDark(context) ? ZenColors.darkGlassBorder : ZenColors.glassBorder;
+
   static double getBlur(BlurDensity density) {
     switch (density) {
       case BlurDensity.low: return 12.0;
@@ -166,126 +183,139 @@ class AppTheme {
     outlineVariant: outlineVariant,
   );
 
+  // "Warm Charcoal" dark scheme — inspired by Claude's dark UI: soft,
+  // warm charcoal surfaces (not near-black/blue-black) with a lightened
+  // sage/teal accent so the Zen brand color stays legible.
   static ColorScheme get _darkColorScheme {
     return const ColorScheme(
       brightness: Brightness.dark,
-      primary: primary,
-      onPrimary: onPrimary,
-      primaryContainer: primaryContainer,
-      onPrimaryContainer: onPrimaryContainer,
-      secondary: secondary,
-      onSecondary: onSecondary,
-      secondaryContainer: secondaryContainer,
-      onSecondaryContainer: onSecondaryContainer,
-      tertiary: tertiary,
-      onTertiary: onTertiary,
-      tertiaryContainer: tertiaryContainer,
-      onTertiaryContainer: onTertiaryContainer,
-      surface: Color(0xFF1E1E1E),
-      onSurface: Colors.white,
-      surfaceContainerLowest: Color(0xFF1A1A1A),
-      surfaceContainerLow: Color(0xFF252525),
-      surfaceContainer: Color(0xFF2A2A2A),
-      surfaceContainerHigh: Color(0xFF333333),
-      onSurfaceVariant: Colors.white70,
+      primary: ZenColors.darkPrimary,
+      onPrimary: ZenColors.darkOnPrimary,
+      primaryContainer: Color(0xFF2F4644),
+      onPrimaryContainer: ZenColors.darkPrimary,
+      secondary: Color(0xFFB3B1A8),
+      onSecondary: ZenColors.darkSurfaceLowest,
+      secondaryContainer: ZenColors.darkSurfaceHigh,
+      onSecondaryContainer: ZenColors.darkOnBackground,
+      tertiary: Color(0xFF9DBAC9),
+      onTertiary: ZenColors.darkSurfaceLowest,
+      tertiaryContainer: Color(0xFF2E3D45),
+      onTertiaryContainer: Color(0xFFC8E3F7),
+      surface: ZenColors.darkSurface,
+      onSurface: ZenColors.darkOnBackground,
+      surfaceContainerLowest: ZenColors.darkSurfaceLowest,
+      surfaceContainerLow: ZenColors.darkSurfaceLow,
+      surfaceContainer: ZenColors.darkSurface,
+      surfaceContainerHigh: ZenColors.darkSurfaceHigh,
+      onSurfaceVariant: ZenColors.darkOnSurfaceVariant,
       error: error,
       onError: onError,
       errorContainer: errorContainer,
       onErrorContainer: onErrorContainer,
-      outline: Color(0xFF444444),
-      outlineVariant: Color(0xFF333333),
+      outline: ZenColors.darkOutline,
+      outlineVariant: ZenColors.darkOutlineVariant,
     );
   }
 
   static TextTheme _buildTextTheme(Brightness brightness) {
+    // Warm off-white / muted-warm-gray text in dark mode (Claude-inspired),
+    // instead of pure Colors.white / white70 / white60 which read cold and
+    // harsh against the warm charcoal background.
+    final isDark = brightness == Brightness.dark;
+    final strongText = isDark ? ZenColors.darkOnBackground : onBackground;
+    final mutedText = isDark ? ZenColors.darkOnSurfaceVariant : onSurfaceVariant;
+    // Slightly dimmer than strongText but warmer/brighter than mutedText —
+    // used where Colors.white70 was previously used for secondary emphasis.
+    const dimStrongDark = Color(0xFFD4D2C8);
+
     final baseTextTheme = TextTheme(
       displayLarge: TextStyle(
         fontSize: 48,
         fontWeight: FontWeight.w600,
-        color: brightness == Brightness.dark ? Colors.white : onBackground,
+        color: strongText,
         letterSpacing: -1.0,
         height: 1.1,
       ),
       displayMedium: TextStyle(
         fontSize: 36,
         fontWeight: FontWeight.w600,
-        color: brightness == Brightness.dark ? Colors.white : onBackground,
+        color: strongText,
         letterSpacing: -0.8,
         height: 1.1,
       ),
       displaySmall: TextStyle(
         fontSize: 28,
         fontWeight: FontWeight.w600,
-        color: brightness == Brightness.dark ? Colors.white : onBackground,
+        color: strongText,
         letterSpacing: -0.5,
         height: 1.2,
       ),
       headlineLarge: TextStyle(
         fontSize: 24,
         fontWeight: FontWeight.w600,
-        color: brightness == Brightness.dark ? Colors.white : onBackground,
+        color: strongText,
         letterSpacing: -0.4,
       ),
       headlineMedium: TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.w600,
-        color: brightness == Brightness.dark ? Colors.white : onBackground,
+        color: strongText,
         letterSpacing: -0.3,
       ),
       headlineSmall: TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.w600,
-        color: brightness == Brightness.dark ? Colors.white : onBackground,
+        color: strongText,
       ),
       titleLarge: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w600,
-        color: brightness == Brightness.dark ? Colors.white : onBackground,
+        color: strongText,
       ),
       titleMedium: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
-        color: brightness == Brightness.dark ? Colors.white : onBackground,
+        color: strongText,
       ),
       titleSmall: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w700,
-        color: brightness == Brightness.dark ? Colors.white70 : onSurfaceVariant,
+        color: isDark ? dimStrongDark : onSurfaceVariant,
         letterSpacing: 1.2,
       ),
       bodyLarge: TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.w400,
-        color: brightness == Brightness.dark ? Colors.white : onBackground,
+        color: strongText,
         height: 1.6,
       ),
       bodyMedium: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w400,
-        color: brightness == Brightness.dark ? Colors.white : onBackground,
+        color: strongText,
         height: 1.6,
       ),
       bodySmall: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w400,
-        color: brightness == Brightness.dark ? Colors.white60 : onSurfaceVariant,
+        color: mutedText,
         height: 1.5,
       ),
-      labelLarge: const TextStyle(
+      labelLarge: TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w500,
-        color: primary,
+        color: isDark ? ZenColors.darkPrimary : primary,
       ),
       labelMedium: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w500,
-        color: brightness == Brightness.dark ? Colors.white70 : onSurfaceVariant,
+        color: isDark ? dimStrongDark : onSurfaceVariant,
         letterSpacing: 0.2,
       ),
       labelSmall: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.w600,
-        color: brightness == Brightness.dark ? Colors.white60 : onSurfaceVariant,
+        color: mutedText,
         letterSpacing: 0.3,
       ),
     );
@@ -316,7 +346,8 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
-      scaffoldBackgroundColor: isDark ? const Color(0xFF121212) : KiyoshiZenTokens.canvas,
+      // Warm charcoal (Claude-inspired) instead of a near-black background.
+      scaffoldBackgroundColor: isDark ? ZenColors.darkCanvas : KiyoshiZenTokens.canvas,
       colorScheme: colorScheme,
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -325,7 +356,7 @@ class AppTheme {
         titleTextStyle: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: isDark ? Colors.white : onBackground,
+          color: isDark ? ZenColors.darkOnBackground : onBackground,
           letterSpacing: -0.3,
         ),
       ),
@@ -334,7 +365,7 @@ class AppTheme {
         elevation: 0,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(radiusLarge),
-          side: BorderSide(color: isDark ? const Color(0xFF333333) : glassBorder, width: 0.5),
+          side: BorderSide(color: isDark ? ZenColors.darkOutlineVariant : glassBorder, width: 0.5),
         ),
       ),
       dividerTheme: const DividerThemeData(
@@ -342,31 +373,34 @@ class AppTheme {
         thickness: 0,
       ),
       iconTheme: IconThemeData(
-        color: isDark ? Colors.white70 : onSurfaceVariant,
+        color: isDark ? ZenColors.darkOnSurfaceVariant : onSurfaceVariant,
         size: 20,
       ),
       textTheme: textTheme,
     );
   }
   
-  static BoxDecoration glassPanel({double radius = radiusLarge}) {
+  /// [context] is optional for backward compatibility, but pass it whenever
+  /// available so the glass panel adapts to dark mode (warm frosted charcoal
+  /// instead of a bright white panel on a dark canvas).
+  static BoxDecoration glassPanel({double radius = radiusLarge, BuildContext? context}) {
     return BoxDecoration(
-      color: glassFill,
+      color: context != null ? glassFillOf(context) : glassFill,
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
-        color: glassBorder,
+        color: context != null ? glassBorderOf(context) : glassBorder,
         width: 1,
       ),
       boxShadow: ambientShadow,
     );
   }
   
-  static BoxDecoration ultraGlass({double radius = 20.0}) {
+  static BoxDecoration ultraGlass({double radius = 20.0, BuildContext? context}) {
     return BoxDecoration(
-      color: glassFill,
+      color: context != null ? glassFillOf(context) : glassFill,
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
-        color: glassBorder,
+        color: context != null ? glassBorderOf(context) : glassBorder,
         width: 1,
       ),
       boxShadow: ambientShadow,
@@ -389,12 +423,13 @@ class AppTheme {
     );
   }
   
-  static BoxDecoration floatingCard({bool isHovered = false}) {
+  static BoxDecoration floatingCard({bool isHovered = false, BuildContext? context}) {
+    final scheme = context != null ? Theme.of(context).colorScheme : null;
     return BoxDecoration(
-      color: surfaceContainerLowest,
+      color: scheme?.surfaceContainerLowest ?? surfaceContainerLowest,
       borderRadius: BorderRadius.circular(radiusLarge),
       border: Border.all(
-        color: outlineVariant,
+        color: scheme?.outlineVariant ?? outlineVariant,
         width: 1,
       ),
       boxShadow: isHovered ? ambientShadowHover : ambientShadow,
@@ -412,12 +447,13 @@ class AppTheme {
     );
   }
   
-  static BoxDecoration glassButton({double radius = radiusXLarge}) {
+  static BoxDecoration glassButton({double radius = radiusXLarge, BuildContext? context}) {
+    final scheme = context != null ? Theme.of(context).colorScheme : null;
     return BoxDecoration(
-      color: surfaceContainerLowest,
+      color: scheme?.surfaceContainerLowest ?? surfaceContainerLowest,
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(
-        color: outlineVariant,
+        color: scheme?.outlineVariant ?? outlineVariant,
         width: 1,
       ),
       boxShadow: [
@@ -430,9 +466,12 @@ class AppTheme {
     );
   }
   
-  static BoxDecoration chip({bool isActive = false}) {
+  static BoxDecoration chip({bool isActive = false, BuildContext? context}) {
+    final scheme = context != null ? Theme.of(context).colorScheme : null;
     return BoxDecoration(
-      color: isActive ? AppTheme.primaryContainer : AppTheme.surfaceContainerLow,
+      color: isActive
+          ? (scheme?.primaryContainer ?? AppTheme.primaryContainer)
+          : (scheme?.surfaceContainerLow ?? AppTheme.surfaceContainerLow),
       borderRadius: BorderRadius.circular(radiusFull),
     );
   }
