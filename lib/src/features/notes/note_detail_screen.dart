@@ -17,29 +17,39 @@ class NoteDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
-  late TextEditingController _controller;
+  late TextEditingController _titleController;
+  late TextEditingController _bodyController;
   bool _isDirty = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.note.content);
-    _controller.addListener(() {
-      if (!_isDirty && _controller.text != widget.note.content) {
-        setState(() => _isDirty = true);
-      }
-    });
+    final initialTitle = widget.note.metadata['title'] as String? ?? 
+        (widget.note.content.isNotEmpty ? widget.note.content.split('\n').first : '');
+    
+    _titleController = TextEditingController(text: initialTitle);
+    _bodyController = TextEditingController(text: widget.note.content);
+
+    _titleController.addListener(_onChanged);
+    _bodyController.addListener(_onChanged);
+  }
+
+  void _onChanged() {
+    if (!_isDirty) {
+      setState(() => _isDirty = true);
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _titleController.dispose();
+    _bodyController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final date = DateFormat('MMM d, yyyy HH:mm').format(
+    final date = DateFormat('MMM d, yyyy • HH:mm').format(
       DateTime.fromMillisecondsSinceEpoch(widget.note.position.toInt() * 1000),
     );
 
@@ -52,6 +62,26 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
           icon: const Icon(LucideIcons.arrowLeft, color: AppTheme.onBackground),
           onPressed: () => _maybePop(),
         ),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(LucideIcons.fileText, size: 16, color: AppTheme.primary),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              'Document Editor',
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: AppTheme.onBackground.withValues(alpha: 0.8),
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+          ],
+        ),
         actions: [
           if (_isDirty)
             IconButton(
@@ -59,8 +89,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
               onPressed: _save,
             ),
           IconButton(
-            icon: const Icon(LucideIcons.trash2,
-                color: AppTheme.onSurfaceVariant),
+            icon: const Icon(LucideIcons.trash2, color: AppTheme.onSurfaceVariant),
             onPressed: () => _delete(),
           ),
         ],
@@ -70,35 +99,79 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(date,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppTheme.onSurfaceVariant.withValues(alpha: 0.45),
-                    )),
+            Row(
+              children: [
+                Icon(
+                  LucideIcons.clock,
+                  size: 13,
+                  color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  date,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppTheme.onSurfaceVariant.withValues(alpha: 0.5),
+                      ),
+                ),
+              ],
+            ),
             const SizedBox(height: AppTheme.spaceMedium),
             Expanded(
               child: ZenGlassCard(
                 radius: 24,
-                opacity: 0.4,
-                padding: const EdgeInsets.all(24),
-                child: TextField(
-                  controller: _controller,
-                  autofocus: true,
-                  maxLines: null,
-                  expands: true,
-                  textAlignVertical: TextAlignVertical.top,
-                  cursorColor: AppTheme.primary,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.onBackground.withValues(alpha: 0.85),
-                        height: 1.8,
+                opacity: 0.5,
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  children: [
+                    // Document Title Field
+                    TextField(
+                      controller: _titleController,
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: AppTheme.onBackground,
+                            fontWeight: FontWeight.w700,
+                          ),
+                      cursorColor: AppTheme.primary,
+                      decoration: InputDecoration(
+                        hintText: 'Note Title…',
+                        hintStyle: TextStyle(
+                          color: AppTheme.onSurfaceVariant.withValues(alpha: 0.3),
+                          fontWeight: FontWeight.w600,
+                        ),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
                       ),
-                  decoration: InputDecoration(
-                    hintText: 'Write your note…',
-                    hintStyle: TextStyle(
-                        color: AppTheme.onSurfaceVariant.withValues(alpha: 0.3)),
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.zero,
-                  ),
+                    ),
+                    const SizedBox(height: 16),
+                    Divider(
+                      color: AppTheme.primary.withValues(alpha: 0.12),
+                      height: 1,
+                    ),
+                    const SizedBox(height: 16),
+                    // Document Body Field
+                    Expanded(
+                      child: TextField(
+                        controller: _bodyController,
+                        maxLines: null,
+                        expands: true,
+                        textAlignVertical: TextAlignVertical.top,
+                        cursorColor: AppTheme.primary,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: AppTheme.onBackground.withValues(alpha: 0.85),
+                              height: 1.8,
+                            ),
+                        decoration: InputDecoration(
+                          hintText: 'Start typing note content here…',
+                          hintStyle: TextStyle(
+                            color: AppTheme.onSurfaceVariant.withValues(alpha: 0.3),
+                          ),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -109,11 +182,22 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
   }
 
   Future<void> _save() async {
-    final text = _controller.text.trim();
-    if (text.isEmpty || text == widget.note.content) return;
-    final updated = widget.note.copyWith(content: text);
+    final title = _titleController.text.trim();
+    final body = _bodyController.text;
+
+    final updatedMetadata = Map<String, dynamic>.from(widget.note.metadata);
+    if (title.isNotEmpty) {
+      updatedMetadata['title'] = title;
+    }
+
+    final updated = widget.note.copyWith(
+      content: body,
+      metadata: updatedMetadata,
+    );
+
     await ref.read(blockServiceProvider).updateBlock(updated);
     setState(() => _isDirty = false);
+
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

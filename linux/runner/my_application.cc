@@ -52,6 +52,12 @@ static void my_application_activate(GApplication* application) {
     gtk_window_set_title(window, "kiyoshi");
   }
 
+  // Set application window icon for desktop taskbar and window frame
+  g_autoptr(GError) icon_error = nullptr;
+  if (!gtk_window_set_icon_from_file(window, "assets/icons/kiyoshi.png", &icon_error)) {
+    gtk_window_set_icon_from_file(window, "packaging/kiyoshi.png", nullptr);
+  }
+
   gtk_window_set_default_size(window, 1280, 720);
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();

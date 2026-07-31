@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kiyoshi/src/core/theme/app_theme.dart';
 import 'package:kiyoshi/src/features/projects/domain/entities/project.dart';
+import 'package:kiyoshi/src/shared/widgets/zen_glass_card.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class ProjectCard extends StatefulWidget {
   final Project project;
   final VoidCallback? onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final int index;
 
   const ProjectCard({
     super.key,
@@ -16,6 +19,7 @@ class ProjectCard extends StatefulWidget {
     this.onTap,
     this.onEdit,
     this.onDelete,
+    this.index = 0,
   });
 
   @override
@@ -35,66 +39,132 @@ class _ProjectCardState extends State<ProjectCard> {
         onTap: widget.onTap,
         child: AnimatedContainer(
           duration: AppTheme.animFast,
-          margin: const EdgeInsets.only(bottom: AppTheme.spaceMedium),
-          padding: const EdgeInsets.all(AppTheme.spaceMedium),
-          decoration: BoxDecoration(
-            color: _isHovering
-                ? Colors.white.withValues(alpha: 0.85)
-                : Colors.white.withValues(alpha: 0.6),
-            borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-            border: Border.all(
-              color: _isHovering
-                  ? AppTheme.primary.withValues(alpha: 0.25)
-                  : AppTheme.outline.withValues(alpha: 0.15),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: _isHovering ? 0.06 : 0.03),
-                blurRadius: _isHovering ? 16 : 8,
-                offset: Offset(0, _isHovering ? 6 : 3),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildHeader(),
-              const SizedBox(height: AppTheme.spaceMedium),
-              _buildTitle(),
-              if (widget.project.description.isNotEmpty) ...[
-                const SizedBox(height: AppTheme.spaceSmall),
-                _buildDescription(),
+          child: ZenGlassCard(
+            radius: 22,
+            opacity: _isHovering ? 0.65 : 0.5,
+            padding: EdgeInsets.zero,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── Title header section ──
+                _buildTitleHeader(context),
+                // ── Body section: description ──
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Description
+                        Expanded(
+                          child: Text(
+                            widget.project.description.isNotEmpty
+                                ? widget.project.description
+                                : 'No description',
+                            maxLines: 4,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: widget.project.description.isNotEmpty
+                                      ? AppTheme.onSurfaceVariant.withValues(alpha: 0.7)
+                                      : AppTheme.onSurfaceVariant.withValues(alpha: 0.35),
+                                  height: 1.5,
+                                  fontSize: 12,
+                                  fontStyle: widget.project.description.isEmpty
+                                      ? FontStyle.italic
+                                      : FontStyle.normal,
+                                ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        // Footer: deadline + date
+                        _buildFooter(context),
+                      ],
+                    ),
+                  ),
+                ),
               ],
-              const SizedBox(height: AppTheme.spaceMedium),
-              _buildFooter(),
-            ],
+            ),
           ),
         ),
+      ),
+    )
+        .animate(delay: Duration(milliseconds: 30 * widget.index))
+        .fadeIn(duration: 300.ms)
+        .slideY(begin: 0.05, curve: Curves.easeOutCubic);
+  }
+
+  Widget _buildTitleHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 12, 12),
+      decoration: BoxDecoration(
+        color: AppTheme.primary.withValues(alpha: 0.06),
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(22),
+          topRight: Radius.circular(22),
+        ),
+        border: Border(
+          bottom: BorderSide(
+            color: AppTheme.primary.withValues(alpha: 0.1),
+            width: 1,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          // Project icon
+          Container(
+            padding: const EdgeInsets.all(7),
+            decoration: BoxDecoration(
+              color: widget.project.statusColor.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              LucideIcons.folder,
+              size: 16,
+              color: widget.project.statusColor,
+            ),
+          ),
+          const SizedBox(width: 10),
+          // Title
+          Expanded(
+            child: Text(
+              widget.project.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.onBackground,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                  ),
+            ),
+          ),
+          // Hover actions
+          if (_isHovering) ...[
+            _buildSmallAction(
+              icon: LucideIcons.pencil,
+              onTap: widget.onEdit,
+            ),
+            const SizedBox(width: 4),
+            _buildSmallAction(
+              icon: LucideIcons.trash2,
+              onTap: widget.onDelete,
+              danger: true,
+            ),
+          ] else ...[
+            // Status dot indicator
+            _buildStatusDot(),
+          ],
+        ],
       ),
     );
   }
 
-  Widget _buildHeader() {
-    return Row(
-      children: [
-        _buildStatusBadge(),
-        const Spacer(),
-        if (_isHovering) _buildActions(),
-      ],
-    );
-  }
-
-  Widget _buildStatusBadge() {
+  Widget _buildStatusDot() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: widget.project.statusColor.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppTheme.radiusFull),
-        border: Border.all(
-          color: widget.project.statusColor.withValues(alpha: 0.25),
-          width: 1,
-        ),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -107,14 +177,13 @@ class _ProjectCardState extends State<ProjectCard> {
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: 5),
           Text(
             widget.project.status.label,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: FontWeight.w600,
               color: widget.project.statusColor,
-              letterSpacing: 0.3,
             ),
           ),
         ],
@@ -122,74 +191,50 @@ class _ProjectCardState extends State<ProjectCard> {
     );
   }
 
-  Widget _buildActions() {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (widget.onEdit != null)
-          _buildIconButton(icon: LucideIcons.pencil, onTap: widget.onEdit!),
-        const SizedBox(width: AppTheme.spaceXSmall),
-        if (widget.onDelete != null)
-          _buildIconButton(icon: LucideIcons.trash2, onTap: widget.onDelete!),
-      ],
-    );
-  }
-
-  Widget _buildIconButton({required IconData icon, required VoidCallback onTap}) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+  Widget _buildSmallAction({
+    required IconData icon,
+    VoidCallback? onTap,
+    bool danger = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
         child: Container(
-          padding: const EdgeInsets.all(6),
+          padding: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            color: danger
+                ? Colors.red.withValues(alpha: 0.08)
+                : AppTheme.primary.withValues(alpha: 0.07),
+            borderRadius: BorderRadius.circular(7),
+          ),
           child: Icon(
             icon,
-            size: 14,
-            color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+            size: 13,
+            color: danger
+                ? Colors.red.withValues(alpha: 0.7)
+                : AppTheme.primary.withValues(alpha: 0.6),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildTitle() {
-    return Text(
-      widget.project.title,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w700,
-        color: AppTheme.onBackground,
-        letterSpacing: -0.3,
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  Widget _buildDescription() {
-    return Text(
-      widget.project.description,
-      style: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w400,
-        color: AppTheme.onSurfaceVariant.withValues(alpha: 0.7),
-        height: 1.5,
-      ),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  Widget _buildFooter() {
+  Widget _buildFooter(BuildContext context) {
     return Row(
       children: [
         if (widget.project.deadline != null) ...[
           _buildDeadlineChip(),
-          const SizedBox(width: AppTheme.spaceSmall),
-        ],
-        const Spacer(),
-        _buildDateInfo(),
+          const Spacer(),
+        ] else
+          const Spacer(),
+        Text(
+          _formatRelativeDate(widget.project.updatedAt),
+          style: TextStyle(
+            fontSize: 10,
+            color: AppTheme.onSurfaceVariant.withValues(alpha: 0.45),
+          ),
+        ),
       ],
     );
   }
@@ -199,43 +244,25 @@ class _ProjectCardState extends State<ProjectCard> {
     final dateColor = isOverdue ? AppTheme.error : AppTheme.primary;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
         color: dateColor.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-        border: Border.all(
-          color: dateColor.withValues(alpha: 0.15),
-          width: 0.5,
-        ),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            LucideIcons.calendar,
-            size: 12,
-            color: dateColor,
-          ),
+          Icon(LucideIcons.calendar, size: 11, color: dateColor),
           const SizedBox(width: 4),
           Text(
-            DateFormat('MMM d, yyyy').format(widget.project.deadline!),
+            DateFormat('MMM d').format(widget.project.deadline!),
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 10,
               fontWeight: FontWeight.w600,
               color: dateColor,
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildDateInfo() {
-    return Text(
-      'Updated ${_formatRelativeDate(widget.project.updatedAt)}',
-      style: TextStyle(
-        fontSize: 11,
-        color: AppTheme.onSurfaceVariant.withValues(alpha: 0.5),
       ),
     );
   }

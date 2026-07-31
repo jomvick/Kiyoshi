@@ -121,14 +121,20 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
         _buildProjectsHeader(projects.length),
         const SizedBox(height: AppTheme.spaceMedium),
         Expanded(
-          child: ListView.builder(
+          child: GridView.builder(
             padding: const EdgeInsets.only(bottom: 120),
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: 260,
+              mainAxisExtent: 240,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+            ),
             itemCount: projects.length,
-            itemExtent: 140, // Increased: header(40) + title(24) + desc(40) + footer(30) = ~134px + margin
             itemBuilder: (context, index) {
               final project = projects[index];
               return ProjectCard(
                 project: project,
+                index: index,
                 onTap: () => _openProject(project),
                 onEdit: () => _showEditProjectDialog(project),
                 onDelete: () => _deleteProject(project),

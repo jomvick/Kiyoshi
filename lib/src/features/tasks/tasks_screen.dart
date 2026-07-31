@@ -17,6 +17,8 @@ import 'package:kiyoshi/src/shared/widgets/zen_glass_card.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+enum TaskViewMode { list, board }
+
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
 
@@ -26,6 +28,12 @@ class TasksScreen extends ConsumerStatefulWidget {
 
 class _TasksScreenState extends ConsumerState<TasksScreen> {
   final ScrollController _kanbanScrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  
+  TaskViewMode _viewMode = TaskViewMode.list;
+  String _statusFilter = 'all'; // 'all', 'todo', 'inProgress', 'done'
+  String _searchQuery = '';
+
   List<Board> _boards = const [
     Board(id: 'todo', title: 'To Do', workspaceId: 'global', order: 0),
     Board(id: 'inProgress', title: 'In Progress', workspaceId: 'global', order: 1),
@@ -41,6 +49,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   @override
   void dispose() {
     _kanbanScrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -119,124 +128,349 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     }
   }
 
-  Future<void> _onAddTask(String status) async {
-    final nameController = TextEditingController();
+  void _showTaskModal({ZenBlock? blockToEdit, String? defaultStatus}) {
+    final nameController = TextEditingController(text: blockToEdit?.content ?? '');
+    final descController = TextEditingController(text: blockToEdit?.metadata['description'] ?? '');
+    String selectedStatus = blockToEdit?.metadata['status'] ?? defaultStatus ?? 'todo';
+    int selectedPriority = blockToEdit?.metadata['priority'] ?? 2; // 1: High, 2: Medium, 3: Low
 
     showDialog(
       context: context,
-      builder: (dialogContext) => Dialog(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        child: ZenGlassCard(
-          radius: 32,
-          padding: const EdgeInsets.all(32),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (ctx, setModalState) => Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: ZenGlassCard(
+            radius: 28,
+            opacity: 0.9,
+            padding: const EdgeInsets.all(28),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primary.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              blockToEdit != null ? LucideIcons.pencil : LucideIcons.plusCircle,
+                              color: AppTheme.primary,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Text(
+                            blockToEdit != null ? 'Edit Task' : 'New Task',
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: AppTheme.onBackground,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18,
+                                ),
+                          ),
+                        ],
                       ),
-                      child: const Icon(LucideIcons.penTool, color: AppTheme.primary, size: 20),
-                    ),
-                    const SizedBox(width: 16),
-                    Text(
-                      'Capture Intent',
-                      style: TextStyle(
-                        color: AppTheme.onBackground.withValues(alpha: 0.8),
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.5,
+                      IconButton(
+                        icon: const Icon(LucideIcons.x, size: 18),
+                        onPressed: () => Navigator.pop(dialogContext),
+                        color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                TextField(
-                  controller: nameController,
-                  autofocus: true,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  cursorColor: AppTheme.primary,
-                  decoration: InputDecoration(
-                    hintText: 'What needs to be done?',
-                    hintStyle: TextStyle(
-                      color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4),
-                      fontWeight: FontWeight.w400,
-                    ),
-                    border: InputBorder.none,
-                    filled: true,
-                    fillColor: Colors.white.withValues(alpha: 0.6),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.8)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  // Title Input
+                  TextField(
+                    controller: nameController,
+                    autofocus: true,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: AppTheme.onBackground,
+                          fontWeight: FontWeight.w500,
+                        ),
+                    decoration: InputDecoration(
+                      hintText: 'Task title…',
+                      hintStyle: TextStyle(
+                        color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4),
+                      ),
+                      filled: true,
+                      fillColor: AppTheme.isDark(context)
+                          ? Colors.black.withValues(alpha: 0.25)
+                          : Colors.white.withValues(alpha: 0.6),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(color: AppTheme.primary.withValues(alpha: 0.12)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+                      ),
                     ),
                   ),
-        onSubmitted: (value) async {
-          if (value.trim().isNotEmpty) {
-            final parsed = ParsedBlock(
-              type: 'todo',
-              content: value.trim(),
-              metadata: {'status': status},
-            );
-            await ref.read(blockServiceProvider).addBlock('global', parsed);
-            if (context.mounted) Navigator.pop(dialogContext);
-          }
-        },
-      ),
-      const SizedBox(height: 24),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            style: TextButton.styleFrom(
-              foregroundColor: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
-            ),
-            child: const Text('Cancel')
-          ),
-          const SizedBox(width: 12),
-          ElevatedButton(
-            onPressed: () async {
-              if (nameController.text.trim().isNotEmpty) {
-                final parsed = ParsedBlock(
-                  type: 'todo',
-                  content: nameController.text.trim(),
-                  metadata: {'status': status},
-                );
-                await ref.read(blockServiceProvider).addBlock('global', parsed);
-                if (context.mounted) Navigator.pop(dialogContext);
-              }
-            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 14),
+                  // Description Input
+                  TextField(
+                    controller: descController,
+                    maxLines: 2,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppTheme.onBackground,
+                        ),
+                    decoration: InputDecoration(
+                      hintText: 'Description or notes (optional)…',
+                      hintStyle: TextStyle(
+                        color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4),
+                      ),
+                      filled: true,
+                      fillColor: AppTheme.isDark(context)
+                          ? Colors.black.withValues(alpha: 0.25)
+                          : Colors.white.withValues(alpha: 0.6),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: BorderSide(color: AppTheme.primary.withValues(alpha: 0.12)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Status selector chips
+                  Text(
+                    'STATUS',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.2,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      _buildChipOption(
+                        label: 'To Do',
+                        icon: LucideIcons.circle,
+                        isSelected: selectedStatus == 'todo',
+                        onTap: () => setModalState(() => selectedStatus = 'todo'),
+                      ),
+                      const SizedBox(width: 8),
+                      _buildChipOption(
+                        label: 'In Progress',
+                        icon: LucideIcons.clock,
+                        isSelected: selectedStatus == 'inProgress',
+                        onTap: () => setModalState(() => selectedStatus = 'inProgress'),
+                      ),
+                      const SizedBox(width: 8),
+                      _buildChipOption(
+                        label: 'Done',
+                        icon: LucideIcons.checkCircle2,
+                        isSelected: selectedStatus == 'done',
+                        onTap: () => setModalState(() => selectedStatus = 'done'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  // Priority selector chips
+                  Text(
+                    'PRIORITY',
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.2,
+                        ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      _buildPriorityChip(
+                        label: 'Low',
+                        color: Colors.blueGrey,
+                        isSelected: selectedPriority == 3,
+                        onTap: () => setModalState(() => selectedPriority = 3),
+                      ),
+                      const SizedBox(width: 8),
+                      _buildPriorityChip(
+                        label: 'Medium',
+                        color: Colors.amber,
+                        isSelected: selectedPriority == 2,
+                        onTap: () => setModalState(() => selectedPriority = 2),
+                      ),
+                      const SizedBox(width: 8),
+                      _buildPriorityChip(
+                        label: 'High',
+                        color: Colors.redAccent,
+                        isSelected: selectedPriority == 1,
+                        onTap: () => setModalState(() => selectedPriority = 1),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(dialogContext),
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            color: AppTheme.onSurfaceVariant.withValues(alpha: 0.7),
+                          ),
                         ),
                       ),
-                      child: const Text('Create', style: TextStyle(fontWeight: FontWeight.w600)),
-                    ),
-                  ],
-                )
-              ],
+                      const SizedBox(width: 12),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          final title = nameController.text.trim();
+                          if (title.isEmpty) return;
+                          final desc = descController.text.trim();
+
+                          if (blockToEdit != null) {
+                            final meta = Map<String, dynamic>.from(blockToEdit.metadata);
+                            meta['status'] = selectedStatus;
+                            meta['priority'] = selectedPriority;
+                            if (desc.isNotEmpty) {
+                              meta['description'] = desc;
+                            } else {
+                              meta.remove('description');
+                            }
+                            final updated = blockToEdit.copyWith(
+                              content: title,
+                              metadata: meta,
+                            );
+                            await ref.read(blockServiceProvider).updateBlock(updated);
+                          } else {
+                            final parsed = ParsedBlock(
+                              type: 'todo',
+                              content: title,
+                              metadata: {
+                                'status': selectedStatus,
+                                'priority': selectedPriority,
+                                if (desc.isNotEmpty) 'description': desc,
+                              },
+                            );
+                            await ref.read(blockServiceProvider).addBlock('global', parsed);
+                          }
+                          if (context.mounted) Navigator.pop(dialogContext);
+                        },
+                        icon: const Icon(LucideIcons.check, size: 16, color: Colors.white),
+                        label: Text(
+                          blockToEdit != null ? 'Save Changes' : 'Create Task',
+                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.primary,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-      ).animate().fadeIn(duration: 200.ms).scaleXY(begin: 0.95, end: 1.0, curve: Curves.easeOutQuart),
+      ),
+    );
+  }
+
+  Widget _buildChipOption({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppTheme.primary.withValues(alpha: 0.15)
+              : Colors.black.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? AppTheme.primary : Colors.transparent,
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected ? AppTheme.primary : AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? AppTheme.primary : AppTheme.onSurfaceVariant.withValues(alpha: 0.8),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPriorityChip({
+    required String label,
+    required Color color,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.04),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected ? color : Colors.transparent,
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: color,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? color : AppTheme.onSurfaceVariant.withValues(alpha: 0.8),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -298,11 +532,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              style: TextButton.styleFrom(
+                      onPressed: () => Navigator.pop(dialogContext),
+                      style: TextButton.styleFrom(
                         foregroundColor: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
                       ),
-                      child: const Text('Cancel')
+                      child: const Text('Cancel'),
                     ),
                     const SizedBox(width: 12),
                     ElevatedButton(
@@ -317,8 +551,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           setState(() {
                             _boards = [..._boards, newBoard];
                           });
-                  await _saveBoards();
-                  if (dialogContext.mounted) Navigator.pop(dialogContext);
+                          await _saveBoards();
+                          if (dialogContext.mounted) Navigator.pop(dialogContext);
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -342,46 +576,306 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     );
   }
 
-  Widget _buildMetricsPill(List<ZenBlock> blocks) {
+  Widget _buildMetricsBanner(List<ZenBlock> blocks) {
     final int total = blocks.length;
     final int done = blocks.where((b) => (b.metadata['status'] ?? 'todo') == 'done').length;
     final int inProgress = blocks.where((b) => b.metadata['status'] == 'inProgress').length;
+    final int todo = blocks.where((b) => (b.metadata['status'] ?? 'todo') == 'todo').length;
     
     final double progress = total == 0 ? 0 : (done / total);
 
     return Container(
       margin: const EdgeInsets.only(top: 16),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.1)),
+        color: AppTheme.isDark(context)
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.white.withValues(alpha: 0.6),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.12)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            width: 16,
-            height: 16,
+            width: 22,
+            height: 22,
             child: CircularProgressIndicator(
               value: progress,
-              strokeWidth: 3,
-              backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
+              strokeWidth: 3.5,
+              backgroundColor: AppTheme.primary.withValues(alpha: 0.12),
               valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF34C759)),
             ),
           ),
-          const SizedBox(width: 12),
-          Text(
-            '$inProgress In Progress • $done Completed',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.onSurfaceVariant.withValues(alpha: 0.8),
+          const SizedBox(width: 14),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '${(progress * 100).toInt()}% completed',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.onBackground.withValues(alpha: 0.9),
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '$todo To Do • $inProgress In Progress • $done Done',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: AppTheme.onSurfaceVariant.withValues(alpha: 0.65),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 150.ms).slideX(begin: -0.05);
+  }
+
+  Widget _buildToolbar(List<ZenBlock> allBlocks) {
+    final int total = allBlocks.length;
+    final int todoCount = allBlocks.where((b) => (b.metadata['status'] ?? 'todo') == 'todo').length;
+    final int inProgressCount = allBlocks.where((b) => b.metadata['status'] == 'inProgress').length;
+    final int doneCount = allBlocks.where((b) => b.metadata['status'] == 'done').length;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.frameMargin),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              // View mode switch toggle
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppTheme.isDark(context)
+                      ? Colors.black.withValues(alpha: 0.25)
+                      : Colors.white.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppTheme.primary.withValues(alpha: 0.12)),
+                ),
+                child: Row(
+                  children: [
+                    _buildViewModeButton(
+                      mode: TaskViewMode.list,
+                      icon: LucideIcons.list,
+                      label: 'List',
+                    ),
+                    const SizedBox(width: 4),
+                    _buildViewModeButton(
+                      mode: TaskViewMode.board,
+                      icon: LucideIcons.kanban,
+                      label: 'Board',
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Search field
+              Expanded(
+                child: ZenGlassCard(
+                  radius: 16,
+                  opacity: 0.5,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                  child: Row(
+                    children: [
+                      Icon(LucideIcons.search,
+                          size: 16,
+                          color: AppTheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (v) => setState(() => _searchQuery = v),
+                          style: Theme.of(context).textTheme.bodySmall,
+                          decoration: InputDecoration(
+                            hintText: 'Search tasks…',
+                            hintStyle: TextStyle(
+                              color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4),
+                              fontSize: 13,
+                            ),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                      if (_searchQuery.isNotEmpty)
+                        GestureDetector(
+                          onTap: () {
+                            _searchController.clear();
+                            setState(() => _searchQuery = '');
+                          },
+                          child: Icon(LucideIcons.x,
+                              size: 14,
+                              color: AppTheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 14),
+              // New Task Button
+              GestureDetector(
+                onTap: () => _showTaskModal(),
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: Container(
+                    height: 44,
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primary,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.primary.withValues(alpha: 0.25),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(LucideIcons.plus, size: 16, color: Colors.white),
+                        SizedBox(width: 6),
+                        Text(
+                          'New Task',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Filter Tabs Row
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildFilterTab('all', 'All Tasks', total),
+                const SizedBox(width: 8),
+                _buildFilterTab('todo', 'To Do', todoCount),
+                const SizedBox(width: 8),
+                _buildFilterTab('inProgress', 'In Progress', inProgressCount),
+                const SizedBox(width: 8),
+                _buildFilterTab('done', 'Completed', doneCount),
+              ],
             ),
           ),
         ],
       ),
-    ).animate().fadeIn(delay: 200.ms).slideX(begin: -0.05);
+    ).animate().fadeIn(delay: 100.ms, duration: 300.ms);
+  }
+
+  Widget _buildViewModeButton({
+    required TaskViewMode mode,
+    required IconData icon,
+    required String label,
+  }) {
+    final bool isSelected = _viewMode == mode;
+    return GestureDetector(
+      onTap: () => setState(() => _viewMode = mode),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          decoration: BoxDecoration(
+            color: isSelected ? AppTheme.primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: isSelected ? Colors.white : AppTheme.onSurfaceVariant.withValues(alpha: 0.7),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected ? Colors.white : AppTheme.onSurfaceVariant.withValues(alpha: 0.8),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterTab(String statusKey, String label, int count) {
+    final bool isSelected = _statusFilter == statusKey;
+    return GestureDetector(
+      onTap: () => setState(() => _statusFilter = statusKey),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppTheme.primary.withValues(alpha: 0.15)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected
+                  ? AppTheme.primary
+                  : AppTheme.onSurfaceVariant.withValues(alpha: 0.15),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color: isSelected
+                      ? AppTheme.primary
+                      : AppTheme.onSurfaceVariant.withValues(alpha: 0.75),
+                ),
+              ),
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppTheme.primary
+                      : AppTheme.onSurfaceVariant.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  '$count',
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    color: isSelected ? Colors.white : AppTheme.onSurfaceVariant.withValues(alpha: 0.7),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -394,6 +888,18 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       child: blocksAsync.when(
         data: (blocks) {
           final todoBlocks = blocks.where((b) => b.type == 'todo').toList();
+
+          // Filter tasks based on search & status filter
+          final filteredBlocks = todoBlocks.where((b) {
+            final status = b.metadata['status'] ?? 'todo';
+            final matchesStatus = _statusFilter == 'all' || status == _statusFilter;
+            final matchesSearch = _searchQuery.isEmpty ||
+                b.content.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                (b.metadata['description'] != null &&
+                    (b.metadata['description'] as String).toLowerCase().contains(_searchQuery.toLowerCase()));
+            return matchesStatus && matchesSearch;
+          }).toList();
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -401,10 +907,14 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 label: 'Strategic Space',
                 title: 'Global Tasks',
                 subtitle: 'Orchestrate your progress across all sanctuaries.',
-                progressIndicator: _buildMetricsPill(todoBlocks),
+                progressIndicator: _buildMetricsBanner(todoBlocks),
               ),
+              _buildToolbar(todoBlocks),
+              const SizedBox(height: 16),
               Expanded(
-                child: _buildKanbanBoard(todoBlocks, columnWidth: kanbanWidth),
+                child: _viewMode == TaskViewMode.list
+                    ? _buildTaskListView(filteredBlocks)
+                    : _buildKanbanBoard(todoBlocks, columnWidth: kanbanWidth),
               ),
             ],
           );
@@ -415,8 +925,206 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     );
   }
 
+  Widget _buildTaskListView(List<ZenBlock> blocks) {
+    if (blocks.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(LucideIcons.checkSquare,
+                size: 52, color: AppTheme.primary.withValues(alpha: 0.2)),
+            const SizedBox(height: 16),
+            Text(
+              'No tasks found',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: AppTheme.onBackground.withValues(alpha: 0.5),
+                    fontWeight: FontWeight.w600,
+                  ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Click + New Task to capture your next objective.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppTheme.onSurfaceVariant.withValues(alpha: 0.45),
+                  ),
+            ),
+          ],
+        ),
+      ).animate().fadeIn(duration: 300.ms);
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.frameMargin),
+      child: ListView.separated(
+        padding: const EdgeInsets.only(bottom: 40),
+        itemCount: blocks.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 10),
+        itemBuilder: (ctx, i) => _buildTaskRow(blocks[i], i),
+      ),
+    );
+  }
+
+  Widget _buildTaskRow(ZenBlock block, int index) {
+    final status = block.metadata['status'] ?? 'todo';
+    final isDone = status == 'done';
+    final priorityVal = block.metadata['priority'] as int? ?? 2;
+    final description = block.metadata['description'] as String?;
+
+    Color priorityColor;
+    String priorityText;
+    if (priorityVal == 1) {
+      priorityColor = Colors.redAccent;
+      priorityText = 'High';
+    } else if (priorityVal == 2) {
+      priorityColor = Colors.amber;
+      priorityText = 'Medium';
+    } else {
+      priorityColor = Colors.blueGrey;
+      priorityText = 'Low';
+    }
+
+    return ZenGlassCard(
+      radius: 18,
+      opacity: isDone ? 0.3 : 0.5,
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      child: Row(
+        children: [
+          // Checkbox toggle button
+          GestureDetector(
+            onTap: () => _onTaskToggle(block),
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: isDone
+                      ? AppTheme.primary
+                      : Colors.transparent,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isDone
+                        ? AppTheme.primary
+                        : AppTheme.onSurfaceVariant.withValues(alpha: 0.35),
+                    width: 2,
+                  ),
+                ),
+                child: isDone
+                    ? const Icon(LucideIcons.check, size: 14, color: Colors.white)
+                    : null,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          // Task Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  block.content,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: isDone
+                            ? AppTheme.onSurfaceVariant.withValues(alpha: 0.45)
+                            : AppTheme.onBackground.withValues(alpha: 0.9),
+                        fontWeight: FontWeight.w600,
+                        decoration: isDone ? TextDecoration.lineThrough : null,
+                      ),
+                ),
+                if (description != null && description.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppTheme.onSurfaceVariant.withValues(alpha: 0.55),
+                          fontSize: 12,
+                        ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Priority badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: priorityColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: priorityColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  priorityText,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: priorityColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          // Edit action
+          _buildIconButton(
+            LucideIcons.pencil,
+            () => _showTaskModal(blockToEdit: block),
+          ),
+          const SizedBox(width: 6),
+          // Delete action
+          _buildIconButton(
+            LucideIcons.trash2,
+            () async {
+              await ref.read(blockServiceProvider).deleteBlock(block);
+            },
+            danger: true,
+          ),
+        ],
+      ),
+    ).animate(delay: Duration(milliseconds: 25 * index)).fadeIn(duration: 250.ms);
+  }
+
+  Widget _buildIconButton(IconData icon, VoidCallback onTap, {bool danger = false}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: danger
+                ? Colors.red.withValues(alpha: 0.08)
+                : AppTheme.primary.withValues(alpha: 0.07),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            size: 14,
+            color: danger
+                ? Colors.red.withValues(alpha: 0.7)
+                : AppTheme.primary.withValues(alpha: 0.6),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _onDeleteBoard(String boardId, List<ZenBlock> boardBlocks) async {
-    // 1. Move tasks to 'todo'
+    // Move tasks to 'todo'
     for (final block in boardBlocks) {
       final updatedMetadata = Map<String, dynamic>.from(block.metadata);
       updatedMetadata['status'] = 'todo';
@@ -424,118 +1132,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       await ref.read(blockServiceProvider).updateBlock(updatedBlock);
     }
 
-    // 2. Remove board
+    // Remove board
     setState(() {
       _boards.removeWhere((b) => b.id == boardId);
     });
     await _saveBoards();
-  }
-
-  Future<void> _onEditTask(ZenBlock block) async {
-    final nameController = TextEditingController(text: block.content);
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) => Dialog(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        child: ZenGlassCard(
-          radius: 32,
-          padding: const EdgeInsets.all(32),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(LucideIcons.pencil, color: AppTheme.primary, size: 20),
-                    ),
-                    const SizedBox(width: 16),
-                    Text(
-                      'Edit Task',
-                      style: TextStyle(
-                        color: AppTheme.onBackground.withValues(alpha: 0.8),
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                TextField(
-                  controller: nameController,
-                  autofocus: true,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  cursorColor: AppTheme.primary,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    filled: true,
-                    fillColor: Colors.white.withValues(alpha: 0.6),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.8)),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
-                    ),
-                  ),
-        onSubmitted: (value) async {
-          if (value.trim().isNotEmpty) {
-            final updatedBlock = block.copyWith(content: value.trim());
-            await ref.read(blockServiceProvider).updateBlock(updatedBlock);
-            if (context.mounted) Navigator.pop(dialogContext);
-          }
-        },
-      ),
-      const SizedBox(height: 24),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            style: TextButton.styleFrom(
-              foregroundColor: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
-            ),
-            child: const Text('Cancel')
-          ),
-          const SizedBox(width: 12),
-          ElevatedButton(
-            onPressed: () async {
-              if (nameController.text.trim().isNotEmpty) {
-                final updatedBlock = block.copyWith(content: nameController.text.trim());
-                await ref.read(blockServiceProvider).updateBlock(updatedBlock);
-                if (context.mounted) Navigator.pop(dialogContext);
-              }
-            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primary,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text('Save', style: TextStyle(fontWeight: FontWeight.w600)),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-        ),
-      ).animate().fadeIn(duration: 200.ms).scaleXY(begin: 0.95, end: 1.0, curve: Curves.easeOutQuart),
-    );
   }
 
   Widget _buildKanbanBoard(List<ZenBlock> blocks, {double columnWidth = 320}) {
@@ -550,91 +1151,95 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           },
         ),
         child: Scrollbar(
-            controller: _kanbanScrollController,
+          controller: _kanbanScrollController,
           thickness: 6.0,
           radius: const Radius.circular(8.0),
           thumbVisibility: true,
           child: LayoutBuilder(
             builder: (context, constraints) => SingleChildScrollView(
-            controller: _kanbanScrollController,
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minWidth: constraints.maxWidth),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-            children: _boards.asMap().entries.map((entry) {
-              final index = entry.key;
-              final board = entry.value;
-              final boardBlocks = blocks.where((b) => (b.metadata['status'] ?? 'todo') == board.id).toList();
-              final boardTasks = boardBlocks.map(_mapToTask).toList();
-              final isDefault = const ['todo', 'inProgress', 'done'].contains(board.id);
+              controller: _kanbanScrollController,
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: _boards.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final board = entry.value;
+                    final boardBlocks = blocks.where((b) {
+                      final status = b.metadata['status'] ?? 'todo';
+                      final matchesSearch = _searchQuery.isEmpty ||
+                          b.content.toLowerCase().contains(_searchQuery.toLowerCase());
+                      return status == board.id && matchesSearch;
+                    }).toList();
 
-              return Padding(
-                padding: const EdgeInsets.only(right: AppTheme.spaceLarge),
-                child: SizedBox(
-                  width: columnWidth,
-                  child: KanbanColumn(
-                    board: board,
-                    tasks: boardTasks,
-                    onAddTask: () => _onAddTask(board.id),
-                    onBoardDeleted: isDefault ? null : () => _onDeleteBoard(board.id, boardBlocks),
-                    onTaskTap: (task) {
-                      final block = boardBlocks.firstWhere((b) => b.id == task.id);
-                      _onTaskToggle(block);
-                    },
-                    onTaskMoved: (task) {
-                      final block = boardBlocks.firstWhere(
-                        (b) => b.id == task.id, 
-                        orElse: () => blocks.firstWhere((b) => b.id == task.id)
-                      );
-                      _onTaskMoved(block, board.id);
-                    },
-                    onTaskReordered: (task, oldIdx, newIdx) {
-                      // Handled by fractional indexing usually
-                    },
-                    onTaskDeleted: (task) async {
-                      final block = boardBlocks.firstWhere((b) => b.id == task.id);
-                      await ref.read(blockServiceProvider).deleteBlock(block);
-                    },
-                    onTaskEdited: (task) {
-                      final block = boardBlocks.firstWhere((b) => b.id == task.id);
-                      _onEditTask(block);
-                    },
-                    accentColor: AppTheme.primary,
-                  ),
-                ),
-              ).animate().fadeIn(delay: (100 * index).ms).slideY(begin: 0.1);
-            }).cast<Widget>().toList()
-              ..add(
-                Padding(
-                  padding: const EdgeInsets.only(right: AppTheme.spaceLarge),
-                  child: InkWell(
-                    onTap: _onAddBoard,
-                    borderRadius: BorderRadius.circular(24),
-                    child: Container(
-                      width: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: AppTheme.primary.withValues(alpha: 0.1),
-                          width: 2,
+                    final boardTasks = boardBlocks.map(_mapToTask).toList();
+                    final isDefault = const ['todo', 'inProgress', 'done'].contains(board.id);
+
+                    return Padding(
+                      padding: const EdgeInsets.only(right: AppTheme.spaceLarge),
+                      child: SizedBox(
+                        width: columnWidth,
+                        child: KanbanColumn(
+                          board: board,
+                          tasks: boardTasks,
+                          onAddTask: () => _showTaskModal(defaultStatus: board.id),
+                          onBoardDeleted: isDefault ? null : () => _onDeleteBoard(board.id, boardBlocks),
+                          onTaskTap: (task) {
+                            final block = boardBlocks.firstWhere((b) => b.id == task.id);
+                            _onTaskToggle(block);
+                          },
+                          onTaskMoved: (task) {
+                            final block = boardBlocks.firstWhere(
+                              (b) => b.id == task.id, 
+                              orElse: () => blocks.firstWhere((b) => b.id == task.id)
+                            );
+                            _onTaskMoved(block, board.id);
+                          },
+                          onTaskReordered: (task, oldIdx, newIdx) {},
+                          onTaskDeleted: (task) async {
+                            final block = boardBlocks.firstWhere((b) => b.id == task.id);
+                            await ref.read(blockServiceProvider).deleteBlock(block);
+                          },
+                          onTaskEdited: (task) {
+                            final block = boardBlocks.firstWhere((b) => b.id == task.id);
+                            _showTaskModal(blockToEdit: block);
+                          },
+                          accentColor: AppTheme.primary,
                         ),
                       ),
-                      child: const Center(
-                        child: Icon(LucideIcons.plus, color: AppTheme.primary, size: 24),
+                    ).animate().fadeIn(delay: (100 * index).ms).slideY(begin: 0.1);
+                  }).cast<Widget>().toList()
+                    ..add(
+                      Padding(
+                        padding: const EdgeInsets.only(right: AppTheme.spaceLarge),
+                        child: InkWell(
+                          onTap: _onAddBoard,
+                          borderRadius: BorderRadius.circular(24),
+                          child: Container(
+                            width: 60,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              borderRadius: BorderRadius.circular(24),
+                              border: Border.all(
+                                color: AppTheme.primary.withValues(alpha: 0.1),
+                                width: 2,
+                              ),
+                            ),
+                            child: const Center(
+                              child: Icon(LucideIcons.plus, color: AppTheme.primary, size: 24),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
                 ),
               ),
+            ),
           ),
         ),
       ),
-      ),
-    ),
-    ),
     );
   }
 }
