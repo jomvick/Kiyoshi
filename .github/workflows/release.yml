@@ -99,7 +99,7 @@ jobs:
           Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "Kiyoshi-$version-windows-x64.zip"
 
       - name: Setup Inno Setup
-        uses: sayeedwe/setup-inno-setup@v1
+        uses: jozefizso/inno-setup-action@v1
 
       - name: Build Windows Installer (.exe)
         run: iscc packaging/windows/kiyoshi_setup.iss
