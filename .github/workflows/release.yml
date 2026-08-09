@@ -99,8 +99,8 @@ jobs:
           $version = $version.Trim()
           Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "Kiyoshi-$version-windows-x64.zip"
 
-      - name: Setup Inno Setup
-        uses: jozefizso/inno-setup-action@v1
+      - name: Install Inno Setup
+        run: choco install innosetup -y
 
       - name: Build Windows Installer (.exe)
         shell: powershell
@@ -108,7 +108,7 @@ jobs:
           $version = Get-Content VERSION -ErrorAction SilentlyContinue
           if (!$version) { $version = "1.0.2" }
           $version = $version.Trim()
-          iscc /DMyAppVersion="$version" packaging\windows\kiyoshi_setup.iss
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion="$version" packaging\windows\kiyoshi_setup.iss
 
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
