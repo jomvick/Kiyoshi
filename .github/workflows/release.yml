@@ -52,10 +52,11 @@ jobs:
 
       - name: Rename RPM to stable name
         run: |
-          APP_VERSION=$(cat VERSION 2>/dev/null | tr -d '\n' || echo '1.0.1')
-          RPM_FILE=$(find build -name '*.rpm' | head -1)
-          cp "$RPM_FILE" "build/kiyoshi-${APP_VERSION}-1.x86_64.rpm"
-          echo "RPM renamed: build/kiyoshi-${APP_VERSION}-1.x86_64.rpm"
+          APP_VERSION=$(cat VERSION 2>/dev/null | tr -d '\r\n' || echo '1.0.2')
+          RPM_FILE=$(find build -maxdepth 1 -name '*.rpm' | head -1)
+          if [ -n "$RPM_FILE" ]; then
+            cp "$RPM_FILE" "build/kiyoshi-${APP_VERSION}-1.x86_64.rpm" || true
+          fi
 
       - name: Upload Linux Artifacts
         uses: actions/upload-artifact@v4
@@ -102,7 +103,12 @@ jobs:
         uses: jozefizso/inno-setup-action@v1
 
       - name: Build Windows Installer (.exe)
-        run: iscc packaging/windows/kiyoshi_setup.iss
+        shell: powershell
+        run: |
+          $version = Get-Content VERSION -ErrorAction SilentlyContinue
+          if (!$version) { $version = "1.0.2" }
+          $version = $version.Trim()
+          iscc /DMyAppVersion="$version" packaging\windows\kiyoshi_setup.iss
 
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
@@ -139,8 +145,13 @@ jobs:
 
       - name: Package macOS DMG
         run: |
-          APP_VERSION=$(cat VERSION 2>/dev/null | xargs || echo '1.0.2')
-          hdiutil create -volname "Kiyoshi" -srcfolder "build/macos/Build/Products/Release/kiyoshi.app" -ov -format UDZO "Kiyoshi-$APP_VERSION-macos.dmg"
+          APP_VERSION=$(cat VERSION 2>/dev/null | tr -d '\r\n' || echo '1.0.2')
+          APP_PATH=$(find build/macos/Build/Products/Release -name "*.app" | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: .app not found!"
+            exit 1
+          fi
+          hdiutil create -volname "Kiyoshi" -srcfolder "$APP_PATH" -ov -format UDZO "Kiyoshi-$APP_VERSION-macos.dmg"
 
       - name: Upload macOS Artifacts
         uses: actions/upload-artifact@v4
@@ -164,11 +175,12 @@ jobs:
           merge-multiple: true
 
       - name: Display Downloaded Files
-        run: ls -l dist/
+        run: ls -la dist/
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           files: |
             dist/Kiyoshi-*.AppImage
             dist/kiyoshi-*.rpm
@@ -178,3 +190,4 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+          fail_on_unmatched_files: false

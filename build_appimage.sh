@@ -4,7 +4,7 @@ set -e
 # Export APPIMAGE_EXTRACT_AND_RUN=1 to run appimagetool in environments without FUSE (like Docker or CI)
 export APPIMAGE_EXTRACT_AND_RUN=1
 
-APPIMAGE_VERSION="$(cat VERSION 2>/dev/null || echo "1.0.1")"
+APPIMAGE_VERSION="$(cat VERSION 2>/dev/null | tr -d '\r\n' || echo "1.0.2")"
 ARCH="x86_64"
 
 echo "==> Building Kiyoshi AppImage v$APPIMAGE_VERSION..."
@@ -22,8 +22,11 @@ fi
 # Ensure appimagetool is available
 if ! command -v appimagetool &> /dev/null; then
     echo "==> Downloading appimagetool..."
-    wget -q "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage" -O /tmp/appimagetool
-    chmod +x /tmp/appimagetool
+    if [ ! -f /tmp/appimagetool ]; then
+        curl -sSL "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage" -o /tmp/appimagetool || \
+        wget -q "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage" -O /tmp/appimagetool
+        chmod +x /tmp/appimagetool
+    fi
     APPIMAGETOOL="/tmp/appimagetool"
 else
     APPIMAGETOOL="appimagetool"
