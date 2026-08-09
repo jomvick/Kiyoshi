@@ -107,6 +107,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   Widget _buildTableCalendar(Map<DateTime, List<ZenBlock>> eventMap) {
+    final scheme = Theme.of(context).colorScheme;
     return ZenGlassCard(
       radius: 24,
       padding: const EdgeInsets.all(AppTheme.spaceMedium),
@@ -133,13 +134,13 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             eventLoader: (day) => eventMap[_normalizeDate(day)] ?? [],
             daysOfWeekStyle: DaysOfWeekStyle(
               weekdayStyle: TextStyle(
-                color: AppTheme.onSurfaceVariant.withValues(alpha: 0.7),
+                color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 1,
               ),
               weekendStyle: TextStyle(
-                color: AppTheme.onSurfaceVariant.withValues(alpha: 0.5),
+                color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 1,
@@ -148,39 +149,39 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             calendarStyle: CalendarStyle(
               outsideDaysVisible: false,
               defaultTextStyle: TextStyle(
-                color: AppTheme.onBackground.withValues(alpha: 0.8),
+                color: scheme.onSurface.withValues(alpha: 0.85),
                 fontWeight: FontWeight.w500,
               ),
               weekendTextStyle: TextStyle(
-                color: AppTheme.onBackground.withValues(alpha: 0.5),
+                color: scheme.onSurface.withValues(alpha: 0.55),
                 fontWeight: FontWeight.w500,
               ),
               todayDecoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.1),
+                color: scheme.primary.withValues(alpha: 0.12),
                 shape: BoxShape.circle,
-                border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
+                border: Border.all(color: scheme.primary.withValues(alpha: 0.4)),
               ),
-              todayTextStyle: const TextStyle(
-                color: AppTheme.primary,
+              todayTextStyle: TextStyle(
+                color: scheme.primary,
                 fontWeight: FontWeight.w700,
               ),
               selectedDecoration: BoxDecoration(
-                color: AppTheme.primary,
+                color: scheme.primary,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.primary.withValues(alpha: 0.3),
+                    color: scheme.primary.withValues(alpha: 0.3),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              selectedTextStyle: const TextStyle(
-                color: Colors.white,
+              selectedTextStyle: TextStyle(
+                color: scheme.onPrimary,
                 fontWeight: FontWeight.w700,
               ),
               markerDecoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.6),
+                color: scheme.primary.withValues(alpha: 0.6),
                 shape: BoxShape.circle,
               ),
               markerSize: 6,
@@ -194,6 +195,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   Widget _buildDayAgenda(List<ZenBlock> dayBlocks) {
+    final scheme = Theme.of(context).colorScheme;
     return ZenGlassCard(
       radius: 24,
       padding: const EdgeInsets.all(AppTheme.spaceLarge),
@@ -202,14 +204,14 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         children: [
           Row(
             children: [
-              Icon(LucideIcons.calendarDays, size: 18, color: AppTheme.primary.withValues(alpha: 0.7)),
+              Icon(LucideIcons.calendarDays, size: 18, color: scheme.primary.withValues(alpha: 0.8)),
               const SizedBox(width: 12),
               Text(
                 DateFormat('EEEE, MMMM d').format(_selectedDay ?? DateTime.now()).toUpperCase(),
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                   letterSpacing: 1.5,
-                  color: AppTheme.primary.withValues(alpha: 0.8),
+                  color: scheme.primary.withValues(alpha: 0.9),
                 ),
               ),
             ],
@@ -234,6 +236,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   Widget _buildEmptyState() {
+    final scheme = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -241,20 +244,20 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.05),
+              color: scheme.primary.withValues(alpha: 0.07),
               shape: BoxShape.circle,
             ),
             child: Icon(
               LucideIcons.wind,
               size: 32,
-              color: AppTheme.primary.withValues(alpha: 0.4),
+              color: scheme.primary.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 16),
           Text(
             'A day of open space',
             style: TextStyle(
-              color: AppTheme.onBackground.withValues(alpha: 0.5),
+              color: scheme.onSurface.withValues(alpha: 0.7),
               fontWeight: FontWeight.w600,
               fontSize: 16,
             ),
@@ -263,7 +266,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           Text(
             'No tasks scheduled for this day.',
             style: TextStyle(
-              color: AppTheme.onSurfaceVariant.withValues(alpha: 0.5),
+              color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
               fontSize: 13,
             ),
           ),
@@ -273,14 +276,16 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
   }
 
   Widget _buildAgendaItem(ZenBlock b, int index) {
+    final scheme = Theme.of(context).colorScheme;
+    final isChecked = b.metadata['checked'] == true;
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.6),
+        color: scheme.surfaceContainerLowest.withValues(alpha: 0.6),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: AppTheme.primary.withValues(alpha: 0.05),
+          color: scheme.primary.withValues(alpha: 0.08),
           width: 1,
         ),
       ),
@@ -290,12 +295,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 2),
             child: Icon(
-              b.metadata['checked'] == true
-                  ? LucideIcons.checkCircle2
-                  : LucideIcons.circle,
-              color: b.metadata['checked'] == true 
-                  ? AppTheme.primary.withValues(alpha: 0.5) 
-                  : AppTheme.primary,
+              isChecked ? LucideIcons.checkCircle2 : LucideIcons.circle,
+              color: isChecked ? scheme.primary.withValues(alpha: 0.5) : scheme.primary,
               size: 20,
             ),
           ),
@@ -308,37 +309,35 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
                   b.content,
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: b.metadata['checked'] == true 
-                        ? AppTheme.onBackground.withValues(alpha: 0.4) 
-                        : AppTheme.onBackground,
-                    decoration: b.metadata['checked'] == true 
-                        ? TextDecoration.lineThrough 
-                        : null,
+                    color: isChecked
+                        ? scheme.onSurface.withValues(alpha: 0.4)
+                        : scheme.onSurface,
+                    decoration: isChecked ? TextDecoration.lineThrough : null,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Icon(LucideIcons.tag, size: 10, color: AppTheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                    Icon(LucideIcons.tag, size: 10, color: scheme.onSurfaceVariant.withValues(alpha: 0.6)),
                     const SizedBox(width: 4),
                     Text(
                       b.type.toUpperCase(),
                       style: TextStyle(
                         fontSize: 10,
-                        color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
                         letterSpacing: 1,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     if (b.metadata['priority'] != null) ...[
                       const SizedBox(width: 12),
-                      Icon(LucideIcons.flag, size: 10, color: AppTheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                      Icon(LucideIcons.flag, size: 10, color: scheme.onSurfaceVariant.withValues(alpha: 0.6)),
                       const SizedBox(width: 4),
                       Text(
                         'P${b.metadata['priority']}',
                         style: TextStyle(
                           fontSize: 10,
-                          color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                          color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -372,6 +371,7 @@ class _AnimatedIconButtonState extends State<_AnimatedIconButton> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -382,8 +382,8 @@ class _AnimatedIconButtonState extends State<_AnimatedIconButton> {
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: _isHovered
-                ? Colors.white.withValues(alpha: 0.8)
-                : Colors.white.withValues(alpha: 0.5),
+                ? scheme.surfaceContainerLowest.withValues(alpha: 0.8)
+                : scheme.surfaceContainerLowest.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12),
             boxShadow: _isHovered
                 ? [
@@ -398,7 +398,7 @@ class _AnimatedIconButtonState extends State<_AnimatedIconButton> {
           child: Icon(
             widget.icon,
             size: 18,
-            color: AppTheme.primary,
+            color: scheme.primary,
           ),
         ),
       ),

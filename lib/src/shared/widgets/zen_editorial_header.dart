@@ -24,7 +24,8 @@ class ZenEditorialHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = accentColor ?? AppTheme.primary;
+    final scheme = Theme.of(context).colorScheme;
+    final color = accentColor ?? scheme.primary;
 
     return Container(
       padding: const EdgeInsets.only(
@@ -58,7 +59,7 @@ class ZenEditorialHeader extends StatelessWidget {
                     Text(
                       title,
                       style: ZenTypography.editorialHeader.copyWith(
-                        color: AppTheme.onBackground,
+                        color: scheme.onSurface,
                         fontSize: 32,
                       ),
                     ),
@@ -73,7 +74,7 @@ class ZenEditorialHeader extends StatelessWidget {
             Text(
               subtitle!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.onSurfaceVariant.withValues(alpha: 0.8),
+                    color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
                     height: 1.4,
                   ),
             ),

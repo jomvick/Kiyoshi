@@ -67,6 +67,7 @@ class _LinkBlockWidgetState extends State<LinkBlockWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -78,13 +79,13 @@ class _LinkBlockWidgetState extends State<LinkBlockWidget> {
           padding: const EdgeInsets.all(AppTheme.spaceMedium),
           decoration: BoxDecoration(
             color: _isHovered
-                ? AppTheme.primary.withValues(alpha: 0.06)
-                : Colors.white.withValues(alpha: 0.5),
+                ? scheme.primary.withValues(alpha: 0.06)
+                : scheme.surfaceContainerLowest.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             border: Border.all(
               color: _isHovered
-                  ? AppTheme.primary.withValues(alpha: 0.2)
-                  : AppTheme.outline.withValues(alpha: 0.2),
+                  ? scheme.primary.withValues(alpha: 0.2)
+                  : scheme.outline.withValues(alpha: 0.2),
             ),
           ),
           child: Row(
@@ -94,7 +95,7 @@ class _LinkBlockWidgetState extends State<LinkBlockWidget> {
                 height: 40,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.08),
+                  color: scheme.primary.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: widget.faviconUrl != null
@@ -107,14 +108,14 @@ class _LinkBlockWidgetState extends State<LinkBlockWidget> {
                           cacheWidth: 40, // Small icons don't need big buffers
                           cacheHeight: 40,
                           fit: BoxFit.contain,
-                          errorBuilder: (_, _, _) => const Icon(
+                          errorBuilder: (_, _, _) => Icon(
                             LucideIcons.link,
                             size: 18,
-                            color: AppTheme.primary,
+                            color: scheme.primary,
                           ),
                         ),
                       )
-                    : const Icon(LucideIcons.link2, size: 18, color: AppTheme.primary),
+                    : Icon(LucideIcons.link2, size: 18, color: scheme.primary),
               ),
               const SizedBox(width: AppTheme.spaceMedium),
               Expanded(
@@ -123,7 +124,7 @@ class _LinkBlockWidgetState extends State<LinkBlockWidget> {
                         controller: _controller,
                         autofocus: true,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppTheme.onBackground,
+                              color: scheme.onSurface,
                             ),
                         decoration: const InputDecoration(
                           hintText: 'Enter URL...',
@@ -142,7 +143,7 @@ class _LinkBlockWidgetState extends State<LinkBlockWidget> {
                           Text(
                             widget.title ?? widget.url,
                             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: AppTheme.onBackground,
+                                  color: scheme.onSurface,
                                   fontWeight: FontWeight.w600,
                                 ),
                             maxLines: 1,
@@ -152,7 +153,7 @@ class _LinkBlockWidgetState extends State<LinkBlockWidget> {
                           Text(
                             widget.url,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppTheme.primary.withValues(alpha: 0.7),
+                                  color: scheme.primary.withValues(alpha: 0.7),
                                 ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -163,7 +164,7 @@ class _LinkBlockWidgetState extends State<LinkBlockWidget> {
               if (_isHovered && !_isEditing) ...[
                 Icon(LucideIcons.externalLink,
                     size: 14,
-                    color: AppTheme.primary.withValues(alpha: 0.5)),
+                    color: scheme.primary.withValues(alpha: 0.5)),
                 const SizedBox(width: 8),
               ],
               if (_isHovered && widget.onChanged != null && !_isEditing) ...[
@@ -172,7 +173,7 @@ class _LinkBlockWidgetState extends State<LinkBlockWidget> {
                   child: Icon(
                     LucideIcons.edit2,
                     size: 16,
-                    color: AppTheme.onSurfaceVariant.withValues(alpha: 0.7),
+                    color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -183,7 +184,7 @@ class _LinkBlockWidgetState extends State<LinkBlockWidget> {
                   child: Icon(
                     Icons.delete_outline_rounded,
                     size: 16,
-                    color: AppTheme.error.withValues(alpha: 0.5),
+                    color: scheme.error.withValues(alpha: 0.5),
                   ),
                 ),
             ],

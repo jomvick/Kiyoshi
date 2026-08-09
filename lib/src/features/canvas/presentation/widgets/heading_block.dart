@@ -43,6 +43,7 @@ class _HeadingBlockWidgetState extends State<HeadingBlockWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -54,12 +55,12 @@ class _HeadingBlockWidgetState extends State<HeadingBlockWidget> {
         ),
         decoration: BoxDecoration(
           color: _isHovered
-              ? Colors.white.withValues(alpha: 0.7)
+              ? scheme.surfaceContainerLowest.withValues(alpha: 0.7)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           border: Border.all(
             color: _isHovered
-                ? AppTheme.primary.withValues(alpha: 0.12)
+                ? scheme.primary.withValues(alpha: 0.12)
                 : Colors.transparent,
           ),
         ),
@@ -72,7 +73,7 @@ class _HeadingBlockWidgetState extends State<HeadingBlockWidget> {
                 onChanged: widget.onChanged,
                 maxLines: null,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: AppTheme.onBackground,
+                      color: scheme.onSurface,
                       fontWeight: FontWeight.w700,
                       letterSpacing: -0.5,
                     ),
@@ -91,7 +92,7 @@ class _HeadingBlockWidgetState extends State<HeadingBlockWidget> {
                   child: Icon(
                     Icons.delete_outline_rounded,
                     size: 18,
-                    color: AppTheme.error.withValues(alpha: 0.5),
+                    color: scheme.error.withValues(alpha: 0.5),
                   ),
                 ),
               ),

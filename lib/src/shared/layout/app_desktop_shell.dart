@@ -52,7 +52,6 @@ class _AppDesktopShellState extends ConsumerState<AppDesktopShell> {
     final isZenMode = prefs.zenModeEnabled;
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
       body: _buildKeyboardListener(isZenMode, prefs),
     );
   }
@@ -220,10 +219,11 @@ class _AppDesktopShellState extends ConsumerState<AppDesktopShell> {
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
+    final scheme = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? AppTheme.error : AppTheme.primary,
+        backgroundColor: isError ? scheme.error : scheme.primary,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
@@ -239,6 +239,10 @@ class _BackgroundGradients extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Slightly boosted alpha in dark mode so the blobs still read as an
+    // ambient glow against the warm charcoal canvas instead of vanishing.
+    final boost = isDark ? 1.4 : 1.0;
     return RepaintBoundary(
       child: Stack(
         children: [
@@ -253,7 +257,7 @@ class _BackgroundGradients extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppTheme.sage.withValues(alpha: 0.15),
+                    AppTheme.sage.withValues(alpha: 0.15 * boost),
                     AppTheme.sage.withValues(alpha: 0.0),
                   ],
                 ),
@@ -272,7 +276,7 @@ class _BackgroundGradients extends StatelessWidget {
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    AppTheme.mintTeal.withValues(alpha: 0.2),
+                    AppTheme.mintTeal.withValues(alpha: 0.2 * boost),
                     AppTheme.mintTeal.withValues(alpha: 0.0),
                   ],
                 ),

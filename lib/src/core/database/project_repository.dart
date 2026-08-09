@@ -35,6 +35,13 @@ class ProjectRepository implements IBlockRepository {
         (blocks) => blocks.map(_mapToEntity).toList());
   }
 
+  /// All blocks across every project (and the global inbox) — used to find
+  /// backlinks: blocks anywhere in the app that reference a given page via
+  /// `[[Page Title]]` syntax.
+  Stream<List<ZenBlock>> watchAllBlocks() {
+    return _db.watchAllBlocks().map((blocks) => blocks.map(_mapToEntity).toList());
+  }
+
   @override
   Future<String> addBlock(String projectId, ParsedBlock parsedBlock) async {
     final maxPos = await _db.getMaxPosition(projectId);
@@ -54,6 +61,50 @@ class ProjectRepository implements IBlockRepository {
 
     await _db.addBlock(companion);
     return id;
+  }
+
+  @override
+  Future<String> addBlockAfter(String projectId, String afterBlockId, ParsedBlock parsedBlock) async {
+    final blocks = await _db.getBlocksForProject(projectId);
+    final index = blocks.indexWhere((b) => b.id == afterBlockId);
+
+    double newPosition;
+    if (index == -1) {
+      // afterBlockId not found (e.g. deleted concurrently) — fall back to
+      // the same "append at the end" behavior as addBlock.
+      final maxPos = await _db.getMaxPosition(projectId);
+      newPosition = (maxPos ?? 0.0) + 1000.0;
+    } else if (index == blocks.length - 1) {
+      newPosition = blocks[index].position + 1000.0;
+    } else {
+      final prevPos = blocks[index].position;
+      final nextPos = blocks[index + 1].position;
+      newPosition = (prevPos + nextPos) / 2;
+    }
+
+    final id = const Uuid().v4();
+    final companion = BlocksCompanion.insert(
+      id: Value(id),
+      projectId: projectId,
+      type: parsedBlock.type,
+      content: parsedBlock.content,
+      metadata: Value(jsonEncode(parsedBlock.metadata)),
+      position: newPosition,
+      parentId: Value(parsedBlock.parentId),
+      createdAt: Value(DateTime.now().toIso8601String()),
+    );
+
+    await _db.addBlock(companion);
+    return id;
+  }
+
+  @override
+  Future<void> moveBlockToProject(String blockId, String targetProjectId) async {
+    final block = await getBlockById(blockId);
+    if (block == null) return;
+    final maxPos = await _db.getMaxPosition(targetProjectId);
+    final newPosition = (maxPos ?? 0.0) + 1000.0;
+    await updateBlock(block.copyWith(projectId: targetProjectId, position: newPosition));
   }
 
   @override
@@ -182,6 +233,15 @@ class ProjectRepository implements IBlockRepository {
       createdAt: p.createdAt != null ? DateTime.parse(p.createdAt!) : DateTime.now(),
       updatedAt: p.updatedAt != null ? DateTime.parse(p.updatedAt!) : DateTime.now(),
     );
+  }
+
+  Future<List<Project>> getAllProjects() async {
+    final list = await _db.getAllProjects();
+    return list.map(_mapProjectToEntity).toList();
+  }
+
+  Stream<List<Project>> watchAllProjects() {
+    return _db.watchAllProjects().map((list) => list.map(_mapProjectToEntity).toList());
   }
 
   Stream<List<Project>> watchProjectsForWorkspace(String workspaceId) {

@@ -13,7 +13,7 @@ class DividerBlockWidget extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: AppTheme.spaceMedium),
         child: Divider(
-          color: AppTheme.onBackground.withValues(alpha: 0.1),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
           thickness: 1,
         ),
       ),
@@ -36,6 +36,7 @@ class _BlockShellState extends State<_BlockShell> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -46,7 +47,7 @@ class _BlockShellState extends State<_BlockShell> {
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           border: Border.all(
             color: _isHovered
-                ? AppTheme.primary.withValues(alpha: 0.1)
+                ? scheme.primary.withValues(alpha: 0.1)
                 : Colors.transparent,
           ),
         ),
@@ -59,7 +60,7 @@ class _BlockShellState extends State<_BlockShell> {
                 child: Icon(
                   Icons.delete_outline_rounded,
                   size: 18,
-                  color: AppTheme.error.withValues(alpha: 0.6),
+                  color: scheme.error.withValues(alpha: 0.6),
                 ),
               ),
           ],

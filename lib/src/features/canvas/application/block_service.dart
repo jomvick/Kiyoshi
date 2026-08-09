@@ -39,6 +39,34 @@ class BlockService {
     return id;
   }
 
+  /// Same as [addBlock] but inserts right after [afterBlockId] instead of
+  /// appending at the end — backs the gutter's per-block "+" button and the
+  /// Enter-to-create-next-block behavior in text/todo blocks.
+  Future<String> addBlockAfter(String projectId, String afterBlockId, ParsedBlock parsedBlock) async {
+    ParsedBlock finalBlock = parsedBlock;
+
+    if (parsedBlock.type == 'image' || parsedBlock.type == 'file') {
+      try {
+        final vaultPath = await _vaultService.copyToVault(parsedBlock.content);
+        finalBlock = ParsedBlock(
+          type: parsedBlock.type,
+          content: vaultPath,
+          metadata: parsedBlock.metadata,
+        );
+      } catch (e) {
+        debugPrint('Vault copy failed: $e');
+      }
+    }
+
+    final id = await _repository.addBlockAfter(projectId, afterBlockId, finalBlock);
+
+    if (finalBlock.type == 'link') {
+      unawaited(_metadataService.enrichBlockIfNeeded(id));
+    }
+
+    return id;
+  }
+
   Future<void> deleteBlock(ZenBlock block) async {
     // Cleanup: Remove physical file if it's in the vault
     if (block.type == 'image' || block.type == 'file') {
@@ -48,6 +76,11 @@ class BlockService {
   }
 
   Future<void> updateBlock(ZenBlock block) => _repository.updateBlock(block);
+
+  /// Attaches an idea from the Notes inbox (or any project) to a different
+  /// project. Places it at the end of the target project's block list.
+  Future<void> moveBlockToProject(String blockId, String targetProjectId) =>
+      _repository.moveBlockToProject(blockId, targetProjectId);
 
   Future<void> reorderBlocks(String projectId, int oldIndex, int newIndex) =>
       _repository.reorderBlocks(projectId, oldIndex, newIndex);

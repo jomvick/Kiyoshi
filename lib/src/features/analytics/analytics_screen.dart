@@ -54,6 +54,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
   }
 
   Widget _buildKeyMetrics(Map<String, dynamic> stats) {
+    final scheme = Theme.of(context).colorScheme;
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -66,7 +67,7 @@ class _AnalyticsScreenState extends ConsumerState<AnalyticsScreen> {
           icon: LucideIcons.layoutGrid,
           label: 'TOTAL BLOCKS',
           value: stats['totalBlocks'].toString(),
-          color: AppTheme.primary,
+          color: scheme.primary,
         ),
         _MetricCard(
           icon: LucideIcons.checkCircle,
@@ -103,7 +104,7 @@ class _MetricCard extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 24),
             const Spacer(),
-            Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppTheme.onSurfaceVariant)),
+            Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant)),
             Text(value, style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800)),
           ],
         ),
@@ -119,6 +120,7 @@ class _EfficiencyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return ZenGlassCard(
       child: Padding(
         padding: const EdgeInsets.all(AppTheme.space2XLarge),
@@ -135,8 +137,8 @@ class _EfficiencyCard extends StatelessWidget {
                   child: CircularProgressIndicator(
                     value: efficiency,
                     strokeWidth: 12,
-                    backgroundColor: AppTheme.primary.withValues(alpha: 0.1),
-                    valueColor: const AlwaysStoppedAnimation(AppTheme.primary),
+                    backgroundColor: scheme.primary.withValues(alpha: 0.1),
+                    valueColor: AlwaysStoppedAnimation(scheme.primary),
                   ),
                 ),
                 Text('${(efficiency * 100).toInt()}%', style: Theme.of(context).textTheme.displaySmall),

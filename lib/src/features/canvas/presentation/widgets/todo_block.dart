@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kiyoshi/src/core/theme/app_theme.dart';
 
 class TodoBlockWidget extends StatefulWidget {
@@ -7,6 +8,11 @@ class TodoBlockWidget extends StatefulWidget {
   final Function(bool?) onChanged;
   final Function(String)? onContentChanged;
   final VoidCallback? onDelete;
+  final bool autofocus;
+
+  /// Enter (without Shift) creates a new to-do block right below and moves
+  /// focus to it, matching how most task lists behave.
+  final VoidCallback? onEnterPressed;
 
   const TodoBlockWidget({
     super.key,
@@ -15,6 +21,8 @@ class TodoBlockWidget extends StatefulWidget {
     required this.onChanged,
     this.onContentChanged,
     this.onDelete,
+    this.autofocus = false,
+    this.onEnterPressed,
   });
 
   @override
@@ -23,12 +31,26 @@ class TodoBlockWidget extends StatefulWidget {
 
 class _TodoBlockWidgetState extends State<TodoBlockWidget> {
   late TextEditingController _controller;
+  late final FocusNode _focusNode;
   bool _isHovered = false;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.content);
+    _focusNode = FocusNode(onKeyEvent: _handleKeyEvent);
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (widget.onEnterPressed == null) return KeyEventResult.ignored;
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    final isEnter = event.logicalKey == LogicalKeyboardKey.enter ||
+        event.logicalKey == LogicalKeyboardKey.numpadEnter;
+    if (!isEnter || HardwareKeyboard.instance.isShiftPressed) {
+      return KeyEventResult.ignored;
+    }
+    widget.onEnterPressed!();
+    return KeyEventResult.handled;
   }
 
   @override
@@ -42,11 +64,13 @@ class _TodoBlockWidgetState extends State<TodoBlockWidget> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -58,12 +82,12 @@ class _TodoBlockWidgetState extends State<TodoBlockWidget> {
         ),
         decoration: BoxDecoration(
           color: _isHovered
-              ? Colors.white.withValues(alpha: 0.7)
+              ? scheme.surfaceContainerLowest.withValues(alpha: 0.7)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           border: Border.all(
             color: _isHovered
-                ? AppTheme.primary.withValues(alpha: 0.12)
+                ? scheme.primary.withValues(alpha: 0.12)
                 : Colors.transparent,
           ),
         ),
@@ -76,12 +100,12 @@ class _TodoBlockWidgetState extends State<TodoBlockWidget> {
               child: Checkbox(
                 value: widget.isChecked,
                 onChanged: widget.onChanged,
-                activeColor: AppTheme.primary,
+                activeColor: scheme.primary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
                 side: BorderSide(
-                  color: AppTheme.onBackground.withValues(alpha: 0.2),
+                  color: scheme.onSurface.withValues(alpha: 0.2),
                   width: 1.5,
                 ),
               ),
@@ -90,12 +114,14 @@ class _TodoBlockWidgetState extends State<TodoBlockWidget> {
             Expanded(
               child: TextField(
                 controller: _controller,
+                focusNode: _focusNode,
+                autofocus: widget.autofocus,
                 onChanged: widget.onContentChanged,
                 maxLines: null,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                       color: widget.isChecked
-                          ? AppTheme.onBackground.withValues(alpha: 0.4)
-                          : AppTheme.onBackground.withValues(alpha: 0.85),
+                          ? scheme.onSurface.withValues(alpha: 0.4)
+                          : scheme.onSurface.withValues(alpha: 0.85),
                       decoration: widget.isChecked ? TextDecoration.lineThrough : null,
                       height: 1.5,
                     ),
@@ -114,7 +140,7 @@ class _TodoBlockWidgetState extends State<TodoBlockWidget> {
                   child: Icon(
                     Icons.delete_outline_rounded,
                     size: 16,
-                    color: AppTheme.error.withValues(alpha: 0.5),
+                    color: scheme.error.withValues(alpha: 0.5),
                   ),
                 ),
               ),

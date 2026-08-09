@@ -23,6 +23,7 @@ class ZenParser {
   static final _priorityRegex = RegExp(r'!([1-4])');
   static final _assigneeRegex = RegExp(r'@(\w+)');
   static final _projectRegex = RegExp(r'#(\w+)');
+  static final _wikiLinkRegex = RegExp(r'\[\[([^\[\]]+)\]\]');
 
   static String _sanitizeText(String input) {
     return input.replaceAll(RegExp(r'[<>&"()]'), '');
@@ -200,6 +201,35 @@ class ZenParser {
   static String getProjectQuery(String input) {
     if (!input.contains('#')) return '';
     return input.split('#').last.toLowerCase();
+  }
+
+  /// Extracts every `[[Page Title]]` reference in [content], trimmed.
+  /// Obsidian-style wiki-link syntax — works in any text/todo/heading block.
+  static List<String> extractLinkTitles(String content) {
+    return _wikiLinkRegex
+        .allMatches(content)
+        .map((m) => m.group(1)!.trim())
+        .where((title) => title.isNotEmpty)
+        .toList();
+  }
+
+  /// True if [content] contains a `[[title]]` reference matching [title]
+  /// (case-insensitive, whitespace-trimmed on both sides).
+  static bool containsLinkTo(String content, String title) {
+    final target = title.trim().toLowerCase();
+    if (target.isEmpty) return false;
+    return extractLinkTitles(content).any((t) => t.toLowerCase() == target);
+  }
+
+  /// Extracts every `#tag` in [content] (lowercased, de-duplicated). Reuses
+  /// the same pattern as the quick-entry `#project` hint, but as a general,
+  /// browsable tag — works in any block, not just the composer.
+  static List<String> extractHashtags(String content) {
+    return _projectRegex
+        .allMatches(content)
+        .map((m) => m.group(1)!.toLowerCase())
+        .toSet()
+        .toList();
   }
 
   /// Converts a ParsedBlock metadata map to JSON string.

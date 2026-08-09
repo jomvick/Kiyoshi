@@ -99,6 +99,9 @@ class AppDatabase extends _$AppDatabase {
       );
 
   // Blocks Queries
+  Future<List<BlockData>> getAllBlocks() => select(blocks).get();
+  Stream<List<BlockData>> watchAllBlocks() => select(blocks).watch();
+
   Future<List<BlockData>> getBlocksForProject(String projectId) {
     return (select(blocks)
           ..where((t) => t.projectId.equals(projectId))
@@ -143,6 +146,9 @@ class AppDatabase extends _$AppDatabase {
       (delete(workspaces)..where((t) => t.id.equals(id))).go();
 
   // Projects Queries
+  Future<List<ProjectData>> getAllProjects() => select(projects).get();
+  Stream<List<ProjectData>> watchAllProjects() => select(projects).watch();
+
   Future<List<ProjectData>> getProjectsForWorkspace(String workspaceId) {
     return (select(projects)
           ..where((t) => t.workspaceId.equals(workspaceId))

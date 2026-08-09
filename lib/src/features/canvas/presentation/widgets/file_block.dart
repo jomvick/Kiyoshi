@@ -101,11 +101,12 @@ class _FileBlockWidgetState extends State<FileBlockWidget> {
   @override
   Widget build(BuildContext context) {
     final isEmpty = widget.fileName.isEmpty;
-    if (isEmpty) return _buildEmptyState();
-    return _buildFileCard();
+    if (isEmpty) return _buildEmptyState(context);
+    return _buildFileCard(context);
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: _pickFile,
       child: MouseRegion(
@@ -117,13 +118,13 @@ class _FileBlockWidgetState extends State<FileBlockWidget> {
           padding: const EdgeInsets.all(AppTheme.spaceLarge),
           decoration: BoxDecoration(
             color: _isHovered
-                ? AppTheme.primary.withValues(alpha: 0.04)
-                : Colors.white.withValues(alpha: 0.3),
+                ? scheme.primary.withValues(alpha: 0.04)
+                : scheme.surfaceContainerLowest.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             border: Border.all(
               color: _isHovered
-                  ? AppTheme.primary.withValues(alpha: 0.25)
-                  : AppTheme.outline.withValues(alpha: 0.2),
+                  ? scheme.primary.withValues(alpha: 0.25)
+                  : scheme.outline.withValues(alpha: 0.2),
             ),
           ),
           child: Row(
@@ -132,13 +133,13 @@ class _FileBlockWidgetState extends State<FileBlockWidget> {
               Icon(
                 LucideIcons.uploadCloud,
                 size: 20,
-                color: AppTheme.primary.withValues(alpha: _isHovered ? 0.7 : 0.4),
+                color: scheme.primary.withValues(alpha: _isHovered ? 0.7 : 0.4),
               ),
               const SizedBox(width: 12),
               Text(
                 'Click to attach a file',
                 style: TextStyle(
-                  color: AppTheme.onSurfaceVariant.withValues(alpha: _isHovered ? 0.8 : 0.5),
+                  color: scheme.onSurfaceVariant.withValues(alpha: _isHovered ? 0.8 : 0.5),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -150,7 +151,8 @@ class _FileBlockWidgetState extends State<FileBlockWidget> {
     );
   }
 
-  Widget _buildFileCard() {
+  Widget _buildFileCard(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -162,13 +164,13 @@ class _FileBlockWidgetState extends State<FileBlockWidget> {
           padding: const EdgeInsets.all(AppTheme.spaceMedium),
           decoration: BoxDecoration(
             color: _isHovered
-                ? AppTheme.primary.withValues(alpha: 0.04)
-                : Colors.white.withValues(alpha: 0.5),
+                ? scheme.primary.withValues(alpha: 0.04)
+                : scheme.surfaceContainerLowest.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
             border: Border.all(
               color: _isHovered
-                  ? AppTheme.primary.withValues(alpha: 0.15)
-                  : AppTheme.outline.withValues(alpha: 0.2),
+                  ? scheme.primary.withValues(alpha: 0.15)
+                  : scheme.outline.withValues(alpha: 0.2),
             ),
           ),
           child: Row(
@@ -176,10 +178,10 @@ class _FileBlockWidgetState extends State<FileBlockWidget> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.1),
+                  color: scheme.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(_fileIcon, size: 20, color: AppTheme.primary),
+                child: Icon(_fileIcon, size: 20, color: scheme.primary),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -190,7 +192,7 @@ class _FileBlockWidgetState extends State<FileBlockWidget> {
                       _displayName,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.onBackground,
+                            color: scheme.onSurface,
                           ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -199,7 +201,7 @@ class _FileBlockWidgetState extends State<FileBlockWidget> {
                       Text(
                         widget.fileSize!,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                              color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
                             ),
                       ),
                   ],
@@ -209,7 +211,7 @@ class _FileBlockWidgetState extends State<FileBlockWidget> {
                 Icon(
                   LucideIcons.externalLink,
                   size: 14,
-                  color: AppTheme.primary.withValues(alpha: 0.5),
+                  color: scheme.primary.withValues(alpha: 0.5),
                 ),
                 const SizedBox(width: 8),
                 GestureDetector(
@@ -217,7 +219,7 @@ class _FileBlockWidgetState extends State<FileBlockWidget> {
                   child: Icon(
                     LucideIcons.refreshCw,
                     size: 14,
-                    color: AppTheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -228,7 +230,7 @@ class _FileBlockWidgetState extends State<FileBlockWidget> {
                   child: Icon(
                     Icons.delete_outline_rounded,
                     size: 16,
-                    color: AppTheme.error.withValues(alpha: 0.5),
+                    color: scheme.error.withValues(alpha: 0.5),
                   ),
                 ),
             ],

@@ -31,6 +31,7 @@ class _ProjectCardState extends State<ProjectCard> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovering = true),
       onExit: (_) => setState(() => _isHovering = false),
@@ -47,7 +48,7 @@ class _ProjectCardState extends State<ProjectCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ── Title header section ──
-                _buildTitleHeader(context),
+                _buildTitleHeader(context, scheme),
                 // ── Body section: description ──
                 Expanded(
                   child: Padding(
@@ -65,8 +66,8 @@ class _ProjectCardState extends State<ProjectCard> {
                             overflow: TextOverflow.ellipsis,
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                   color: widget.project.description.isNotEmpty
-                                      ? AppTheme.onSurfaceVariant.withValues(alpha: 0.7)
-                                      : AppTheme.onSurfaceVariant.withValues(alpha: 0.35),
+                                      ? scheme.onSurface.withValues(alpha: 0.75)
+                                      : scheme.onSurfaceVariant.withValues(alpha: 0.5),
                                   height: 1.5,
                                   fontSize: 12,
                                   fontStyle: widget.project.description.isEmpty
@@ -77,7 +78,7 @@ class _ProjectCardState extends State<ProjectCard> {
                         ),
                         const SizedBox(height: 8),
                         // Footer: deadline + date
-                        _buildFooter(context),
+                        _buildFooter(context, scheme),
                       ],
                     ),
                   ),
@@ -93,18 +94,18 @@ class _ProjectCardState extends State<ProjectCard> {
         .slideY(begin: 0.05, curve: Curves.easeOutCubic);
   }
 
-  Widget _buildTitleHeader(BuildContext context) {
+  Widget _buildTitleHeader(BuildContext context, ColorScheme scheme) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 12, 12),
       decoration: BoxDecoration(
-        color: AppTheme.primary.withValues(alpha: 0.06),
+        color: scheme.primary.withValues(alpha: 0.08),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(22),
           topRight: Radius.circular(22),
         ),
         border: Border(
           bottom: BorderSide(
-            color: AppTheme.primary.withValues(alpha: 0.1),
+            color: scheme.primary.withValues(alpha: 0.12),
             width: 1,
           ),
         ),
@@ -132,7 +133,7 @@ class _ProjectCardState extends State<ProjectCard> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppTheme.onBackground,
+                    color: scheme.onSurface,
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                   ),
@@ -143,12 +144,14 @@ class _ProjectCardState extends State<ProjectCard> {
             _buildSmallAction(
               icon: LucideIcons.pencil,
               onTap: widget.onEdit,
+              scheme: scheme,
             ),
             const SizedBox(width: 4),
             _buildSmallAction(
               icon: LucideIcons.trash2,
               onTap: widget.onDelete,
               danger: true,
+              scheme: scheme,
             ),
           ] else ...[
             // Status dot indicator
@@ -193,6 +196,7 @@ class _ProjectCardState extends State<ProjectCard> {
 
   Widget _buildSmallAction({
     required IconData icon,
+    required ColorScheme scheme,
     VoidCallback? onTap,
     bool danger = false,
   }) {
@@ -204,27 +208,27 @@ class _ProjectCardState extends State<ProjectCard> {
           padding: const EdgeInsets.all(5),
           decoration: BoxDecoration(
             color: danger
-                ? Colors.red.withValues(alpha: 0.08)
-                : AppTheme.primary.withValues(alpha: 0.07),
+                ? scheme.error.withValues(alpha: 0.1)
+                : scheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(7),
           ),
           child: Icon(
             icon,
             size: 13,
             color: danger
-                ? Colors.red.withValues(alpha: 0.7)
-                : AppTheme.primary.withValues(alpha: 0.6),
+                ? scheme.error.withValues(alpha: 0.8)
+                : scheme.primary.withValues(alpha: 0.8),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFooter(BuildContext context) {
+  Widget _buildFooter(BuildContext context, ColorScheme scheme) {
     return Row(
       children: [
         if (widget.project.deadline != null) ...[
-          _buildDeadlineChip(),
+          _buildDeadlineChip(scheme),
           const Spacer(),
         ] else
           const Spacer(),
@@ -232,21 +236,21 @@ class _ProjectCardState extends State<ProjectCard> {
           _formatRelativeDate(widget.project.updatedAt),
           style: TextStyle(
             fontSize: 10,
-            color: AppTheme.onSurfaceVariant.withValues(alpha: 0.45),
+            color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildDeadlineChip() {
+  Widget _buildDeadlineChip(ColorScheme scheme) {
     final isOverdue = widget.project.isOverdue;
-    final dateColor = isOverdue ? AppTheme.error : AppTheme.primary;
+    final dateColor = isOverdue ? scheme.error : scheme.primary;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: dateColor.withValues(alpha: 0.08),
+        color: dateColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(

@@ -59,22 +59,23 @@ class _ImageBlockWidgetState extends State<ImageBlockWidget> {
   }
 
   Widget _buildErrorState() {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       height: 160,
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppTheme.error.withValues(alpha: 0.05),
+        color: scheme.error.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.error.withValues(alpha: 0.2)),
+        border: Border.all(color: scheme.error.withValues(alpha: 0.2)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(LucideIcons.alertCircle, size: 32, color: AppTheme.error.withValues(alpha: 0.5)),
+          Icon(LucideIcons.alertCircle, size: 32, color: scheme.error.withValues(alpha: 0.5)),
           const SizedBox(height: 8),
           Text(
             'Image unavailable',
-            style: TextStyle(color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6), fontSize: 13),
+            style: TextStyle(color: scheme.onSurfaceVariant.withValues(alpha: 0.6), fontSize: 13),
           ),
         ],
       ),
@@ -82,6 +83,7 @@ class _ImageBlockWidgetState extends State<ImageBlockWidget> {
   }
 
   Widget _buildEmptyState() {
+    final scheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: _pickImage,
       child: MouseRegion(
@@ -94,13 +96,13 @@ class _ImageBlockWidgetState extends State<ImageBlockWidget> {
           width: double.infinity,
           decoration: BoxDecoration(
             color: _isHovered
-                ? AppTheme.primary.withValues(alpha: 0.05)
-                : AppTheme.surfaceContainerLow.withValues(alpha: 0.5),
+                ? scheme.primary.withValues(alpha: 0.05)
+                : scheme.surfaceContainerLow.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: _isHovered
-                  ? AppTheme.primary.withValues(alpha: 0.3)
-                  : AppTheme.outline.withValues(alpha: 0.2),
+                  ? scheme.primary.withValues(alpha: 0.3)
+                  : scheme.outline.withValues(alpha: 0.2),
               width: 1.5,
               strokeAlign: BorderSide.strokeAlignInside,
             ),
@@ -111,13 +113,13 @@ class _ImageBlockWidgetState extends State<ImageBlockWidget> {
               Icon(
                 LucideIcons.imagePlus,
                 size: 32,
-                color: AppTheme.primary.withValues(alpha: _isHovered ? 0.7 : 0.35),
+                color: scheme.primary.withValues(alpha: _isHovered ? 0.7 : 0.35),
               ),
               const SizedBox(height: 12),
               Text(
                 'Click to upload an image',
                 style: TextStyle(
-                  color: AppTheme.onSurfaceVariant.withValues(alpha: _isHovered ? 0.8 : 0.5),
+                  color: scheme.onSurfaceVariant.withValues(alpha: _isHovered ? 0.8 : 0.5),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -126,7 +128,7 @@ class _ImageBlockWidgetState extends State<ImageBlockWidget> {
               Text(
                 'PNG, JPG, GIF, WEBP',
                 style: TextStyle(
-                  color: AppTheme.onSurfaceVariant.withValues(alpha: 0.3),
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.3),
                   fontSize: 11,
                 ),
               ),

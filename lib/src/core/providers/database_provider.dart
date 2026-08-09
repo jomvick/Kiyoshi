@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:kiyoshi/src/core/database/database.dart';
 import 'package:kiyoshi/src/features/canvas/domain/entities/zen_block.dart';
+import 'package:kiyoshi/src/features/canvas/application/zen_parser.dart';
 import 'package:kiyoshi/src/features/projects/domain/entities/workspace.dart';
 import 'package:kiyoshi/src/features/projects/domain/entities/project.dart';
 import 'package:kiyoshi/src/features/kanban_board/domain/entities/todo_task.dart';
@@ -50,6 +51,46 @@ final projectBlocksProvider =
   return service.watchBlocks(projectId);
 });
 
+/// Blocks anywhere else in the app (excluding [params.excludeProjectId])
+/// that reference [params.title] via `[[Page Title]]` syntax — backs the
+/// "Linked mentions" panel on project pages, Obsidian-style backlinks.
+final backlinksProvider = StreamProvider.autoDispose
+    .family<List<ZenBlock>, ({String excludeProjectId, String title})>((ref, params) {
+  final repo = ref.watch(projectRepositoryProvider);
+  return repo.watchAllBlocks().map((blocks) => blocks
+      .where((b) =>
+          b.projectId != params.excludeProjectId &&
+          ZenParser.containsLinkTo(b.content, params.title))
+      .toList());
+});
+
+/// Every `#tag` used anywhere in the app, with how many blocks use each —
+/// powers a simple Obsidian-style tag browser. Previously `#tag` only fed a
+/// one-off quick-entry hint (`ZenParser._projectRegex`), never a persisted
+/// or browsable index.
+final allTagsProvider = StreamProvider.autoDispose<Map<String, int>>((ref) {
+  final repo = ref.watch(projectRepositoryProvider);
+  return repo.watchAllBlocks().map((blocks) {
+    final counts = <String, int>{};
+    for (final b in blocks) {
+      for (final tag in ZenParser.extractHashtags(b.content)) {
+        counts[tag] = (counts[tag] ?? 0) + 1;
+      }
+    }
+    return counts;
+  });
+});
+
+/// All blocks anywhere in the app tagged with [tag] (case-insensitive).
+final blocksForTagProvider =
+    StreamProvider.autoDispose.family<List<ZenBlock>, String>((ref, tag) {
+  final repo = ref.watch(projectRepositoryProvider);
+  final normalized = tag.toLowerCase();
+  return repo.watchAllBlocks().map((blocks) => blocks
+      .where((b) => ZenParser.extractHashtags(b.content).contains(normalized))
+      .toList());
+});
+
 final allWorkspacesProvider = StreamProvider.autoDispose<List<Workspace>>((ref) {
   final repo = ref.watch(projectRepositoryProvider);
   return repo.watchWorkspaces();
@@ -86,6 +127,11 @@ final calendarEventsProvider = StreamProvider.autoDispose<List<ZenBlock>>((ref) 
 });
 
 // Projects Providers
+final allProjectsProvider = StreamProvider.autoDispose<List<Project>>((ref) {
+  final repo = ref.watch(projectRepositoryProvider);
+  return repo.watchAllProjects();
+});
+
 final projectsForWorkspaceProvider =
     StreamProvider.autoDispose.family<List<Project>, String>((ref, workspaceId) {
   final repo = ref.watch(projectRepositoryProvider);

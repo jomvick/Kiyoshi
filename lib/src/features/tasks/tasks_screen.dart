@@ -129,6 +129,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   void _showTaskModal({ZenBlock? blockToEdit, String? defaultStatus}) {
+    final scheme = Theme.of(context).colorScheme;
     final nameController = TextEditingController(text: blockToEdit?.content ?? '');
     final descController = TextEditingController(text: blockToEdit?.metadata['description'] ?? '');
     String selectedStatus = blockToEdit?.metadata['status'] ?? defaultStatus ?? 'todo';
@@ -158,12 +159,12 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: AppTheme.primary.withValues(alpha: 0.12),
+                              color: scheme.primary.withValues(alpha: 0.12),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
                               blockToEdit != null ? LucideIcons.pencil : LucideIcons.plusCircle,
-                              color: AppTheme.primary,
+                              color: scheme.primary,
                               size: 20,
                             ),
                           ),
@@ -171,7 +172,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           Text(
                             blockToEdit != null ? 'Edit Task' : 'New Task',
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  color: AppTheme.onBackground,
+                                  color: scheme.onSurface,
                                   fontWeight: FontWeight.w700,
                                   fontSize: 18,
                                 ),
@@ -181,7 +182,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       IconButton(
                         icon: const Icon(LucideIcons.x, size: 18),
                         onPressed: () => Navigator.pop(dialogContext),
-                        color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
                       ),
                     ],
                   ),
@@ -191,26 +192,24 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     controller: nameController,
                     autofocus: true,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.onBackground,
+                          color: scheme.onSurface,
                           fontWeight: FontWeight.w500,
                         ),
                     decoration: InputDecoration(
                       hintText: 'Task title…',
                       hintStyle: TextStyle(
-                        color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4),
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                       ),
                       filled: true,
-                      fillColor: AppTheme.isDark(context)
-                          ? Colors.black.withValues(alpha: 0.25)
-                          : Colors.white.withValues(alpha: 0.6),
+                      fillColor: scheme.surfaceContainerLowest.withValues(alpha: 0.6),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(color: AppTheme.primary.withValues(alpha: 0.12)),
+                        borderSide: BorderSide(color: scheme.primary.withValues(alpha: 0.12)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+                        borderSide: BorderSide(color: scheme.primary, width: 1.5),
                       ),
                     ),
                   ),
@@ -220,25 +219,23 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     controller: descController,
                     maxLines: 2,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppTheme.onBackground,
+                          color: scheme.onSurface,
                         ),
                     decoration: InputDecoration(
                       hintText: 'Description or notes (optional)…',
                       hintStyle: TextStyle(
-                        color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4),
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                       ),
                       filled: true,
-                      fillColor: AppTheme.isDark(context)
-                          ? Colors.black.withValues(alpha: 0.25)
-                          : Colors.white.withValues(alpha: 0.6),
+                      fillColor: scheme.surfaceContainerLowest.withValues(alpha: 0.6),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: BorderSide(color: AppTheme.primary.withValues(alpha: 0.12)),
+                        borderSide: BorderSide(color: scheme.primary.withValues(alpha: 0.12)),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(14),
-                        borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
+                        borderSide: BorderSide(color: scheme.primary, width: 1.5),
                       ),
                     ),
                   ),
@@ -247,7 +244,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   Text(
                     'STATUS',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                          color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1.2,
                         ),
@@ -282,7 +279,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   Text(
                     'PRIORITY',
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                          color: scheme.onSurfaceVariant.withValues(alpha: 0.7),
                           fontWeight: FontWeight.w700,
                           letterSpacing: 1.2,
                         ),
@@ -321,7 +318,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         child: Text(
                           'Cancel',
                           style: TextStyle(
-                            color: AppTheme.onSurfaceVariant.withValues(alpha: 0.7),
+                            color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
                           ),
                         ),
                       ),
@@ -360,13 +357,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           }
                           if (context.mounted) Navigator.pop(dialogContext);
                         },
-                        icon: const Icon(LucideIcons.check, size: 16, color: Colors.white),
+                        icon: Icon(LucideIcons.check, size: 16, color: scheme.onPrimary),
                         label: Text(
                           blockToEdit != null ? 'Save Changes' : 'Create Task',
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+                          style: TextStyle(color: scheme.onPrimary, fontWeight: FontWeight.w600),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.primary,
+                          backgroundColor: scheme.primary,
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           shape: RoundedRectangleBorder(
@@ -391,6 +388,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    final scheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -398,11 +396,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppTheme.primary.withValues(alpha: 0.15)
-              : Colors.black.withValues(alpha: 0.04),
+              ? scheme.primary.withValues(alpha: 0.15)
+              : scheme.onSurface.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? AppTheme.primary : Colors.transparent,
+            color: isSelected ? scheme.primary : Colors.transparent,
             width: 1.5,
           ),
         ),
@@ -412,7 +410,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             Icon(
               icon,
               size: 14,
-              color: isSelected ? AppTheme.primary : AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+              color: isSelected ? scheme.primary : scheme.onSurfaceVariant.withValues(alpha: 0.7),
             ),
             const SizedBox(width: 6),
             Text(
@@ -420,7 +418,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? AppTheme.primary : AppTheme.onSurfaceVariant.withValues(alpha: 0.8),
+                color: isSelected ? scheme.primary : scheme.onSurfaceVariant.withValues(alpha: 0.85),
               ),
             ),
           ],
@@ -435,13 +433,14 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    final scheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.04),
+          color: isSelected ? color.withValues(alpha: 0.15) : scheme.onSurface.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: isSelected ? color : Colors.transparent,
@@ -465,7 +464,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? color : AppTheme.onSurfaceVariant.withValues(alpha: 0.8),
+                color: isSelected ? color : scheme.onSurfaceVariant.withValues(alpha: 0.85),
               ),
             ),
           ],
@@ -475,6 +474,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   void _onAddBoard() {
+    final scheme = Theme.of(context).colorScheme;
     final nameController = TextEditingController();
 
     showDialog(
@@ -496,16 +496,16 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        color: scheme.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(LucideIcons.layout, color: AppTheme.primary, size: 20),
+                      child: Icon(LucideIcons.layout, color: scheme.primary, size: 20),
                     ),
                     const SizedBox(width: 16),
                     Text(
                       'New Column',
                       style: TextStyle(
-                        color: AppTheme.onBackground.withValues(alpha: 0.8),
+                        color: scheme.onSurface.withValues(alpha: 0.9),
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                       ),
@@ -519,7 +519,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   decoration: InputDecoration(
                     hintText: 'e.g. In Review',
                     filled: true,
-                    fillColor: Colors.white.withValues(alpha: 0.5),
+                    fillColor: scheme.surfaceContainerLowest.withValues(alpha: 0.6),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
                       borderSide: BorderSide.none,
@@ -534,7 +534,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     TextButton(
                       onPressed: () => Navigator.pop(dialogContext),
                       style: TextButton.styleFrom(
-                        foregroundColor: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                        foregroundColor: scheme.onSurfaceVariant.withValues(alpha: 0.7),
                       ),
                       child: const Text('Cancel'),
                     ),
@@ -556,8 +556,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primary,
-                        foregroundColor: Colors.white,
+                        backgroundColor: scheme.primary,
+                        foregroundColor: scheme.onPrimary,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                         shape: RoundedRectangleBorder(
@@ -577,6 +577,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   Widget _buildMetricsBanner(List<ZenBlock> blocks) {
+    final scheme = Theme.of(context).colorScheme;
     final int total = blocks.length;
     final int done = blocks.where((b) => (b.metadata['status'] ?? 'todo') == 'done').length;
     final int inProgress = blocks.where((b) => b.metadata['status'] == 'inProgress').length;
@@ -588,11 +589,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
       margin: const EdgeInsets.only(top: 16),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       decoration: BoxDecoration(
-        color: AppTheme.isDark(context)
-            ? Colors.white.withValues(alpha: 0.05)
-            : Colors.white.withValues(alpha: 0.6),
+        color: scheme.surfaceContainerLowest.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.12)),
+        border: Border.all(color: scheme.primary.withValues(alpha: 0.12)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -603,7 +602,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             child: CircularProgressIndicator(
               value: progress,
               strokeWidth: 3.5,
-              backgroundColor: AppTheme.primary.withValues(alpha: 0.12),
+              backgroundColor: scheme.primary.withValues(alpha: 0.12),
               valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF34C759)),
             ),
           ),
@@ -617,7 +616,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: AppTheme.onBackground.withValues(alpha: 0.9),
+                  color: scheme.onSurface.withValues(alpha: 0.95),
                 ),
               ),
               const SizedBox(height: 2),
@@ -626,7 +625,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
-                  color: AppTheme.onSurfaceVariant.withValues(alpha: 0.65),
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.75),
                 ),
               ),
             ],
@@ -637,6 +636,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   Widget _buildToolbar(List<ZenBlock> allBlocks) {
+    final scheme = Theme.of(context).colorScheme;
     final int total = allBlocks.length;
     final int todoCount = allBlocks.where((b) => (b.metadata['status'] ?? 'todo') == 'todo').length;
     final int inProgressCount = allBlocks.where((b) => b.metadata['status'] == 'inProgress').length;
@@ -653,11 +653,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: AppTheme.isDark(context)
-                      ? Colors.black.withValues(alpha: 0.25)
-                      : Colors.white.withValues(alpha: 0.5),
+                  color: scheme.surfaceContainerLowest.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppTheme.primary.withValues(alpha: 0.12)),
+                  border: Border.all(color: scheme.primary.withValues(alpha: 0.12)),
                 ),
                 child: Row(
                   children: [
@@ -686,7 +684,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     children: [
                       Icon(LucideIcons.search,
                           size: 16,
-                          color: AppTheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                          color: scheme.onSurfaceVariant.withValues(alpha: 0.6)),
                       const SizedBox(width: 10),
                       Expanded(
                         child: TextField(
@@ -696,7 +694,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           decoration: InputDecoration(
                             hintText: 'Search tasks…',
                             hintStyle: TextStyle(
-                              color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4),
+                              color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                               fontSize: 13,
                             ),
                             border: InputBorder.none,
@@ -713,7 +711,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           },
                           child: Icon(LucideIcons.x,
                               size: 14,
-                              color: AppTheme.onSurfaceVariant.withValues(alpha: 0.5)),
+                              color: scheme.onSurfaceVariant.withValues(alpha: 0.6)),
                         ),
                     ],
                   ),
@@ -729,11 +727,11 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     height: 44,
                     padding: const EdgeInsets.symmetric(horizontal: 18),
                     decoration: BoxDecoration(
-                      color: AppTheme.primary,
+                      color: scheme.primary,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: AppTheme.primary.withValues(alpha: 0.25),
+                          color: scheme.primary.withValues(alpha: 0.25),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -741,13 +739,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
-                      children: const [
-                        Icon(LucideIcons.plus, size: 16, color: Colors.white),
-                        SizedBox(width: 6),
+                      children: [
+                        Icon(LucideIcons.plus, size: 16, color: scheme.onPrimary),
+                        const SizedBox(width: 6),
                         Text(
                           'New Task',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: scheme.onPrimary,
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
                           ),
@@ -785,6 +783,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     required IconData icon,
     required String label,
   }) {
+    final scheme = Theme.of(context).colorScheme;
     final bool isSelected = _viewMode == mode;
     return GestureDetector(
       onTap: () => setState(() => _viewMode = mode),
@@ -794,7 +793,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           duration: const Duration(milliseconds: 150),
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: isSelected ? AppTheme.primary : Colors.transparent,
+            color: isSelected ? scheme.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -802,7 +801,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               Icon(
                 icon,
                 size: 14,
-                color: isSelected ? Colors.white : AppTheme.onSurfaceVariant.withValues(alpha: 0.7),
+                color: isSelected ? scheme.onPrimary : scheme.onSurfaceVariant.withValues(alpha: 0.8),
               ),
               const SizedBox(width: 6),
               Text(
@@ -810,7 +809,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  color: isSelected ? Colors.white : AppTheme.onSurfaceVariant.withValues(alpha: 0.8),
+                  color: isSelected ? scheme.onPrimary : scheme.onSurfaceVariant.withValues(alpha: 0.9),
                 ),
               ),
             ],
@@ -821,6 +820,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   Widget _buildFilterTab(String statusKey, String label, int count) {
+    final scheme = Theme.of(context).colorScheme;
     final bool isSelected = _statusFilter == statusKey;
     return GestureDetector(
       onTap: () => setState(() => _statusFilter = statusKey),
@@ -831,13 +831,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           decoration: BoxDecoration(
             color: isSelected
-                ? AppTheme.primary.withValues(alpha: 0.15)
+                ? scheme.primary.withValues(alpha: 0.15)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isSelected
-                  ? AppTheme.primary
-                  : AppTheme.onSurfaceVariant.withValues(alpha: 0.15),
+                  ? scheme.primary
+                  : scheme.onSurfaceVariant.withValues(alpha: 0.2),
             ),
           ),
           child: Row(
@@ -849,8 +849,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   fontSize: 12,
                   fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   color: isSelected
-                      ? AppTheme.primary
-                      : AppTheme.onSurfaceVariant.withValues(alpha: 0.75),
+                      ? scheme.primary
+                      : scheme.onSurfaceVariant.withValues(alpha: 0.85),
                 ),
               ),
               const SizedBox(width: 6),
@@ -858,8 +858,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppTheme.primary
-                      : AppTheme.onSurfaceVariant.withValues(alpha: 0.12),
+                      ? scheme.primary
+                      : scheme.onSurfaceVariant.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -867,7 +867,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
-                    color: isSelected ? Colors.white : AppTheme.onSurfaceVariant.withValues(alpha: 0.7),
+                    color: isSelected ? scheme.onPrimary : scheme.onSurfaceVariant.withValues(alpha: 0.85),
                   ),
                 ),
               ),
@@ -926,18 +926,19 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   Widget _buildTaskListView(List<ZenBlock> blocks) {
+    final scheme = Theme.of(context).colorScheme;
     if (blocks.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(LucideIcons.checkSquare,
-                size: 52, color: AppTheme.primary.withValues(alpha: 0.2)),
+                size: 52, color: scheme.primary.withValues(alpha: 0.25)),
             const SizedBox(height: 16),
             Text(
               'No tasks found',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: AppTheme.onBackground.withValues(alpha: 0.5),
+                    color: scheme.onSurface.withValues(alpha: 0.6),
                     fontWeight: FontWeight.w600,
                   ),
             ),
@@ -945,7 +946,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             Text(
               'Click + New Task to capture your next objective.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.onSurfaceVariant.withValues(alpha: 0.45),
+                    color: scheme.onSurfaceVariant.withValues(alpha: 0.55),
                   ),
             ),
           ],
@@ -965,6 +966,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   Widget _buildTaskRow(ZenBlock block, int index) {
+    final scheme = Theme.of(context).colorScheme;
     final status = block.metadata['status'] ?? 'todo';
     final isDone = status == 'done';
     final priorityVal = block.metadata['priority'] as int? ?? 2;
@@ -1000,18 +1002,18 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 height: 22,
                 decoration: BoxDecoration(
                   color: isDone
-                      ? AppTheme.primary
+                      ? scheme.primary
                       : Colors.transparent,
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: isDone
-                        ? AppTheme.primary
-                        : AppTheme.onSurfaceVariant.withValues(alpha: 0.35),
+                        ? scheme.primary
+                        : scheme.onSurfaceVariant.withValues(alpha: 0.4),
                     width: 2,
                   ),
                 ),
                 child: isDone
-                    ? const Icon(LucideIcons.check, size: 14, color: Colors.white)
+                    ? Icon(LucideIcons.check, size: 14, color: scheme.onPrimary)
                     : null,
               ),
             ),
@@ -1026,8 +1028,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   block.content,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: isDone
-                            ? AppTheme.onSurfaceVariant.withValues(alpha: 0.45)
-                            : AppTheme.onBackground.withValues(alpha: 0.9),
+                            ? scheme.onSurfaceVariant.withValues(alpha: 0.5)
+                            : scheme.onSurface.withValues(alpha: 0.95),
                         fontWeight: FontWeight.w600,
                         decoration: isDone ? TextDecoration.lineThrough : null,
                       ),
@@ -1039,7 +1041,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppTheme.onSurfaceVariant.withValues(alpha: 0.55),
+                          color: scheme.onSurfaceVariant.withValues(alpha: 0.65),
                           fontSize: 12,
                         ),
                   ),
@@ -1052,7 +1054,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: priorityColor.withValues(alpha: 0.1),
+              color: priorityColor.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
@@ -1099,6 +1101,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   Widget _buildIconButton(IconData icon, VoidCallback onTap, {bool danger = false}) {
+    final scheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: MouseRegion(
@@ -1107,16 +1110,16 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             color: danger
-                ? Colors.red.withValues(alpha: 0.08)
-                : AppTheme.primary.withValues(alpha: 0.07),
+                ? scheme.error.withValues(alpha: 0.1)
+                : scheme.primary.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
             icon,
             size: 14,
             color: danger
-                ? Colors.red.withValues(alpha: 0.7)
-                : AppTheme.primary.withValues(alpha: 0.6),
+                ? scheme.error.withValues(alpha: 0.8)
+                : scheme.primary.withValues(alpha: 0.7),
           ),
         ),
       ),
@@ -1140,6 +1143,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   }
 
   Widget _buildKanbanBoard(List<ZenBlock> blocks, {double columnWidth = 320}) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.frameMargin),
       child: ScrollConfiguration(
@@ -1206,7 +1210,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                             final block = boardBlocks.firstWhere((b) => b.id == task.id);
                             _showTaskModal(blockToEdit: block);
                           },
-                          accentColor: AppTheme.primary,
+                          accentColor: scheme.primary,
                         ),
                       ),
                     ).animate().fadeIn(delay: (100 * index).ms).slideY(begin: 0.1);
@@ -1220,15 +1224,15 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           child: Container(
                             width: 60,
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.4),
+                              color: scheme.surfaceContainerLowest.withValues(alpha: 0.4),
                               borderRadius: BorderRadius.circular(24),
                               border: Border.all(
-                                color: AppTheme.primary.withValues(alpha: 0.1),
+                                color: scheme.primary.withValues(alpha: 0.15),
                                 width: 2,
                               ),
                             ),
-                            child: const Center(
-                              child: Icon(LucideIcons.plus, color: AppTheme.primary, size: 24),
+                            child: Center(
+                              child: Icon(LucideIcons.plus, color: scheme.primary, size: 24),
                             ),
                           ),
                         ),

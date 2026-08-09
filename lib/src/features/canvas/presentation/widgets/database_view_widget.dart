@@ -57,6 +57,7 @@ class _DatabaseViewWidgetState extends ConsumerState<DatabaseViewWidget> {
   }
 
   void _onAddTask(String boardId) {
+    final scheme = Theme.of(context).colorScheme;
     final nameController = TextEditingController();
     showDialog(
       context: context,
@@ -77,16 +78,16 @@ class _DatabaseViewWidgetState extends ConsumerState<DatabaseViewWidget> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
+                        color: scheme.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(LucideIcons.penTool, color: AppTheme.primary, size: 20),
+                      child: Icon(LucideIcons.penTool, color: scheme.primary, size: 20),
                     ),
                     const SizedBox(width: 16),
                     Text(
                       'Capture Intent',
                       style: TextStyle(
-                        color: AppTheme.onBackground.withValues(alpha: 0.8),
+                        color: scheme.onSurface.withValues(alpha: 0.8),
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
                         letterSpacing: -0.5,
@@ -99,24 +100,24 @@ class _DatabaseViewWidgetState extends ConsumerState<DatabaseViewWidget> {
                   controller: nameController,
                   autofocus: true,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  cursorColor: AppTheme.primary,
+                  cursorColor: scheme.primary,
                   decoration: InputDecoration(
                     hintText: 'What needs to be done?',
                     hintStyle: TextStyle(
-                      color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4),
+                      color: scheme.onSurfaceVariant.withValues(alpha: 0.4),
                       fontWeight: FontWeight.w400,
                     ),
                     border: InputBorder.none,
                     filled: true,
-                    fillColor: Colors.white.withValues(alpha: 0.6),
+                    fillColor: scheme.surfaceContainerLowest.withValues(alpha: 0.6),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.8)),
+                      borderSide: BorderSide(color: scheme.surfaceContainerLowest.withValues(alpha: 0.8)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide(color: AppTheme.primary.withValues(alpha: 0.3)),
+                      borderSide: BorderSide(color: scheme.primary.withValues(alpha: 0.3)),
                     ),
                   ),
                   onSubmitted: (value) {
@@ -130,7 +131,7 @@ class _DatabaseViewWidgetState extends ConsumerState<DatabaseViewWidget> {
                     TextButton(
                       onPressed: () => Navigator.pop(ctx),
                       style: TextButton.styleFrom(
-                        foregroundColor: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                        foregroundColor: scheme.onSurfaceVariant.withValues(alpha: 0.6),
                       ),
                       child: const Text('Cancel'),
                     ),
@@ -142,8 +143,8 @@ class _DatabaseViewWidgetState extends ConsumerState<DatabaseViewWidget> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.primary,
-                        foregroundColor: Colors.white,
+                        backgroundColor: scheme.primary,
+                        foregroundColor: scheme.onPrimary,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -179,13 +180,14 @@ class _DatabaseViewWidgetState extends ConsumerState<DatabaseViewWidget> {
   @override
   Widget build(BuildContext context) {
     final tasksAsync = ref.watch(tasksForProjectProvider(widget.projectId));
+    final scheme = Theme.of(context).colorScheme;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: AppTheme.spaceMedium),
       decoration: BoxDecoration(
-        color: AppTheme.surface.withValues(alpha: 0.5),
+        color: scheme.surface.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-        border: Border.all(color: AppTheme.outline.withValues(alpha: 0.1)),
+        border: Border.all(color: scheme.outline.withValues(alpha: 0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -194,11 +196,11 @@ class _DatabaseViewWidgetState extends ConsumerState<DatabaseViewWidget> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: AppTheme.outline.withValues(alpha: 0.1))),
+              border: Border(bottom: BorderSide(color: scheme.outline.withValues(alpha: 0.1))),
             ),
             child: Row(
               children: [
-                const Icon(LucideIcons.layoutGrid, size: 16, color: AppTheme.primary),
+                Icon(LucideIcons.layoutGrid, size: 16, color: scheme.primary),
                 const SizedBox(width: 8),
                 const Text(
                   'Board View',
@@ -242,7 +244,7 @@ class _DatabaseViewWidgetState extends ConsumerState<DatabaseViewWidget> {
                           onAddTask: () => _onAddTask(board.id),
                           onTaskMoved: (_) {},
                           onTaskReordered: (task, a, b) {},
-                          accentColor: AppTheme.primary,
+                          accentColor: scheme.primary,
                         ),
                       ).animate().fadeIn(delay: (80 * index).ms).slideY(begin: 0.08);
                     }).toList(),

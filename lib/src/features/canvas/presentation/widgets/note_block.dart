@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kiyoshi/src/core/theme/app_theme.dart';
 
 class NoteBlockWidget extends StatefulWidget {
@@ -6,6 +7,12 @@ class NoteBlockWidget extends StatefulWidget {
   final bool isHeading;
   final Function(String)? onChanged;
   final VoidCallback? onDelete;
+  final bool autofocus;
+
+  /// Called when Enter (without Shift) is pressed — Notion-style "create a
+  /// new block below and move on", instead of just inserting a newline.
+  /// Shift+Enter still inserts a literal newline within this block.
+  final VoidCallback? onEnterPressed;
 
   const NoteBlockWidget({
     super.key,
@@ -13,6 +20,8 @@ class NoteBlockWidget extends StatefulWidget {
     this.isHeading = false,
     this.onChanged,
     this.onDelete,
+    this.autofocus = false,
+    this.onEnterPressed,
   });
 
   @override
@@ -21,12 +30,26 @@ class NoteBlockWidget extends StatefulWidget {
 
 class _NoteBlockWidgetState extends State<NoteBlockWidget> {
   late TextEditingController _controller;
+  late final FocusNode _focusNode;
   bool _isHovered = false;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController(text: widget.content);
+    _focusNode = FocusNode(onKeyEvent: _handleKeyEvent);
+  }
+
+  KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
+    if (widget.onEnterPressed == null) return KeyEventResult.ignored;
+    if (event is! KeyDownEvent) return KeyEventResult.ignored;
+    final isEnter = event.logicalKey == LogicalKeyboardKey.enter ||
+        event.logicalKey == LogicalKeyboardKey.numpadEnter;
+    if (!isEnter || HardwareKeyboard.instance.isShiftPressed) {
+      return KeyEventResult.ignored;
+    }
+    widget.onEnterPressed!();
+    return KeyEventResult.handled;
   }
 
   @override
@@ -40,11 +63,13 @@ class _NoteBlockWidgetState extends State<NoteBlockWidget> {
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -56,12 +81,12 @@ class _NoteBlockWidgetState extends State<NoteBlockWidget> {
         ),
         decoration: BoxDecoration(
           color: _isHovered
-              ? Colors.white.withValues(alpha: 0.7)
+              ? scheme.surfaceContainerLowest.withValues(alpha: 0.7)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           border: Border.all(
             color: _isHovered
-                ? AppTheme.primary.withValues(alpha: 0.12)
+                ? scheme.primary.withValues(alpha: 0.12)
                 : Colors.transparent,
           ),
         ),
@@ -71,16 +96,18 @@ class _NoteBlockWidgetState extends State<NoteBlockWidget> {
             Expanded(
               child: TextField(
                 controller: _controller,
+                focusNode: _focusNode,
+                autofocus: widget.autofocus,
                 onChanged: widget.onChanged,
                 maxLines: null,
                 style: widget.isHeading
                     ? Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          color: AppTheme.onBackground,
+                          color: scheme.onSurface,
                           fontWeight: FontWeight.w700,
                           letterSpacing: -0.3,
                         )
                     : Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: AppTheme.onBackground.withValues(alpha: 0.85),
+                          color: scheme.onSurface.withValues(alpha: 0.85),
                           height: 1.65,
                         ),
                 decoration: const InputDecoration(
@@ -98,7 +125,7 @@ class _NoteBlockWidgetState extends State<NoteBlockWidget> {
                   child: Icon(
                     Icons.delete_outline_rounded,
                     size: 16,
-                    color: AppTheme.error.withValues(alpha: 0.5),
+                    color: scheme.error.withValues(alpha: 0.5),
                   ),
                 ),
               ),

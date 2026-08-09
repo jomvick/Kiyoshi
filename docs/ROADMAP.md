@@ -113,11 +113,102 @@
 - Snapping/alignement magnétique avancé (grille simple uniquement)
 
 ### 5. Definition of Done (v1 whiteboard)
-- [ ] Créer/déplacer/redimensionner/supprimer une forme, un sticky note, un texte libre
-- [ ] Relier deux formes par une flèche qui suit si on déplace l'une des deux
-- [ ] Pan + zoom fluides (60fps sur un board de taille raisonnable, ~50 formes)
-- [ ] Persistance : fermer/rouvrir le projet restaure exactement l'état (formes + viewport)
-- [ ] Dark mode pris en compte dès la première version (pas de couleurs statiques blanches)
+- [x] Créer/déplacer/supprimer une forme, un sticky note, un texte libre (redimensionnement de
+      forme individuelle pas encore fait — seule la hauteur du board se redimensionne)
+- [x] Relier deux formes par une flèche (statique : ne suit pas automatiquement si l'une des
+      formes liées est déplacée ensuite — amélioration possible plus tard)
+- [ ] Pan + zoom fluides (non fait dans ce v1 — le board est borné à sa zone visible, pas de
+      caméra infinie ; à ajouter si le besoin d'un board plus grand se confirme à l'usage)
+- [x] Persistance : les formes + la hauteur du board sont sauvegardées dans `block.metadata`
+      via `BlockService.updateBlock` (même mécanisme que les autres blocs, aucune migration DB)
+- [x] Dark mode pris en compte dès la première version (`Theme.of(context).colorScheme` partout,
+      sticky notes gardées lisibles avec texte foncé fixe sur fond couleur clair)
+
+**✅ Livré :** `whiteboard_block.dart` (widget + painter), intégré dans `ZenCanvas` via la
+commande `/whiteboard` et le `case 'whiteboard'` de `_buildBlock()`. Outils : sélection
+(déplacer/supprimer), rectangle, ellipse, flèche, texte, sticky note, palette de 5 couleurs,
+édition de texte par double-clic (formes existantes) ou automatiquement à la création, poignée
+ de redimensionnement du board en bas à droite. Bug corrigé lors du debug : `shouldRepaint`
+comparait la liste de formes par référence (toujours égale puisque mutée en place), empêchant
+le repaint visuel lors d'un déplacement/suppression de forme.
+
+**✅ UX — poignée de drag Notion-like :** `block_canvas.dart` affichait un réordonnancement
+fonctionnel mais totalement invisible (long-press sur tout le bloc, aucun indice visuel). Ajout
+d'une poignée `⋮⋮` (icon `gripVertical`) dans une gouttière à gauche de chaque bloc, visible
+uniquement au survol (`AnimatedOpacity` + `IgnorePointer`), avec tooltip "Drag to reorder" —
+pattern directement inspiré de Notion. Le drag est maintenant déclenché uniquement depuis cette
+poignée (`ReorderableDragStartListener`) et non plus depuis tout le bloc, ce qui évite aussi les
+conflits accidentels avec l'édition de texte.
+
+**⏳ Reste pour une v1.1 :** pan/zoom, redimensionnement individuel des formes, flèches qui
+suivent leurs formes liées, undo/redo.
+
+### 6. Autres pistes UX "Notion-like" identifiées
+- [x] **Menu `/` inline et filtrable** — remplacé le dialog plein écran (`CommandPalette.show`)
+      par un menu ancré juste au-dessus du champ de saisie (`CompositedTransformFollower` +
+      `OverlayPortal`), qui filtre en direct pendant la frappe, navigable au clavier
+      (↑/↓/Entrée/Échap via `FocusNode.onKeyEvent`, avec double sécurité sur `onSubmitted`
+      pour rester correct même en cas d'ordre de dispatch imprévu). Le bouton `+` ouvre le
+      même menu (simule un `/`). Le dialog plein écran `CommandPalette` est conservé tel quel
+      pour le raccourci global `Cmd+K` (cas d'usage légitime pour un vrai dialog).
+- [x] **Rappel syntaxe markdown à la Obsidian** — ligne discrète sous le champ de saisie
+      (`# heading · -[ ] todo · \`\`\` code · / more blocks`) pour rendre visible que la
+      frappe directe marche aussi, sans passer par le menu.
+- [x] Pas d'insertion "à cet endroit" — **fait.** Nouvelle méthode `addBlockAfter` (position
+      fractionnaire, même logique que `reorderBlocks`) dans `IBlockRepository`/`ProjectRepository`/
+      `BlockService`, exposée via `ZenCanvas.onCreateBlockAfter`. Bouton `+` dans la gouttière de
+      chaque bloc (à côté de la poignée de drag), insère un bloc texte vide juste après.
+- [x] Entrée clavier pour créer un nouveau bloc — **fait** pour les blocs texte et todo
+      (`onEnterPressed` sur `NoteBlockWidget`/`TodoBlockWidget`, Shift+Entrée garde le retour à
+      la ligne classique). Le focus clavier passe automatiquement au nouveau bloc
+      (`_pendingFocusBlockId` + `autofocus`). Pas fait pour heading/code/link/etc. (moins
+      prioritaire, comportement moins évident pour ces types).
+- [x] Menu contextuel unifié par bloc (Supprimer/Dupliquer) — **fait.** Troisième icône ⋮ dans la
+      gouttière (`PopupMenuButton`), fonctionne identiquement pour tous les types de blocs au lieu
+      de la suppression au survol implémentée différemment par chaque widget. "Transformer en…"
+      pas fait (changerait le `type` d'un bloc existant en préservant son contenu — plus complexe,
+      à documenter séparément si besoin).
+
+---
+
+## 🌱 PLANIFIÉ — Rapprocher "Notes" (idées) et "Projects" (Notion/Obsidian-inspired)
+
+> Constat (session du 08/08/2026) : `NotesScreen` (inbox globale d'idées non classées) et chaque
+> `Project` sont des silos étanches — un `ZenBlock` appartient à exactement un `projectId`
+> (`'global'` ou l'ID d'un projet), sans aucun pont ni lien croisé entre les deux.
+
+### ✅ Fait — le pont manquant (rattacher une idée à un projet)
+- [x] `IBlockRepository.moveBlockToProject` + implémentation `ProjectRepository` (recalcule la
+      position en fin de liste du projet cible via `getMaxPosition`, pas de collision de position)
+- [x] `BlockService.moveBlockToProject` exposé
+- [x] `AppDatabase.getAllProjects`/`watchAllProjects` (tous workspaces confondus — n'existait pas)
+- [x] `allProjectsProvider` (Riverpod)
+- [x] Bouton "Attach to project" sur chaque carte de `NotesScreen` → dialog listant tous les
+      projets → la note change de `projectId` et disparaît naturellement de l'inbox (le stream
+      filtré sur `'global'` ne la voit plus, aucune UI supplémentaire nécessaire)
+
+### ⏳ Reste à faire (par ordre de valeur probable)
+- [x] Liens croisés `[[page]]` + panneau de rétroliens (Obsidian) — **fait, v1 en lecture seule.**
+      `ZenParser.extractLinkTitles`/`containsLinkTo` détectent la syntaxe `[[Titre]]` dans
+      n'importe quel bloc texte. `backlinksProvider` scanne tous les blocs de l'app (nouvelle
+      requête `AppDatabase.watchAllBlocks`, n'existait pas) et filtre ceux qui référencent le
+      titre du projet courant. Panneau "LINKED MENTIONS" affiché en bas de chaque page projet
+      (nouveau paramètre `ZenCanvas.footer`, symétrique du `header` existant).
+      **Limite assumée** : lecture seule, pas de clic-pour-naviguer vers la source, pas
+      d'autocomplétion `[[` en tapant, pas de rendu du lien comme élément cliquable dans
+      l'éditeur (le texte `[[Titre]]` reste du texte brut affiché tel quel).
+- [ ] Tags transverses navigables (au-delà du `#projet` de `ZenParser`, qui n'est qu'un indice de
+      saisie rapide non persisté/navigable)
+- [ ] Hiérarchie de projets (`Project.parentId`, sous-projets à la Notion)
+- [ ] Recherche unifiée idées + projets (aujourd'hui `NotesScreen` ne cherche que dans `'global'`)
+
+### 🐛 Bug pré-existant repéré en chemin (pas corrigé, hors scope de cette session)
+`NotesScreen._buildFileNoteCard` affiche `DateTime.fromMillisecondsSinceEpoch(note.position.toInt() * 1000)`
+comme si `position` était un timestamp Unix — mais `position` suit en réalité le schéma
+incrémental de `addBlock` (~1000, 2000, 3000…). La date affichée sur les cartes de notes est
+donc probablement erronée (proche de 1970). À corriger séparément : soit stocker un vrai
+`createdAt` (le champ existe déjà sur `ZenBlock` mais n'est pas utilisé ici), soit ne plus
+réutiliser `position` comme timestamp.
 
 ---
 

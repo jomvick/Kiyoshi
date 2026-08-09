@@ -64,7 +64,9 @@ class ZenStudioPageShell extends StatelessWidget {
                                       .textTheme
                                       .bodyMedium
                                       ?.copyWith(
-                                        color: AppTheme.onSurfaceVariant
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant
                                             .withValues(alpha: 0.7),
                                       ),
                                 ),

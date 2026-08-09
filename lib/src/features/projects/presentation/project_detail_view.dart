@@ -56,9 +56,9 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
   Widget build(BuildContext context) {
     final blocksAsync = ref.watch(projectBlocksProvider(widget.project.id));
     final projectAsync = ref.watch(projectByIdProvider(widget.project.id));
+    final scheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
       body: projectAsync.when(
         data: (project) {
           final currentProject = project ?? widget.project;
@@ -72,7 +72,7 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
                       center: Alignment.topRight,
                       radius: 1.5,
                       colors: [
-                        AppTheme.primary.withValues(alpha: 0.05),
+                        scheme.primary.withValues(alpha: 0.05),
                         Colors.transparent,
                       ],
                     ),
@@ -104,10 +104,12 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
                         onContentChanged: _handleContentChanged,
                         onDelete: _handleBlockDeleted,
                         onCreateBlock: _handleBlockCreated,
+                        onCreateBlockAfter: _handleBlockCreatedAfter,
+                        footer: _buildBacklinksSection(currentProject),
                       ),
-                      loading: () => const Center(
+                      loading: () => Center(
                         child: CircularProgressIndicator(
-                          color: AppTheme.primary,
+                          color: scheme.primary,
                         ),
                       ),
                       error: (err, stack) => Center(
@@ -117,13 +119,13 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
                             Icon(
                               LucideIcons.alertCircle,
                               size: 48,
-                              color: AppTheme.error.withValues(alpha: 0.5),
+                              color: scheme.error.withValues(alpha: 0.5),
                             ),
                             const SizedBox(height: 16),
-                            const Text(
+                            Text(
                               'Error loading blocks',
                               style: TextStyle(
-                                color: AppTheme.onSurfaceVariant,
+                                color: scheme.onSurfaceVariant,
                               ),
                             ),
                           ],
@@ -136,8 +138,8 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
             ],
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: AppTheme.primary),
+        loading: () => Center(
+          child: CircularProgressIndicator(color: scheme.primary),
         ),
         error: (err, stack) => Center(
           child: Column(
@@ -146,7 +148,7 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
               Icon(
                 LucideIcons.alertCircle,
                 size: 48,
-                color: AppTheme.error.withValues(alpha: 0.5),
+                color: scheme.error.withValues(alpha: 0.5),
               ),
               const SizedBox(height: 16),
               const Text('Could not load project.'),
@@ -266,6 +268,7 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
   // _buildContent replaced by ZenCanvas
 
   Widget _buildZenHeader(Project project) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.symmetric(
         horizontal: AppTheme.space2XLarge,
@@ -277,7 +280,7 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
           filter: ui.ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: Container(
             padding: const EdgeInsets.all(AppTheme.space2XLarge),
-            decoration: AppTheme.glassPanel(radius: 24),
+            decoration: AppTheme.glassPanel(radius: 24, context: context),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -289,7 +292,7 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
                         fontWeight: FontWeight.w800,
                         letterSpacing: -1,
-                        color: AppTheme.onBackground.withValues(alpha: 0.9),
+                        color: scheme.onSurface.withValues(alpha: 0.9),
                       ),
                   decoration: const InputDecoration(
                     border: InputBorder.none,
@@ -315,6 +318,7 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
             children: [
               if (project.deadline != null)
                 _buildMetadataChip(
+                  context: context,
                   icon: LucideIcons.calendar,
                   label: DateFormat('MMM d, yyyy').format(project.deadline!),
                   isOverdue: project.isOverdue,
@@ -322,6 +326,7 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
               if (project.deadline != null && project.status != ProjectStatus.completed)
                 const SizedBox(width: AppTheme.spaceMedium),
               _buildMetadataChip(
+                context: context,
                 icon: LucideIcons.clock,
                 label: 'Updated ${_formatRelativeDate(project.updatedAt)}',
               ),
@@ -332,13 +337,13 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
             controller: _descriptionController,
             maxLines: null,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppTheme.onSurfaceVariant.withValues(alpha: 0.8),
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
                   height: 1.5,
                 ),
             decoration: InputDecoration(
               hintText: 'Add a project description...',
               hintStyle: TextStyle(
-                color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4),
+                color: scheme.onSurfaceVariant.withValues(alpha: 0.4),
               ),
               border: InputBorder.none,
               isDense: true,
@@ -362,12 +367,97 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
     );
   }
 
+  /// Blocks anywhere else in the app that reference this project's title
+  /// via `[[Page Title]]` syntax — Obsidian-style backlinks. Read-only in
+  /// this v1 (tapping a row doesn't jump to its source page yet).
+  Widget _buildBacklinksSection(Project project) {
+    return Consumer(
+      builder: (context, ref, _) {
+        final scheme = Theme.of(context).colorScheme;
+        final backlinksAsync = ref.watch(
+          backlinksProvider((excludeProjectId: project.id, title: project.title)),
+        );
+        return backlinksAsync.when(
+          data: (blocks) {
+            if (blocks.isEmpty) return const SizedBox.shrink();
+            return Container(
+              margin: const EdgeInsets.symmetric(
+                horizontal: AppTheme.space2XLarge,
+                vertical: AppTheme.spaceLarge,
+              ),
+              padding: const EdgeInsets.all(AppTheme.spaceLarge),
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainerLow.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+                border: Border.all(color: scheme.outlineVariant.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(LucideIcons.link, size: 14, color: scheme.primary.withValues(alpha: 0.7)),
+                      const SizedBox(width: 8),
+                      Text(
+                        'LINKED MENTIONS (${blocks.length})',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: scheme.primary,
+                              letterSpacing: 1.5,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppTheme.spaceMedium),
+                  ...blocks.map((b) => _buildBacklinkRow(b, scheme)),
+                ],
+              ),
+            );
+          },
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
+        );
+      },
+    );
+  }
+
+  Widget _buildBacklinkRow(ZenBlock block, ColorScheme scheme) {
+    final snippet = block.content.trim();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(LucideIcons.fileText, size: 13, color: scheme.onSurfaceVariant.withValues(alpha: 0.6)),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                snippet.isEmpty ? '(empty block)' : snippet,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildMetadataChip({
+    required BuildContext context,
     required IconData icon,
     required String label,
     bool isOverdue = false,
   }) {
-    final color = isOverdue ? AppTheme.error : AppTheme.primary;
+    final scheme = Theme.of(context).colorScheme;
+    final color = isOverdue ? scheme.error : scheme.primary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -402,9 +492,9 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
       debugPrint('Could not update status: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not update status.'),
-            backgroundColor: AppTheme.error,
+          SnackBar(
+            content: const Text('Could not update status.'),
+            backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -427,13 +517,43 @@ class _ProjectDetailViewState extends ConsumerState<ProjectDetailView> {
       debugPrint('Could not save block: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Could not save block.'),
-            backgroundColor: AppTheme.error,
+          SnackBar(
+            content: const Text('Could not save block.'),
+            backgroundColor: Theme.of(context).colorScheme.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
       }
+    }
+  }
+
+  /// Backs the gutter '+' and Enter-to-create-next-block: inserts right
+  /// after [afterBlockId] instead of appending at the end, and returns the
+  /// new block's id so [ZenCanvas] can move keyboard focus to it.
+  Future<String> _handleBlockCreatedAfter(
+    String afterBlockId,
+    String type,
+    String content,
+    Map<String, dynamic> metadata,
+  ) async {
+    try {
+      return await ref.read(blockServiceProvider).addBlockAfter(
+        widget.project.id,
+        afterBlockId,
+        ParsedBlock(type: type, content: content, metadata: metadata),
+      );
+    } catch (e) {
+      debugPrint('Could not insert block: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Could not insert block.'),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+      rethrow;
     }
   }
 
@@ -512,6 +632,7 @@ class _AnimatedIconButtonState extends State<_AnimatedIconButton> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -522,8 +643,8 @@ class _AnimatedIconButtonState extends State<_AnimatedIconButton> {
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: _isHovered
-                ? Colors.white.withValues(alpha: 0.8)
-                : Colors.white.withValues(alpha: 0.5),
+                ? scheme.surfaceContainerLowest.withValues(alpha: 0.8)
+                : scheme.surfaceContainerLowest.withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12),
             boxShadow: _isHovered
                 ? [
@@ -538,7 +659,7 @@ class _AnimatedIconButtonState extends State<_AnimatedIconButton> {
           child: Icon(
             widget.icon,
             size: 18,
-            color: AppTheme.primary,
+            color: scheme.primary,
           ),
         ),
       ),

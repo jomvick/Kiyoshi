@@ -53,6 +53,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -61,20 +62,20 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.1),
+              color: scheme.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               LucideIcons.briefcase,
               size: 36,
-              color: AppTheme.primary.withValues(alpha: 0.4),
+              color: scheme.primary.withValues(alpha: 0.4),
             ),
           ),
           const SizedBox(height: 24),
           Text(
             'No workspaces yet',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppTheme.onBackground.withValues(alpha: 0.6),
+                  color: scheme.onSurface.withValues(alpha: 0.6),
                 ),
           ),
           const SizedBox(height: 8),
@@ -82,7 +83,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
             'Create a workspace to organize your projects',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
           ),
           const SizedBox(height: 32),
@@ -118,7 +119,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildProjectsHeader(projects.length),
+        _buildProjectsHeader(context, projects.length),
         const SizedBox(height: AppTheme.spaceMedium),
         Expanded(
           child: GridView.builder(
@@ -147,6 +148,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
   }
 
   Widget _buildNoProjectsState(BuildContext context, Workspace workspace) {
+    final scheme = Theme.of(context).colorScheme;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -155,20 +157,20 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.08),
+              color: scheme.primary.withValues(alpha: 0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(
               LucideIcons.folderPlus,
               size: 28,
-              color: AppTheme.primary.withValues(alpha: 0.4),
+              color: scheme.primary.withValues(alpha: 0.4),
             ),
           ),
           const SizedBox(height: 20),
           Text(
             'No projects in this workspace',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: AppTheme.onBackground.withValues(alpha: 0.6),
+                  color: scheme.onSurface.withValues(alpha: 0.6),
                 ),
           ),
           const SizedBox(height: 8),
@@ -176,7 +178,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
             'Create your first project to get started',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppTheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
           ),
           const SizedBox(height: 24),
@@ -190,7 +192,8 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
     );
   }
 
-  Widget _buildProjectsHeader(int count) {
+  Widget _buildProjectsHeader(BuildContext context, int count) {
+    final scheme = Theme.of(context).colorScheme;
     return Row(
       children: [
         Text(
@@ -198,7 +201,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w700,
-            color: AppTheme.onBackground.withValues(alpha: 0.5),
+            color: scheme.onSurface.withValues(alpha: 0.5),
             letterSpacing: 1.5,
           ),
         ),
@@ -206,15 +209,15 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           decoration: BoxDecoration(
-            color: AppTheme.primary.withValues(alpha: 0.1),
+            color: scheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(
             count.toString(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,
-              color: AppTheme.primary,
+              color: scheme.primary,
             ),
           ),
         ),
@@ -253,7 +256,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
         child: Container(
           width: 400,
           padding: const EdgeInsets.all(AppTheme.spaceLarge),
-          decoration: AppTheme.glassPanel(radius: 24),
+          decoration: AppTheme.glassPanel(radius: 24, context: ctx),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,7 +326,7 @@ class _ProjectsScreenState extends ConsumerState<ProjectsScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: AppTheme.error),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
             child: const Text('DELETE'),
           ),
         ],
@@ -399,7 +402,7 @@ class _CreateProjectDialogState extends ConsumerState<_CreateProjectDialog> {
       child: Container(
         width: 450,
         padding: const EdgeInsets.all(AppTheme.spaceLarge),
-        decoration: AppTheme.glassPanel(radius: 24),
+        decoration: AppTheme.glassPanel(radius: 24, context: context),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -434,10 +437,10 @@ class _CreateProjectDialogState extends ConsumerState<_CreateProjectDialog> {
               children: [
                 const Icon(LucideIcons.calendar, size: 18),
                 const SizedBox(width: 8),
-                const Text(
+                Text(
                   'Deadline',
                   style: TextStyle(
-                    color: AppTheme.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     fontSize: 14,
                   ),
                 ),
@@ -545,7 +548,7 @@ class _EditProjectDialogState extends ConsumerState<_EditProjectDialog> {
       child: Container(
         width: 450,
         padding: const EdgeInsets.all(AppTheme.spaceLarge),
-        decoration: AppTheme.glassPanel(radius: 24),
+        decoration: AppTheme.glassPanel(radius: 24, context: context),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -49,17 +49,17 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     final date = DateFormat('MMM d, yyyy • HH:mm').format(
       DateTime.fromMillisecondsSinceEpoch(widget.note.position.toInt() * 1000),
     );
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(LucideIcons.arrowLeft, color: AppTheme.onBackground),
+          icon: Icon(LucideIcons.arrowLeft, color: scheme.onSurface),
           onPressed: () => _maybePop(),
         ),
         title: Row(
@@ -67,16 +67,16 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: AppTheme.primary.withValues(alpha: 0.12),
+                color: scheme.primary.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Icon(LucideIcons.fileText, size: 16, color: AppTheme.primary),
+              child: Icon(LucideIcons.fileText, size: 16, color: scheme.primary),
             ),
             const SizedBox(width: 10),
             Text(
               'Document Editor',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: AppTheme.onBackground.withValues(alpha: 0.8),
+                    color: scheme.onSurface.withValues(alpha: 0.85),
                     fontWeight: FontWeight.w600,
                   ),
             ),
@@ -85,11 +85,11 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
         actions: [
           if (_isDirty)
             IconButton(
-              icon: const Icon(LucideIcons.check, color: AppTheme.primary),
+              icon: Icon(LucideIcons.check, color: scheme.primary),
               onPressed: _save,
             ),
           IconButton(
-            icon: const Icon(LucideIcons.trash2, color: AppTheme.onSurfaceVariant),
+            icon: Icon(LucideIcons.trash2, color: scheme.onSurfaceVariant),
             onPressed: () => _delete(),
           ),
         ],
@@ -104,13 +104,13 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                 Icon(
                   LucideIcons.clock,
                   size: 13,
-                  color: AppTheme.onSurfaceVariant.withValues(alpha: 0.4),
+                  color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
                 const SizedBox(width: 6),
                 Text(
                   date,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppTheme.onSurfaceVariant.withValues(alpha: 0.5),
+                        color: scheme.onSurfaceVariant.withValues(alpha: 0.6),
                       ),
                 ),
               ],
@@ -127,14 +127,14 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                     TextField(
                       controller: _titleController,
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: AppTheme.onBackground,
+                            color: scheme.onSurface,
                             fontWeight: FontWeight.w700,
                           ),
-                      cursorColor: AppTheme.primary,
+                      cursorColor: scheme.primary,
                       decoration: InputDecoration(
                         hintText: 'Note Title…',
                         hintStyle: TextStyle(
-                          color: AppTheme.onSurfaceVariant.withValues(alpha: 0.3),
+                          color: scheme.onSurfaceVariant.withValues(alpha: 0.4),
                           fontWeight: FontWeight.w600,
                         ),
                         border: InputBorder.none,
@@ -144,7 +144,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                     ),
                     const SizedBox(height: 16),
                     Divider(
-                      color: AppTheme.primary.withValues(alpha: 0.12),
+                      color: scheme.primary.withValues(alpha: 0.15),
                       height: 1,
                     ),
                     const SizedBox(height: 16),
@@ -155,15 +155,15 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                         maxLines: null,
                         expands: true,
                         textAlignVertical: TextAlignVertical.top,
-                        cursorColor: AppTheme.primary,
+                        cursorColor: scheme.primary,
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                              color: AppTheme.onBackground.withValues(alpha: 0.85),
+                              color: scheme.onSurface.withValues(alpha: 0.9),
                               height: 1.8,
                             ),
                         decoration: InputDecoration(
                           hintText: 'Start typing note content here…',
                           hintStyle: TextStyle(
-                            color: AppTheme.onSurfaceVariant.withValues(alpha: 0.3),
+                            color: scheme.onSurfaceVariant.withValues(alpha: 0.4),
                           ),
                           border: InputBorder.none,
                           isDense: true,
@@ -182,6 +182,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
   }
 
   Future<void> _save() async {
+    final scheme = Theme.of(context).colorScheme;
     final title = _titleController.text.trim();
     final body = _bodyController.text;
 
@@ -204,13 +205,14 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
           content: const Text('Note saved'),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          backgroundColor: AppTheme.primary,
+          backgroundColor: scheme.primary,
         ),
       );
     }
   }
 
   Future<void> _delete() async {
+    final scheme = Theme.of(context).colorScheme;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -224,8 +226,8 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
+                backgroundColor: scheme.error,
+                foregroundColor: scheme.onError,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12))),
             child: const Text('Delete'),
@@ -241,6 +243,7 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
 
   void _maybePop() {
     if (_isDirty) {
+      final scheme = Theme.of(context).colorScheme;
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
@@ -257,8 +260,8 @@ class _NoteDetailScreenState extends ConsumerState<NoteDetailScreen> {
                 Navigator.of(context).pop();
               },
               style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
+                  backgroundColor: scheme.error,
+                  foregroundColor: scheme.onError,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12))),
               child: const Text('Discard'),
