@@ -67,7 +67,7 @@ jobs:
           if-no-files-found: error
 
   build-windows:
-    name: Build Windows (ZIP)
+    name: Build Windows (ZIP & Installer .exe)
     runs-on: windows-latest
     steps:
       - name: Checkout Code
@@ -94,15 +94,23 @@ jobs:
         shell: powershell
         run: |
           $version = Get-Content VERSION -ErrorAction SilentlyContinue
-          if (!$version) { $version = "1.0.1" }
+          if (!$version) { $version = "1.0.2" }
           $version = $version.Trim()
           Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "Kiyoshi-$version-windows-x64.zip"
+
+      - name: Setup Inno Setup
+        uses: sayeedwe/setup-inno-setup@v1
+
+      - name: Build Windows Installer (.exe)
+        run: iscc packaging/windows/kiyoshi_setup.iss
 
       - name: Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-package
-          path: Kiyoshi-*-windows-x64.zip
+          path: |
+            Kiyoshi-*-windows-x64.zip
+            Kiyoshi-*-Setup.exe
           if-no-files-found: error
 
   build-macos:
@@ -131,7 +139,7 @@ jobs:
 
       - name: Package macOS DMG
         run: |
-          APP_VERSION=$(cat VERSION 2>/dev/null | xargs || echo '1.0.1')
+          APP_VERSION=$(cat VERSION 2>/dev/null | xargs || echo '1.0.2')
           hdiutil create -volname "Kiyoshi" -srcfolder "build/macos/Build/Products/Release/kiyoshi.app" -ov -format UDZO "Kiyoshi-$APP_VERSION-macos.dmg"
 
       - name: Upload macOS Artifacts
@@ -165,6 +173,7 @@ jobs:
             dist/Kiyoshi-*.AppImage
             dist/kiyoshi-*.rpm
             dist/Kiyoshi-*.zip
+            dist/Kiyoshi-*.exe
             dist/Kiyoshi-*.dmg
           generate_release_notes: true
           draft: false
