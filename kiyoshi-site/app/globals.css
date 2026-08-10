@@ -1,0 +1,95 @@
+@import "tailwindcss";
+
+@theme {
+  /* Canvas — the app's own "Warm Charcoal" dark palette (zen_colors.dart),
+     explicitly modeled on Claude's dark UI: warm soft charcoal, not near-black. */
+  --color-canvas: #262624;
+  --color-canvas-raised: #30302e;
+  --color-canvas-sunken: #1f1e1d;
+
+  /* Ink — warm off-white / muted warm gray, matching ZenColors.darkOnBackground */
+  --color-ink: #ecebe4;
+  --color-ink-muted: #b3b1a8;
+  --color-ink-faint: #7a7972;
+
+  /* Sage — the lighter teal the app switches to in dark mode so it stays
+     legible against the charcoal (ZenColors.darkPrimary) */
+  --color-sage: #8fbdb8;
+  --color-sage-dim: #74a29d;
+  --color-sage-light: #b7d9d5;
+  --color-mint: #2f4644;
+  --color-accent-ink: #0e1a19; /* text color placed on top of the light accent */
+
+  /* Hairline outline, following the app's "No-Line" low-contrast rule */
+  --color-outline: #ffffff14;
+
+  /* Spectral — the app's own "Prismatic Borders" ring, reused as the site's signature */
+  --color-spectral-1: #ffd1d1;
+  --color-spectral-2: #d1ffd1;
+  --color-spectral-3: #d1f1ff;
+  --color-spectral-4: #e4d1ff;
+
+  --font-display: var(--font-montserrat);
+  --font-body: var(--font-inter);
+  --font-mono: var(--font-jetbrains);
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+/* Glass panel — mirrors AppTheme.glassPanel() from the Flutter app:
+   translucent fill, hairline border, soft ambient shadow. */
+.glass {
+  background: color-mix(in srgb, var(--color-canvas-raised) 55%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 10px 30px -10px rgba(0, 0, 0, 0.45),
+    0 2px 8px -2px rgba(0, 0, 0, 0.3);
+}
+
+/* Prismatic focus ring — the app's "Prismatic Borders" setting, made literal.
+   A conic sweep through the same spectral tones used in BotanicalLogoPainter. */
+.prismatic-ring {
+  position: relative;
+  isolation: isolate;
+}
+.prismatic-ring::before {
+  content: "";
+  position: absolute;
+  inset: -1.5px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from 0deg,
+    var(--color-spectral-2),
+    var(--color-spectral-3),
+    var(--color-spectral-4),
+    var(--color-spectral-1),
+    var(--color-spectral-2)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 300ms ease;
+  z-index: -1;
+}
+.prismatic-ring:hover::before,
+.prismatic-ring:focus-visible::before {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
