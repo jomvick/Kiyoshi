@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
-import 'package:kiyoshi/src/core/theme/app_theme.dart';
 import 'package:kiyoshi/src/features/canvas/application/zen_parser.dart';
 import 'package:kiyoshi/src/shared/widgets/zen_glass_card.dart';
 import 'package:kiyoshi/src/shared/widgets/botanical_logo.dart';
@@ -9,7 +8,10 @@ import 'package:kiyoshi/src/core/design_system/kiyoshi_zen_tokens.dart';
 import 'package:kiyoshi/src/shared/widgets/prismatic_border_painter.dart';
 import 'package:kiyoshi/src/shared/widgets/zen_bar_shared.dart';
 
-class MorphingZenBar extends StatefulWidget {
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kiyoshi/src/core/localization/app_translation.dart';
+
+class MorphingZenBar extends ConsumerStatefulWidget {
   final Function(String title, DateTime? date, String? project, int priority) onTaskCreated;
   final Function(String type, String content, Map<String, dynamic> metadata)? onBlockCreated;
   final Function(String title, String? description)? onProjectCreated;
@@ -30,10 +32,10 @@ class MorphingZenBar extends StatefulWidget {
   });
 
   @override
-  State<MorphingZenBar> createState() => _MorphingZenBarState();
+  ConsumerState<MorphingZenBar> createState() => _MorphingZenBarState();
 }
 
-class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStateMixin, ZenBarSharedState<MorphingZenBar> {
+class _MorphingZenBarState extends ConsumerState<MorphingZenBar> with TickerProviderStateMixin, ZenBarSharedState<MorphingZenBar> {
   final bool _isManuallyExpanded = false;
 
   @override
@@ -196,6 +198,7 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
   }
 
   Widget _buildExpandedContent() {
+    final t = ref.watch(translationProvider);
     final scheme = Theme.of(context).colorScheme;
     final cmd = activeCommand;
     final cmdColor = cmd != null
@@ -203,56 +206,93 @@ class _MorphingZenBarState extends State<MorphingZenBar> with TickerProviderStat
         : scheme.primary;
     final hintText = cmd != null
         ? 'Write your ${cmd['label'].toString().toLowerCase()}...'
-        : currentPlaceholder;
+        : t.nextFocusPlaceholder;
+    final isEmpty = controller.text.isEmpty && cmd == null;
 
     return Container(
       key: const ValueKey('expanded'),
       width: double.infinity,
+      height: 60,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          BotanicalLogo(
-            size: 28,
-            color: isFocused
-                ? scheme.primary
-                : scheme.onSurfaceVariant.withValues(alpha: 0.6),
-            showPrismaticHalo: isFocused,
-          ),
-          const SizedBox(width: 10),
-          if (cmd != null) ...[
-            ZenBarCommandPill(command: cmd, color: cmdColor, onDismiss: dismissCommand),
-            const SizedBox(width: 8),
-          ],
-          Expanded(
-            child: TextField(
-              controller: controller,
-              focusNode: focusNode,
-              textAlignVertical: TextAlignVertical.center,
-              onSubmitted: (_) => _submitTask(),
-              cursorColor: scheme.primary,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: scheme.onSurface,
-                fontWeight: FontWeight.w500,
-              ),
-              decoration: InputDecoration(
-                hintText: hintText,
-                hintStyle: TextStyle(
-                  color: scheme.onSurfaceVariant.withValues(alpha: 0.4),
-                  fontWeight: FontWeight.w400,
-                ),
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(vertical: 14),
+          // Centered Logo + Placeholder Overlay when empty and unfocused
+          if (isEmpty && !isFocused)
+            IgnorePointer(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  BotanicalLogo(
+                    size: 22,
+                    color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
+                    showPrismaticHalo: false,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    t.nextFocusPlaceholder,
+                    style: TextStyle(
+                      color: scheme.onSurfaceVariant.withValues(alpha: 0.45),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
               ),
             ),
+
+          // Main Interactive Row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Show Left Logo when focused or when input/cmd active
+              if (!isEmpty || isFocused) ...[
+                BotanicalLogo(
+                  size: 26,
+                  color: isFocused
+                      ? scheme.primary
+                      : scheme.onSurfaceVariant.withValues(alpha: 0.6),
+                  showPrismaticHalo: isFocused,
+                ),
+                const SizedBox(width: 10),
+              ],
+              if (cmd != null) ...[
+                ZenBarCommandPill(command: cmd, color: cmdColor, onDismiss: dismissCommand),
+                const SizedBox(width: 8),
+              ],
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  textAlignVertical: TextAlignVertical.center,
+                  onSubmitted: (_) => _submitTask(),
+                  cursorColor: scheme.primary,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: scheme.onSurface,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: (isEmpty && !isFocused) ? null : hintText,
+                    hintStyle: TextStyle(
+                      color: scheme.onSurfaceVariant.withValues(alpha: 0.4),
+                      fontWeight: FontWeight.w400,
+                    ),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+              if (cmd == null && lastResult != null && controller.text.isNotEmpty)
+                ZenBarVisualFeedback(result: lastResult),
+              const SizedBox(width: 8),
+              // Submit button (Up arrow) centered on the right
+              ZenBarSubmitButton(
+                onTap: _submitTask,
+                isActive: controller.text.isNotEmpty || cmd != null,
+              ),
+            ],
           ),
-          if (cmd == null && lastResult != null && controller.text.isNotEmpty)
-            ZenBarVisualFeedback(result: lastResult),
-          if (controller.text.isNotEmpty || cmd != null) ...[
-            const SizedBox(width: 8),
-            ZenBarSubmitButton(onTap: _submitTask),
-          ],
         ],
       ),
     );

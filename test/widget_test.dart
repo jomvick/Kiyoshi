@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:kiyoshi/src/core/providers/preferences_provider.dart';
 import 'package:kiyoshi/src/features/projects/domain/entities/workspace.dart';
 import 'package:kiyoshi/src/core/navigation/app_destination.dart';
 import 'package:kiyoshi/src/shared/widgets/sidebar.dart';
@@ -16,16 +19,24 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Sidebar(
-            selectedWorkspace: const Workspace(id: '1', name: 'Studio'),
-            workspaces: [const Workspace(id: '1', name: 'Studio')],
-            onWorkspaceSelected: (_) {},
-            onCreateWorkspace: () {},
-            onDestinationSelected: (_) {},
-            selectedDestination: AppDestination.dashboard,
+      ProviderScope(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: Sidebar(
+              selectedWorkspace: const Workspace(id: '1', name: 'Studio'),
+              workspaces: [const Workspace(id: '1', name: 'Studio')],
+              onWorkspaceSelected: (_) {},
+              onCreateWorkspace: () {},
+              onDestinationSelected: (_) {},
+              selectedDestination: AppDestination.dashboard,
+            ),
           ),
         ),
       ),

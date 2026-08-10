@@ -12,6 +12,7 @@ import 'package:kiyoshi/src/core/providers/database_provider.dart';
 import 'package:kiyoshi/src/core/providers/preferences_provider.dart';
 import 'package:kiyoshi/src/features/canvas/domain/entities/zen_block.dart';
 import 'package:kiyoshi/src/features/canvas/application/zen_parser.dart';
+import 'package:kiyoshi/src/core/localization/app_translation.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:kiyoshi/src/shared/widgets/zen_glass_card.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -637,6 +638,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
   Widget _buildToolbar(List<ZenBlock> allBlocks) {
     final scheme = Theme.of(context).colorScheme;
+    final t = ref.watch(translationProvider);
     final int total = allBlocks.length;
     final int todoCount = allBlocks.where((b) => (b.metadata['status'] ?? 'todo') == 'todo').length;
     final int inProgressCount = allBlocks.where((b) => b.metadata['status'] == 'inProgress').length;
@@ -662,13 +664,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     _buildViewModeButton(
                       mode: TaskViewMode.list,
                       icon: LucideIcons.list,
-                      label: 'List',
+                      label: t.listView,
                     ),
                     const SizedBox(width: 4),
                     _buildViewModeButton(
                       mode: TaskViewMode.board,
                       icon: LucideIcons.kanban,
-                      label: 'Board',
+                      label: t.boardView,
                     ),
                   ],
                 ),
@@ -692,7 +694,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                           onChanged: (v) => setState(() => _searchQuery = v),
                           style: Theme.of(context).textTheme.bodySmall,
                           decoration: InputDecoration(
-                            hintText: 'Search tasks…',
+                            hintText: t.searchTasks,
                             hintStyle: TextStyle(
                               color: scheme.onSurfaceVariant.withValues(alpha: 0.5),
                               fontSize: 13,
@@ -743,7 +745,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         Icon(LucideIcons.plus, size: 16, color: scheme.onPrimary),
                         const SizedBox(width: 6),
                         Text(
-                          'New Task',
+                          t.newTask,
                           style: TextStyle(
                             color: scheme.onPrimary,
                             fontWeight: FontWeight.w600,
@@ -763,13 +765,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                _buildFilterTab('all', 'All Tasks', total),
+                _buildFilterTab('all', t.allTasks, total),
                 const SizedBox(width: 8),
-                _buildFilterTab('todo', 'To Do', todoCount),
+                _buildFilterTab('todo', t.toDo, todoCount),
                 const SizedBox(width: 8),
-                _buildFilterTab('inProgress', 'In Progress', inProgressCount),
+                _buildFilterTab('inProgress', t.inProgress, inProgressCount),
                 const SizedBox(width: 8),
-                _buildFilterTab('done', 'Completed', doneCount),
+                _buildFilterTab('done', t.completed, doneCount),
               ],
             ),
           ),

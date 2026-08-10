@@ -147,29 +147,49 @@ class ZenBarVisualFeedback extends StatelessWidget {
 
 class ZenBarSubmitButton extends StatelessWidget {
   final VoidCallback onTap;
+  final bool isActive;
 
-  const ZenBarSubmitButton({super.key, required this.onTap});
+  const ZenBarSubmitButton({
+    super.key,
+    required this.onTap,
+    this.isActive = true,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: 42,
-        height: 42,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: AppTheme.primary,
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.primary.withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: 36,
+          height: 36,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isActive
+                ? scheme.primary
+                : scheme.onSurfaceVariant.withValues(alpha: 0.12),
+            shape: BoxShape.circle,
+            boxShadow: isActive
+                ? [
+                    BoxShadow(
+                      color: scheme.primary.withValues(alpha: 0.35),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ]
+                : [],
+          ),
+          child: Icon(
+            LucideIcons.arrowUp,
+            size: 18,
+            color: isActive
+                ? Colors.white
+                : scheme.onSurfaceVariant.withValues(alpha: 0.4),
+          ),
         ),
-        child: const Icon(LucideIcons.arrowUp, size: 20, color: Colors.white),
       ),
     );
   }

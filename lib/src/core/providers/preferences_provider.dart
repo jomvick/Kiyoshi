@@ -23,6 +23,7 @@ class AppPreferences {
   final bool showGrid;
   final bool snapToGrid;
   final double kanbanColumnWidth;
+  final String language; // 'en' or 'fr'
 
   const AppPreferences({
     this.sidebarExpanded = true,
@@ -36,6 +37,7 @@ class AppPreferences {
     this.showGrid = true,
     this.snapToGrid = true,
     this.kanbanColumnWidth = 300,
+    this.language = 'en',
   });
 
   AppPreferences copyWith({
@@ -50,6 +52,7 @@ class AppPreferences {
     bool? showGrid,
     bool? snapToGrid,
     double? kanbanColumnWidth,
+    String? language,
   }) {
     return AppPreferences(
       sidebarExpanded: sidebarExpanded ?? this.sidebarExpanded,
@@ -63,6 +66,7 @@ class AppPreferences {
       showGrid: showGrid ?? this.showGrid,
       snapToGrid: snapToGrid ?? this.snapToGrid,
       kanbanColumnWidth: kanbanColumnWidth ?? this.kanbanColumnWidth,
+      language: language ?? this.language,
     );
   }
 
@@ -79,6 +83,7 @@ class AppPreferences {
       'showGrid': showGrid,
       'snapToGrid': snapToGrid,
       'kanbanColumnWidth': kanbanColumnWidth,
+      'language': language,
     };
   }
 
@@ -95,6 +100,7 @@ class AppPreferences {
       showGrid: json['showGrid'] as bool? ?? showGrid,
       snapToGrid: json['snapToGrid'] as bool? ?? snapToGrid,
       kanbanColumnWidth: (json['kanbanColumnWidth'] as num?)?.toDouble() ?? kanbanColumnWidth,
+      language: json['language'] as String? ?? language,
     );
   }
 }
@@ -119,6 +125,7 @@ class PreferencesNotifier extends StateNotifier<AppPreferences> {
       showGrid: _prefs.getBool('show_grid') ?? true,
       snapToGrid: _prefs.getBool('snap_to_grid') ?? true,
       kanbanColumnWidth: _prefs.getDouble('kanban_column_width') ?? 300,
+      language: _prefs.getString('language') ?? 'en',
     );
   }
 
@@ -175,5 +182,10 @@ class PreferencesNotifier extends StateNotifier<AppPreferences> {
   Future<void> setKanbanColumnWidth(double width) async {
     await _prefs.setDouble('kanban_column_width', width);
     state = state.copyWith(kanbanColumnWidth: width);
+  }
+
+  Future<void> setLanguage(String language) async {
+    await _prefs.setString('language', language);
+    state = state.copyWith(language: language);
   }
 }

@@ -11,6 +11,7 @@ import 'package:kiyoshi/src/features/canvas/application/zen_parser.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kiyoshi/src/shared/widgets/sidebar.dart';
 import 'package:kiyoshi/src/features/navigation/morphing_zen_bar.dart';
+import 'package:kiyoshi/src/features/ai_agent/presentation/ai_agent_drawer.dart';
 
 class AppDesktopShell extends ConsumerStatefulWidget {
   final Workspace? selectedWorkspace;
@@ -61,9 +62,9 @@ class _AppDesktopShellState extends ConsumerState<AppDesktopShell> {
       focusNode: FocusNode(),
       autofocus: true,
       onKeyEvent: (event) {
-        if (event is KeyDownEvent && 
-            !_quickEntryFocusNode.hasFocus && 
-            event.character != null && 
+        if (event is KeyDownEvent &&
+            !_quickEntryFocusNode.hasFocus &&
+            event.character != null &&
             event.character!.isNotEmpty) {
           _quickEntryFocusNode.requestFocus();
         }
@@ -74,6 +75,8 @@ class _AppDesktopShellState extends ConsumerState<AppDesktopShell> {
           _buildLayoutRow(isZenMode, prefs),
           if (!isZenMode && widget.selectedDestination == AppDestination.dashboard)
             _buildZenBar(prefs),
+          // ─── AI Agent Drawer Overlay ─────────────────────────────
+          const AiAgentDrawer(),
         ],
       ),
     );

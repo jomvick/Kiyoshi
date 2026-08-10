@@ -14,6 +14,7 @@ import 'package:kiyoshi/src/features/tasks/tasks_screen.dart';
 import 'package:kiyoshi/src/features/settings/settings_screen.dart';
 import 'package:kiyoshi/src/shared/layout/app_desktop_shell.dart';
 import 'package:kiyoshi/src/shared/widgets/command_palette.dart';
+import 'package:kiyoshi/src/features/ai_agent/presentation/ai_agent_providers.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:uuid/uuid.dart';
 
@@ -178,6 +179,12 @@ class _KanbanBoardScreenState extends ConsumerState<KanbanBoardScreen> {
         } else if (event.logicalKey == LogicalKeyboardKey.keyF &&
             HardwareKeyboard.instance.isMetaPressed) {
           _toggleFocusMode();
+        } else if (event.logicalKey == LogicalKeyboardKey.keyI &&
+            (HardwareKeyboard.instance.isMetaPressed ||
+                HardwareKeyboard.instance.isControlPressed)) {
+          // Ctrl+I / Cmd+I toggles the AI drawer
+          final isOpen = ref.read(aiDrawerOpenProvider);
+          ref.read(aiDrawerOpenProvider.notifier).state = !isOpen;
         }
       },
       child: workspacesAsync.when(

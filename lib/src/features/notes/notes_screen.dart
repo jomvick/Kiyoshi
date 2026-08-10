@@ -12,6 +12,8 @@ import 'package:kiyoshi/src/features/projects/domain/entities/project.dart';
 import 'package:kiyoshi/src/shared/widgets/zen_glass_card.dart';
 import 'package:intl/intl.dart';
 
+import 'package:kiyoshi/src/core/localization/app_translation.dart';
+
 class NotesScreen extends ConsumerStatefulWidget {
   const NotesScreen({super.key});
 
@@ -139,6 +141,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
 
   Widget _buildHeader(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final t = ref.watch(translationProvider);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
           AppTheme.frameMargin, AppTheme.frameMargin, AppTheme.frameMargin, 0),
@@ -146,7 +149,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'QUICK CAPTURE',
+            t.quickCapture,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
                   color: scheme.primary.withValues(alpha: 0.7),
                   letterSpacing: 4.0,
@@ -158,7 +161,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                'Notes',
+                t.notes,
                 style: Theme.of(context).textTheme.displaySmall?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: scheme.onSurface,
@@ -169,7 +172,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Text(
-                    'All your fleeting thoughts, unattached to any project.',
+                    t.fleetingThoughts,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
                         ),
@@ -186,6 +189,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
 
   Widget _buildToolbar(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final t = ref.watch(translationProvider);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppTheme.frameMargin),
       child: Row(
@@ -207,7 +211,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                       onChanged: (v) => setState(() => _searchQuery = v),
                       style: Theme.of(context).textTheme.bodyMedium,
                       decoration: InputDecoration(
-                        hintText: 'Search notes…',
+                        hintText: t.searchNotes,
                         hintStyle: TextStyle(
                             color: scheme.onSurfaceVariant.withValues(alpha: 0.5)),
                         border: InputBorder.none,
@@ -256,7 +260,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
                     Icon(LucideIcons.plus, size: 18, color: scheme.onPrimary),
                     const SizedBox(width: 8),
                     Text(
-                      'New Note',
+                      t.newNote,
                       style: TextStyle(
                         color: scheme.onPrimary,
                         fontWeight: FontWeight.w600,
@@ -494,6 +498,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
 
   Widget _buildEmptyState(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final t = ref.watch(translationProvider);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -502,7 +507,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
               size: 56, color: scheme.primary.withValues(alpha: 0.25)),
           const SizedBox(height: 20),
           Text(
-            'A blank canvas awaits',
+            t.blankCanvas,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: scheme.onSurface.withValues(alpha: 0.6),
                   fontWeight: FontWeight.w600,
@@ -510,7 +515,7 @@ class _NotesScreenState extends ConsumerState<NotesScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Click the + New Note button\nto capture your first thought.',
+            t.blankCanvasSubtitle,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant.withValues(alpha: 0.55),

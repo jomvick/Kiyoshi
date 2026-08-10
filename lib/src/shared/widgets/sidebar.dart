@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:kiyoshi/src/core/localization/app_translation.dart';
 import 'package:kiyoshi/src/features/projects/domain/entities/workspace.dart';
 import 'package:kiyoshi/src/core/navigation/app_destination.dart';
 import 'package:kiyoshi/src/core/theme/app_theme.dart';
 import 'package:kiyoshi/src/core/design_system/kiyoshi_zen_tokens.dart';
 import 'package:kiyoshi/src/shared/widgets/botanical_logo.dart';
 import 'package:kiyoshi/src/shared/widgets/prismatic_border_painter.dart';
+import 'package:kiyoshi/src/features/ai_agent/presentation/ai_agent_providers.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-
-class Sidebar extends StatelessWidget {
+class Sidebar extends ConsumerWidget {
   final Workspace? selectedWorkspace;
   final List<Workspace> workspaces;
   final ValueChanged<Workspace> onWorkspaceSelected;
@@ -30,7 +33,7 @@ class Sidebar extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Cache local references to avoid widget. lookups
     final dest = selectedDestination;
     final onDestSelect = onDestinationSelected;
@@ -130,6 +133,8 @@ class Sidebar extends StatelessWidget {
                     ),
                   ),
                 ),
+                // ─── AI Agent Button ───────────────────────────────────────
+                _AiSidebarButton(isExpanded: isExpanded),
               ],
             ),
           ),
@@ -139,7 +144,8 @@ class Sidebar extends StatelessWidget {
   }
 }
 
-class _SidebarNavItem extends StatelessWidget {
+
+class _SidebarNavItem extends ConsumerWidget {
   final AppDestination destination;
   final bool isSelected;
   final bool isExpanded;
@@ -153,14 +159,16 @@ class _SidebarNavItem extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final t = ref.watch(translationProvider);
+    final localizedLabel = t.getDestinationLabel(destination);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Tooltip(
-        message: isExpanded ? '' : destination.label,
+        message: isExpanded ? '' : localizedLabel,
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
@@ -199,7 +207,7 @@ class _SidebarNavItem extends StatelessWidget {
                               children: [
                                 const SizedBox(width: AppTheme.spaceMedium),
                                 Text(
-                                  destination.label,
+                                  localizedLabel,
                                   maxLines: 1,
                                   overflow: TextOverflow.clip,
                                   style: theme.textTheme.bodySmall?.copyWith(
@@ -215,6 +223,94 @@ class _SidebarNavItem extends StatelessWidget {
                           : const SizedBox.shrink(),
                     ),
                   ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Glowing AI button shown at the bottom of the sidebar.
+class _AiSidebarButton extends ConsumerWidget {
+  final bool isExpanded;
+
+  const _AiSidebarButton({required this.isExpanded});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    const aiColor = Color(0xFF2A9D84);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Tooltip(
+        message: isExpanded ? '' : 'Kiyoshi AI',
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => ref.read(aiDrawerOpenProvider.notifier).state = true,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: EdgeInsets.symmetric(
+                horizontal: isExpanded ? AppTheme.spaceMedium : 0,
+                vertical: 12,
+              ),
+              alignment: isExpanded ? Alignment.centerLeft : Alignment.center,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    aiColor.withValues(alpha: 0.12),
+                    const Color(0xFF5C8DAE).withValues(alpha: 0.08),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                    color: aiColor.withValues(alpha: 0.25)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    LucideIcons.sparkles,
+                    size: isExpanded ? 18 : 20,
+                    color: aiColor,
+                  ),
+                  if (isExpanded) ...[
+                    const SizedBox(width: AppTheme.spaceMedium),
+                    Flexible(
+                      child: Text(
+                        'Kiyoshi AI',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: aiColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: aiColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'IA',
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          color: aiColor,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

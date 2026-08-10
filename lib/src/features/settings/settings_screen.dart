@@ -11,15 +11,18 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:kiyoshi/src/core/localization/app_translation.dart';
+
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final prefs = ref.watch(preferencesProvider);
+    final t = ref.watch(translationProvider);
 
     return ZenStudioPageShell(
-      title: 'SETTINGS',
+      title: t.settings.toUpperCase(),
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
           AppTheme.space2XLarge,
@@ -30,12 +33,16 @@ class SettingsScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const ZenEditorialHeader(
-              label: 'Configuration',
-              title: 'Settings',
-              subtitle: 'Customize your Zen Studio experience.',
+            ZenEditorialHeader(
+              label: t.configuration,
+              title: t.settings,
+              subtitle: t.isFr
+                  ? 'Personnalisez votre expérience Zen Studio.'
+                  : 'Customize your Zen Studio experience.',
             ),
             const SizedBox(height: AppTheme.spaceLarge),
+            _buildLanguageSection(context, ref, prefs, t),
+            const SizedBox(height: AppTheme.spaceXLarge),
             _buildAppearanceSection(context, ref, prefs),
             const SizedBox(height: AppTheme.spaceXLarge),
             _buildBehaviorSection(context, ref, prefs),
@@ -52,6 +59,27 @@ class SettingsScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildLanguageSection(
+      BuildContext context, WidgetRef ref, AppPreferences prefs, AppTranslation t) {
+    return _SettingsSection(
+      title: t.language,
+      icon: LucideIcons.languages,
+      children: [
+        _SettingsDropdownTile(
+          icon: LucideIcons.globe,
+          title: t.languageSelectTitle,
+          subtitle: t.languageSelectSubtitle,
+          value: prefs.language,
+          items: const [
+            (value: 'en', label: 'English 🇬🇧'),
+            (value: 'fr', label: 'Français 🇫🇷'),
+          ],
+          onChanged: (v) => ref.read(preferencesProvider.notifier).setLanguage(v),
+        ),
+      ],
     );
   }
 
