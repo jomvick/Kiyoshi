@@ -8,6 +8,7 @@ import 'package:kiyoshi/src/core/design_system/kiyoshi_zen_tokens.dart';
 import 'package:kiyoshi/src/shared/widgets/botanical_logo.dart';
 import 'package:kiyoshi/src/shared/widgets/prismatic_border_painter.dart';
 import 'package:kiyoshi/src/features/ai_agent/presentation/ai_agent_providers.dart';
+import 'package:kiyoshi/src/features/widget_bar/widget_window_provider.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 class Sidebar extends ConsumerWidget {
@@ -135,6 +136,8 @@ class Sidebar extends ConsumerWidget {
                 ),
                 // ─── AI Agent Button ───────────────────────────────────────
                 _AiSidebarButton(isExpanded: isExpanded),
+                // ─── Widget Bar Button ─────────────────────────────────────
+                _WidgetBarSidebarButton(isExpanded: isExpanded),
               ],
             ),
           ),
@@ -307,6 +310,95 @@ class _AiSidebarButton extends ConsumerWidget {
                           fontWeight: FontWeight.w800,
                           color: aiColor,
                           letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Floating widget bar toggle shown under the AI button.
+class _WidgetBarSidebarButton extends ConsumerWidget {
+  final bool isExpanded;
+
+  const _WidgetBarSidebarButton({required this.isExpanded});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final service = ref.watch(widgetWindowServiceProvider);
+    const widgetColor = Color(0xFF5C8DAE);
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Tooltip(
+        message: isExpanded ? '' : 'Kiyoshi Widget',
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () => service.toggle(),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              padding: EdgeInsets.symmetric(
+                horizontal: isExpanded ? AppTheme.spaceMedium : 0,
+                vertical: 12,
+              ),
+              alignment: isExpanded ? Alignment.centerLeft : Alignment.center,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    widgetColor.withValues(alpha: 0.12),
+                    const Color(0xFF2A9D84).withValues(alpha: 0.10),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                    color: widgetColor.withValues(alpha: 0.25)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    LucideIcons.layoutGrid,
+                    size: isExpanded ? 18 : 20,
+                    color: widgetColor,
+                  ),
+                  if (isExpanded) ...[
+                    const SizedBox(width: AppTheme.spaceMedium),
+                    Flexible(
+                      child: Text(
+                        'Kiyoshi Widget',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: widgetColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 7, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: widgetColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'WIDGET',
+                        style: TextStyle(
+                          fontSize: 8,
+                          fontWeight: FontWeight.w800,
+                          color: widgetColor,
+                          letterSpacing: 0.4,
                         ),
                       ),
                     ),

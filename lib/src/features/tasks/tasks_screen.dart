@@ -123,7 +123,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     try {
       final status = block.metadata['status'] ?? 'todo';
       final newStatus = status == 'done' ? 'todo' : 'done';
-      await _onTaskMoved(block, newStatus);
+      final meta = Map<String, dynamic>.from(block.metadata)..['status'] = newStatus;
+      if (newStatus == 'done') {
+        meta['completedAt'] = DateTime.now().toIso8601String();
+      } else {
+        meta.remove('completedAt');
+      }
+      await ref.read(blockServiceProvider).updateBlock(block.copyWith(metadata: meta));
     } catch (e) {
       debugPrint('Failed to toggle task: $e');
     }

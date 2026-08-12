@@ -58,6 +58,8 @@ dependencies:
   http: ^1.6.0
   shared_preferences: ^2.2.2
   file_picker: ^11.0.2
+  desktop_multi_window: ^0.3.0
+  window_manager: ^0.5.2
 
 dev_dependencies:
   flutter_test:
